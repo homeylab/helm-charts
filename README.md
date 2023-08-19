@@ -17,11 +17,6 @@ A collection of helm charts that I created for some apps that either do not have
 
 For customizations, it is recommended to use your own values file and specify it when using helm with the `-f` flag.
 
-To add the charts
-```
-
-```
-
 Apps available
 | Application  | Description | 
 | ------------- | ------------- |
