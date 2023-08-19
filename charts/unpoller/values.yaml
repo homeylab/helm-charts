@@ -1,0 +1,140 @@
+# Default values for unifi-unpoller.
+replicaCount: 1
+
+## From: https://github.com/unpoller/unpoller/pkgs/container/unpoller
+image:
+  repository: ghcr.io
+  name: unpoller/unpoller
+  pullPolicy: IfNotPresent
+  # Overrides the image tag, default is the chart appVersion.
+  tag: "v2.8.1"
+
+## set image for post install helm tests
+testCurlImage:
+  repository: docker.io
+  name: busybox
+  tag: "1.36.1"
+  pullPolicy: IfNotPresent
+
+updateStrategy:
+  type: Recreate
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 9130
+  protocol: TCP
+  name: prom
+
+## https://unpoller.com/docs/install/configuration/
+## From ref: """ While Prometheus provides some configuration parameters, you shouldn't change them. """ - don't really recommend making config changes to prom settings at this time
+## set prom port to service.port
+## after testing, the path should be set to "/metrics"
+promPodAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/path: /metrics
+  prometheus.io/port: "9130" # should be quoted for podAnnotations
+
+## extra pod annotations
+podAnnotations: {}
+
+## Use prometheus service monitor instead for Prom operator
+serviceMonitor:
+  enabled: false
+  # extra labels
+  labels: {}
+
+
+## https://unpoller.com/docs/install/dockercompose
+## These become env vars for container based off the doc above
+## all keys will be uppercased just in case
+config:
+  UP_INFLUXDB_DISABLE: true
+  UP_POLLER_DEBUG: false
+  UP_UNIFI_DYNAMIC: false
+  UP_PROMETHEUS_HTTP_LISTEN: "0.0.0.0:9130"
+
+  ## NOTE: by default the image is going to use the value of UP_PROMETHEUS_NAMESPACE ( not your actual deployed namespace) to prepend the metrics
+  ## example: "{{ namespace }}_client_receive_bytes_total" => "unpoller_client_receive_bytes_total"
+  ## Since the grafana charts (https://github.com/unpoller/dashboards) all have "unpoller" set in the prom queries, you should put this as "unpoller"
+  ## TO work with the existing grafana dashboards unpoller provides, it is highly recommended to leave it as default: "unpoller"
+  ## You can install this helm chart in any namespace you'd like though, just keep it the below var equal to "unpoller" for metrics
+  UP_PROMETHEUS_NAMESPACE: "unpoller"
+
+  ## For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller):
+  ## Email field will be the 'username' you will need to create the config file.
+  ## change the below to your created user/pass
+  UP_UNIFI_CONTROLLER_0_USER: unpoller@homeylab.org
+  UP_UNIFI_CONTROLLER_0_PASS: unpoller
+  UP_UNIFI_CONTROLLER_0_SAVE_ALARMS: "true"
+  UP_UNIFI_CONTROLLER_0_SAVE_ANOMALIES: "true"
+  UP_UNIFI_CONTROLLER_0_SAVE_DPI: "true"
+  UP_UNIFI_CONTROLLER_0_SAVE_EVENTS: "true"
+  UP_UNIFI_CONTROLLER_0_SAVE_IDS: "true"
+  UP_UNIFI_CONTROLLER_0_SAVE_SITES: "true"
+  ## change the below to your unifi instance
+  UP_UNIFI_CONTROLLER_0_URL: https://unifi.localdomain:8443
+
+## specify any extra env variables as needed from the config documentation
+## https://unpoller.com/docs/install/configuration/
+## all keys will be uppercased just in case
+extraEnv: {}
+  # UP_UNIFI_CONTROLLER_0_VERIFY_SSL: "true"
+
+## Liveness prove
+## port: "prom" = .Values.service.port in the deployment file
+## https://unpoller.com/docs/advanced/api  - health check endpoint
+livenessProbe:
+  httpGet:
+    path: /health
+    port: prom
+  initialDelaySeconds: 2
+  periodSeconds: 20
+  timeoutSeconds: 2
+  failureThreshold: 3
+  successThreshold: 1
+
+## Readiness prove
+## port: "prom" = .Values.service.port in the deployment file
+## https://unpoller.com/docs/advanced/api - health check endpoint
+readinessProbe:
+  httpGet:
+    path: /health
+    port: prom
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 5
+  successThreshold: 1
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
