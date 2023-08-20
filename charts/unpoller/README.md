@@ -1,4 +1,22 @@
-# Simply Deploy Unpoller For Prometheus Metrics
+# Unpoller
+This chart deploys unpoller, an app that gathers metrics from unifi controllers and formats it for prometheus scraping or service monitors.
+
+## Add Chart Repo
+```
+helm repo add homeylab https://homeylab.github.io/helm-charts/
+helm repo update homeylab
+```
+
+## Install
+```
+helm install unpoller homeylab/unpoller -n unpoller --create-namespace
+```
+
+## Upgrade
+```
+helm upgrade unpoller homeylab/unpoller -n unpoller 
+```
+
 
 ## Tested On
 - k3s `v1.27.4`
@@ -25,7 +43,7 @@ config:
 
 Then deploy:
 ```
-helm install unpoller unpoller/ -n unpoller --create-namespace
+helm install -f my-values.yaml unpoller unpoller/ -n unpoller --create-namespace
 ```
 
 ## Configuration Options
@@ -33,11 +51,11 @@ I will try to explain some of the options and what they do since the wording on 
 
 The default config options provided in this chart match the same values given in the dockercompose example from unpoller.
 
-References:
+### References
 * https://unpoller.com/docs/install/configuration/
 * https://unpoller.com/docs/install/dockercompose
 
-Explanations:
+### Important Options
 1. `UP_PROMETHEUS_NAMESPACE`
     * By default, the image is going to use the value of UP_PROMETHEUS_NAMESPACE ( not your actual deployed namespace) to prepend the metrics
     * example: "{{ namespace }}_client_receive_bytes_total" => "unpoller_client_receive_bytes_total"
