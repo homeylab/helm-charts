@@ -1,0 +1,29 @@
+{{- if .Values.persistence.enabled -}}
+{{- if not .Values.persistence.existingClaim -}}
+---
+kind: "PersistentVolumeClaim"
+apiVersion: "v1"
+metadata:
+  name: {{ include "bookstack.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+  {{- if .Values.persistence.annotations }}
+  {{ toYaml .Values.persistence.annotations | indent 2 }}  
+  {{ end }}
+  labels:
+    {{- include "bookstack.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- range .Values.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+  storageClassName: {{ if .Values.persistence.storageClass -}} {{ .Values.persistence.storageClass | quote }} {{- else -}} "" {{- end }}
+  {{- if .Values.persistence.selector }}
+  selector:
+{{ toYaml .Values.persistence.selector | indent 4 }}
+  {{ end }}
+{{- end }}
+{{- end }}

@@ -67,8 +67,8 @@ config:
   ## For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller):
   ## Email field will be the 'username' you will need to create the config file.
   ## change the below to your created user/pass
-  UP_UNIFI_CONTROLLER_0_USER: unpoller@homeylab.org
-  UP_UNIFI_CONTROLLER_0_PASS: unpoller
+  UP_UNIFI_CONTROLLER_0_USER: ""
+  UP_UNIFI_CONTROLLER_0_PASS: ""
   UP_UNIFI_CONTROLLER_0_SAVE_ALARMS: "true"
   UP_UNIFI_CONTROLLER_0_SAVE_ANOMALIES: "true"
   UP_UNIFI_CONTROLLER_0_SAVE_DPI: "true"

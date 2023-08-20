@@ -1,0 +1,240 @@
+# Default values for bookstack.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: lscr.io/linuxserver/bookstack
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "23.06.2"
+
+updateStrategy:
+  type: Recreate
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+## Below options are used as env variables, choose any valid one Bookstack supports
+## Ref: https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete
+## Some default values below that can be changed
+## if mariadb values are set as default, below DB host/port will work
+config:
+  APP_URL: "https://wiki.example.org"
+  DB_HOST: bookstack-mariadb.bookstack.svc.cluster.local
+  DB_PORT: 3306
+  DB_DATABASE: bookstack
+  DB_USER: bookstack
+  DB_PASS: ""
+  # Cache & Session driver to use
+  # Can be 'file', 'database', 'memcached' or 'redis'
+  CACHE_DRIVER: database
+  SESSION_DRIVER: database
+  TZ: Etc/UTC
+  APP_DEFAULT_DARK_MODE: true
+  APP_VIEWS_BOOKS: list
+
+## Any additional env variables
+extraEnv: {}
+
+## existing secret for credentials
+existingSecret: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  name: http
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    # nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    # nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: wiki.example.org
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 5G
+  ## Name of an existing `PersistentVolumeClaim` for MySQL primary replicas
+  ## NOTE: When it's set the rest of persistence parameters are ignored
+  existingClaim: ""
+  accessModes:
+    - ReadWriteOnce
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+## Liveness prove
+## NOT yet tested
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 2
+  periodSeconds: 20
+  timeoutSeconds: 2
+  failureThreshold: 5
+  successThreshold: 1
+
+## Readiness prove
+## NOT yet tested
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 5
+  successThreshold: 1
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# https://github.com/bitnami/charts/tree/main/bitnami/mysql
+# some basic options below but look at their chart for more
+mariadb:
+  enabled: true
+  ## @param architecture MySQL architecture (`standalone` or `replication`)
+  architecture: standalone
+  ## MySQL Authentication parameters
+  ##
+  auth:
+    ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#setting-the-root-password-on-first-run
+    ##
+    rootPassword: ""
+    ## @param auth.existingSecret Use existing secret for password details. The secret has to contain the keys `mysql-root-password`, `mysql-replication-password` and `mysql-password`
+    ## NOTE: When it's set the auth.rootPassword, auth.password, auth.replicationPassword are ignored.
+    ##
+    existingSecret: ""
+    ## @param auth.createDatabase Whether to create the .Values.auth.database or not
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
+    ##
+    createDatabase: true
+    ## @param auth.database Name for a custom database to create
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
+    ##
+    database: "bookstack"
+    ## @param auth.username Name for a custom user to create
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-user-on-first-run
+    ##
+    username: "bookstack"
+    ## @param auth.password Password for the new user. Ignored if existing secret is provided
+    ##
+    password: ""
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  persistence:
+    ## @param primary.persistence.enabled Enable persistence on MySQL primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
+    ##
+    enabled: true
+    ## @param primary.persistence.existingClaim Name of an existing `PersistentVolumeClaim` for MySQL primary replicas
+    ## NOTE: When it's set the rest of persistence parameters are ignored
+    ##
+    existingClaim: ""
+    ## @param primary.persistence.storageClass MySQL primary persistent volume storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)  
+    ##
+    storageClass: ""
+    ## @param primary.persistence.accessModes MySQL primary persistent volume access Modes
+    ##
+    accessModes:
+      - ReadWriteOnce
+    ## @param primary.persistence.size MySQL primary persistent volume size
+    ##
+    size: 5Gi
+    annotations: []
+    selector: []
+  
+  metrics:
+    ## @param metrics.enabled Start a side-car prometheus exporter
+    ##
+    enabled: true
+    ## Prometheus Service Monitor
+    ## ref: https://github.com/coreos/prometheus-operator
+    ##
+    serviceMonitor:
+      ## @param metrics.serviceMonitor.enabled Create ServiceMonitor Resource for scraping metrics using PrometheusOperator
+      ##
+      enabled: false
+      ## @param metrics.serviceMonitor.labels Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
+      ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
+      ##
+      labels:
+        app: mariadb
+    ## Prometheus Operator prometheusRule configuration
+    ##
+    prometheusRule:
+      ## @param metrics.prometheusRule.enabled Creates a Prometheus Operator prometheusRule (also requires `metrics.enabled` to be `true` and `metrics.prometheusRule.rules`)
+      ##
+      enabled: false
+      ## @param metrics.prometheusRule.namespace Namespace for the prometheusRule Resource (defaults to the Release Namespace)
+      ##
+      namespace: ""
+      ## @param metrics.prometheusRule.additionalLabels Additional labels that can be used so prometheusRule will be discovered by Prometheus
+      ##
+      additionalLabels: {}
+      ## @param metrics.prometheusRule.rules Prometheus Rule definitions
+      ##  - alert: Mysql-Down
+      ##    expr: absent(up{job="mysql"} == 1)
+      ##    for: 5m
+      ##    labels:
+      ##      severity: warning
+      ##      service: mariadb
+      ##    annotations:
+      ##      message: 'MariaDB instance {{`{{`}} $labels.instance {{`}}`}}  is down'
+      ##      summary: MariaDB instance is down
+      ##
+      rules: []
