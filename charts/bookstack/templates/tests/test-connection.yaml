@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: busybox
+      image: "{{ .Values.testCurlImage.repository}}/{{ .Values.testCurlImage.name }}:{{ .Values.testCurlImage.tag }}"
       command: ['wget']
       args: ['{{ include "bookstack.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

@@ -3,10 +3,18 @@
 # Declare variables to be passed into your templates.
 
 image:
-  repository: lscr.io/linuxserver/bookstack
+  repository: lscr.io
+  image: linuxserver/bookstack
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "23.06.2"
+
+## set image for post install helm tests
+testCurlImage:
+  repository: docker.io
+  name: busybox
+  tag: "1.36.1"
+  pullPolicy: IfNotPresent
 
 updateStrategy:
   type: Recreate
