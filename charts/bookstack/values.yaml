@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 
 image:
-  repository: lscr.io
-  image: linuxserver/bookstack
+  repository: docker.io
+  name: lscr.io/linuxserver/bookstack
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "23.06.2"
