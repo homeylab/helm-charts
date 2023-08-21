@@ -3,6 +3,21 @@ entries:
   bookstack:
   - apiVersion: v2
     appVersion: 23.06.2
+    created: "2023-08-21T02:57:34.962484132Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 13.0.2
+    description: bookstack documentation platform
+    digest: 6c475109a982adb34fb2088280668a7f84bba3b45ed62568ef08c8b909fda263
+    name: bookstack
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-1.0.0/bookstack-1.0.0.tgz
+    version: 1.0.0
+  - apiVersion: v2
+    appVersion: 23.06.2
     created: "2023-08-21T01:45:08.75331889Z"
     dependencies:
     - condition: mariadb.enabled
@@ -34,6 +49,17 @@ entries:
   unpoller:
   - apiVersion: v2
     appVersion: 2.8.1
+    created: "2023-08-21T02:57:35.189305911Z"
+    description: unpoller for unifi controller metrics
+    digest: 589044dadaa67c13921a4b4864f165c0299adbf8ab6fd4970bd61cfe1d0c7117
+    icon: https://unpoller.com/img/logo.png
+    name: unpoller
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-1.0.2/unpoller-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
+    appVersion: 2.8.1
     created: "2023-08-20T08:39:32.395699947Z"
     description: unpoller for unifi controller metrics
     digest: 94dfd2ac81c6f2949ecb5fe6f985e2e4ecca2c94507a03e28c1cdcb66b81bc3f
@@ -54,4 +80,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2023-08-21T01:45:08.753487994Z"
+generated: "2023-08-21T02:57:35.189327912Z"
