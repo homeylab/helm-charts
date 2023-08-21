@@ -79,11 +79,15 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-  {{- if .Values.persistence.enabled }}
+  {{- if .Values.persistence.existingClaim }}
+        - name: config
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim  }}
+  {{- else if .Values.persistence.enabled }}
         - name: config
           persistentVolumeClaim:
             claimName: {{ include "bookstack.fullname" . }}
-  {{- else if not .Values.persistence.enabled }}
+  {{- else }}
         - name: config
           emptyDir: {}
   {{- end }}

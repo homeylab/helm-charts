@@ -88,8 +88,7 @@ persistence:
   enabled: true
   storageClass: ""
   size: 5G
-  ## Name of an existing `PersistentVolumeClaim` for MySQL primary replicas
-  ## NOTE: When it's set the rest of persistence parameters are ignored
+  ## NOTE: When existingClaim is set the rest of persistence parameters are ignored
   existingClaim: ""
   accessModes:
     - ReadWriteOnce
@@ -106,7 +105,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-## Liveness prove
+## Liveness probe
 ## NOT yet tested
 livenessProbe:
   enabled: true
@@ -119,7 +118,7 @@ livenessProbe:
   failureThreshold: 5
   successThreshold: 1
 
-## Readiness prove
+## Readiness probe
 ## NOT yet tested
 readinessProbe:
   httpGet:

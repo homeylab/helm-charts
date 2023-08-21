@@ -84,7 +84,7 @@ config:
 extraEnv: {}
   # UP_UNIFI_CONTROLLER_0_VERIFY_SSL: "true"
 
-## Liveness prove
+## Liveness probe
 ## port: "prom" = .Values.service.port in the deployment file
 ## https://unpoller.com/docs/advanced/api  - health check endpoint
 livenessProbe:
@@ -97,7 +97,7 @@ livenessProbe:
   failureThreshold: 3
   successThreshold: 1
 
-## Readiness prove
+## Readiness probe
 ## port: "prom" = .Values.service.port in the deployment file
 ## https://unpoller.com/docs/advanced/api - health check endpoint
 readinessProbe:
