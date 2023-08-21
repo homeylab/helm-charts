@@ -45,36 +45,6 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-## Below options are used as env variables, choose any valid one Bookstack supports
-## Ref: https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete
-## Some default values below that can be changed
-## if mariadb values are set as default, below DB host/port will work
-config:
-  APP_URL: "https://wiki.example.org"
-  DB_HOST: bookstack-mariadb.bookstack.svc.cluster.local
-  DB_PORT: 3306
-  DB_DATABASE: bookstack
-  DB_USER: bookstack
-  DB_PASS: ""
-  # Cache & Session driver to use
-  # Can be 'file', 'database', 'memcached' or 'redis'
-  CACHE_DRIVER: database
-  SESSION_DRIVER: database
-  TZ: Etc/UTC
-  APP_DEFAULT_DARK_MODE: true
-  APP_VIEWS_BOOKS: list
-
-## Any additional env variables
-extraEnv: {}
-
-## existing secret for credentials
-existingSecret: ""
-
-service:
-  type: ClusterIP
-  port: 80
-  name: http
-
 ingress:
   enabled: false
   className: ""
@@ -91,6 +61,38 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+## Below options are used as env variables, choose any valid one Bookstack supports
+## Ref: https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete
+## Some default values below for reference, uncomment and add your own
+## if included chart mariadb values are used, below DB host/port will work
+config: {}
+  # APP_URL: "https://wiki.example.org"
+  # DB_HOST: bookstack-mariadb.bookstack.svc.cluster.local
+  # DB_PORT: 3306
+  # DB_DATABASE: bookstack
+  # DB_USER: bookstack
+  # DB_PASS: ""
+
+  ## Cache & Session driver to use
+  ## Can be 'file', 'database', 'memcached' or 'redis'
+  # CACHE_DRIVER: database
+  # SESSION_DRIVER: database
+
+  # TZ: Etc/UTC
+  # APP_DEFAULT_DARK_MODE: true
+  # APP_VIEWS_BOOKS: list
+
+## Any additional env variables
+extraEnv: {}
+
+## existing secret for credentials
+existingSecret: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  name: http
 
 persistence:
   enabled: true

@@ -48,35 +48,37 @@ serviceMonitor:
   labels: {}
 
 
-## https://unpoller.com/docs/install/dockercompose
+## Ref: https://unpoller.com/docs/install/dockercompose
 ## These become env vars for container based off the doc above
 ## all keys will be uppercased just in case
-config:
-  UP_INFLUXDB_DISABLE: true
-  UP_POLLER_DEBUG: false
-  UP_UNIFI_DYNAMIC: false
-  UP_PROMETHEUS_HTTP_LISTEN: "0.0.0.0:9130"
+## Some example values shown below, most values can be used as is except for credentials and host
+config: {}
+  # UP_INFLUXDB_DISABLE: true
+  # UP_POLLER_DEBUG: false
+  # UP_UNIFI_DYNAMIC: false
+  # UP_PROMETHEUS_HTTP_LISTEN: "0.0.0.0:9130"
 
   ## NOTE: by default the image is going to use the value of UP_PROMETHEUS_NAMESPACE ( not your actual deployed namespace) to prepend the metrics
   ## example: "{{ namespace }}_client_receive_bytes_total" => "unpoller_client_receive_bytes_total"
   ## Since the grafana charts (https://github.com/unpoller/dashboards) all have "unpoller" set in the prom queries, you should put this as "unpoller"
   ## TO work with the existing grafana dashboards unpoller provides, it is highly recommended to leave it as default: "unpoller"
   ## You can install this helm chart in any namespace you'd like though, just keep it the below var equal to "unpoller" for metrics
-  UP_PROMETHEUS_NAMESPACE: "unpoller"
+  # UP_PROMETHEUS_NAMESPACE: "unpoller"
 
   ## For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller):
   ## Email field will be the 'username' you will need to create the config file.
   ## change the below to your created user/pass
-  UP_UNIFI_CONTROLLER_0_USER: ""
-  UP_UNIFI_CONTROLLER_0_PASS: ""
-  UP_UNIFI_CONTROLLER_0_SAVE_ALARMS: "true"
-  UP_UNIFI_CONTROLLER_0_SAVE_ANOMALIES: "true"
-  UP_UNIFI_CONTROLLER_0_SAVE_DPI: "true"
-  UP_UNIFI_CONTROLLER_0_SAVE_EVENTS: "true"
-  UP_UNIFI_CONTROLLER_0_SAVE_IDS: "true"
-  UP_UNIFI_CONTROLLER_0_SAVE_SITES: "true"
+  # UP_UNIFI_CONTROLLER_0_USER: ""
+  # UP_UNIFI_CONTROLLER_0_PASS: ""
+  # UP_UNIFI_CONTROLLER_0_SAVE_ALARMS: "true"
+  # UP_UNIFI_CONTROLLER_0_SAVE_ANOMALIES: "true"
+  # UP_UNIFI_CONTROLLER_0_SAVE_DPI: "true"
+  # UP_UNIFI_CONTROLLER_0_SAVE_EVENTS: "true"
+  # UP_UNIFI_CONTROLLER_0_SAVE_IDS: "true"
+  # UP_UNIFI_CONTROLLER_0_SAVE_SITES: "true"
+  
   ## change the below to your unifi instance
-  UP_UNIFI_CONTROLLER_0_URL: https://unifi.localdomain:8443
+  # UP_UNIFI_CONTROLLER_0_URL: https://unifi.localdomain:8443
 
 ## specify any extra env variables as needed from the config documentation
 ## https://unpoller.com/docs/install/configuration/

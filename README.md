@@ -40,3 +40,8 @@ homeylab/unpoller	1.0.0        	2.8.1      	A Helm chart for Kubernetes
 # Install a specific version
 helm install -f my-values.yaml unpoller homeylab/unpoller -n unpoller --create-namespace --version 1.0.0
 ```
+
+## Tested On
+All charts are currently tested on:
+- k3s `v1.27.4`
+- Helm `v3.12.1`

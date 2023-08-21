@@ -1,6 +1,8 @@
 # Unpoller
 This chart deploys unpoller, an app that gathers metrics from unifi controllers and formats it for prometheus scraping or service monitors.
 
+*Note: You should set some chart values by creating your own values.yaml and save that locally*
+
 ## Add Chart Repo
 ```
 helm repo add homeylab https://homeylab.github.io/helm-charts/
@@ -10,27 +12,26 @@ helm repo update homeylab
 ## Install
 ```
 helm install unpoller homeylab/unpoller -n unpoller --create-namespace
+
+# with own values file - recommended
+helm install -f my-values.yaml homeylab/unpoller -n unpoller --create-namespace
 ```
 
 ## Upgrade
 ```
-helm upgrade unpoller homeylab/unpoller -n unpoller 
+helm upgrade unpoller homeylab/unpoller -n unpoller
+
+# with own values file - recommended
+helm upgrade -f my-values.yaml unpoller homeylab/unpoller -n unpoller
 ```
-
-
-## Tested On
-- k3s `v1.27.4`
-- Helm `v3.12.1`
-- Unifi Controller `7.2.95`
-    - https://hub.docker.com/r/linuxserver/unifi-controller
-- Unpoller `v2.8.1`
-    - https://github.com/unpoller/unpoller
 
 ## Prerequisites
 Ensure you have created a user in your unifi site as described here: https://unpoller.com/docs/install/controllerlogin
 
-## Deploy
-If you just want to deploy as simple as possible, change only the variables below in values.yaml file before you deploy
+## Simple Deploy
+If you just want to deploy as simple as possible, create your own values.yaml file
+1. uncomment all the key/value variables in `config` section of values.yaml
+2. update the 3 variables below in config section with your values
 ```
 config:
     ...
@@ -51,10 +52,6 @@ I will try to explain some of the options and what they do since the wording on 
 
 The default config options provided in this chart match the same values given in the dockercompose example from unpoller.
 
-### References
-* https://unpoller.com/docs/install/configuration/
-* https://unpoller.com/docs/install/dockercompose
-
 ### Important Options
 1. `UP_PROMETHEUS_NAMESPACE`
     * By default, the image is going to use the value of UP_PROMETHEUS_NAMESPACE ( not your actual deployed namespace) to prepend the metrics
@@ -71,3 +68,7 @@ The default config options provided in this chart match the same values given in
 3. `UP_UNIFI_CONTROLLER_0_SAVE_DPI`
     * This is set to `enabled` by default and requires DPI (Deep Packet Inspection) to be enabled for your site in Unifi
     * If not `enabled`, you will see no data
+
+### References
+* https://unpoller.com/docs/install/configuration/
+* https://unpoller.com/docs/install/dockercompose
