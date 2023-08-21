@@ -4,7 +4,7 @@
 
 image:
   repository: docker.io
-  name: lscr.io/linuxserver/bookstack
+  name: linuxserver/bookstack
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "23.06.2"
