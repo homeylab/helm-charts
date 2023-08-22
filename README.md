@@ -24,7 +24,14 @@ Apps available
 
 ## Recommendations
 ### Create A Values File
-Use a values file to make changes and save your custom configuration. Use the `-f` flag like so, example
+Use a values file to make changes and save your custom configuration. When using upstream helm charts and specifying your own values file, variables are handled like so:
+
+- First the base default values.yaml in the project/bundle is evaluated and all variables and values loaded.
+- When you specify your own file, your configuration is applied on top and overrides existing configuration in the base values.yaml. Certain variable types will be merged with your changes instead of overriden, for example: `config:{}` would be merged.
+
+General recommendation is only specify in your own values file what you are customizing or overriding. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
+
+Use the `-f` flag like so, example
 ```
 helm install -f my-values.yaml unpoller homeylab/unpoller -n unpoller --create-namespace
 ```
