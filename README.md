@@ -29,7 +29,7 @@ Use a values file to make changes and save your custom configuration. When using
 - First the base default values.yaml in the project/bundle is evaluated and all variables and values loaded.
 - When you specify your own file, your configuration is applied on top and overrides existing configuration in the base values.yaml. Certain variable types will be merged with your changes instead of overriden, for example: `config:{}` would be merged.
 
-General recommendation is only specify in your own values file what you are customizing or overriding. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
+General recommendation is only specify in your own values file what you are customizing or overriding. You can also include variables that are defaulted to a specific value that you need to stay constant, just in case the upstream helm chart changes. For example, maybe you are using a protocol like TCP and that is default now, it may change to UDP in the future, so you might want to keep that in your own values file. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
 
 Use the `-f` flag like so, example
 ```
