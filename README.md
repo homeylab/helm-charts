@@ -52,3 +52,13 @@ helm install -f my-values.yaml unpoller homeylab/unpoller -n unpoller --create-n
 All charts are currently tested on:
 - k3s `v1.27.4`
 - Helm `v3.12.1`
+
+### Chart Testing
+WIP Section
+```
+## update depedencies
+helm dep update bookstac
+
+## simple test
+ct install --chart-dirs bookstack --charts bookstack/
+```
