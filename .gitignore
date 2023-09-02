@@ -2,6 +2,7 @@
 local-values.yaml
 
 # Chart dependencies
+/charts/*/Chart.lock
 /charts/*/charts
 .idea
 .vscode

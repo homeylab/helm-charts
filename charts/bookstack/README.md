@@ -26,7 +26,7 @@ helm upgrade -f my-values.yaml bookstack homeylab/bookstack -n bookstack
 ```
 
 ## Prerequisites
-Ensure you either enable mariadb dependency, `mariadb.enabled`, or have an existing compatible DB server ready for bookstack. This chart provides the option to install mariadb by default from bitnami.
+Ensure you either enable mariadb dependency, `mariadb.enabled`, or have an existing compatible DB server ready for bookstack. This chart provides the option to install mariadb by default from [bitnami](https://github.com/bitnami/charts/tree/main/bitnami/mariadb).
 
 ## Simple Deploy
 If you just want to deploy as simple as possible, create your own values.yaml file
@@ -34,6 +34,12 @@ If you just want to deploy as simple as possible, create your own values.yaml fi
 2. Ensure `mariadb.enabled` is set to true for chart dependency
 3. Change APP_URL in config and ingress-nginx (if used) to your preferred hostname
 4. Change any relevant persistence options for `persistence.storageClass``
+
+After first install, initial admin account will be set to:
+```
+email: admin@admin.com
+passsword: password
+```
 
 ## Configuration Options
 For more configuration options, refer to the documented env variables available for bookstack [here](https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete)

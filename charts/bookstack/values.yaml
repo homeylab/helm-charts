@@ -7,7 +7,7 @@ image:
   name: linuxserver/bookstack
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "23.06.2"
+  tag: "version-v23.08"
 
 ## set image for post install helm tests
 testCurlImage:
@@ -97,7 +97,7 @@ service:
 persistence:
   enabled: true
   storageClass: ""
-  size: 5G
+  size: 5Gi
   ## NOTE: When existingClaim is set the rest of persistence parameters are ignored
   existingClaim: ""
   accessModes:
