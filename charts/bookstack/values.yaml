@@ -150,13 +150,14 @@ affinity: {}
 # some basic options below but look at their chart for more
 mariadb:
   enabled: true
-  ## @param architecture MySQL architecture (`standalone` or `replication`)
+  ## @param architecture MariaDB architecture (`standalone` or `replication`)
+  ##
   architecture: standalone
   ## MySQL Authentication parameters
   ##
   auth:
-    ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#setting-the-root-password-on-first-run
+    ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided.
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mariadb#setting-the-root-password-on-first-run
     ##
     rootPassword: ""
     ## @param auth.existingSecret Use existing secret for password details. The secret has to contain the keys `mysql-root-password`, `mysql-replication-password` and `mysql-password`
@@ -168,45 +169,59 @@ mariadb:
     ##
     createDatabase: true
     ## @param auth.database Name for a custom database to create
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
+    ## ref: https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-on-first-run
     ##
     database: "bookstack"
     ## @param auth.username Name for a custom user to create
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-user-on-first-run
+    ## ref: https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-user-on-first-run
     ##
     username: "bookstack"
     ## @param auth.password Password for the new user. Ignored if existing secret is provided
     ##
-    password: ""
+    password: "bookstack"
   ## Enable persistence using Persistent Volume Claims
   ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
   ##
-  persistence:
-    ## @param primary.persistence.enabled Enable persistence on MySQL primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
-    ##
-    enabled: true
-    ## @param primary.persistence.existingClaim Name of an existing `PersistentVolumeClaim` for MySQL primary replicas
-    ## NOTE: When it's set the rest of persistence parameters are ignored
-    ##
-    existingClaim: ""
-    ## @param primary.persistence.storageClass MySQL primary persistent volume storage Class
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)  
-    ##
-    storageClass: ""
-    ## @param primary.persistence.accessModes MySQL primary persistent volume access Modes
-    ##
-    accessModes:
-      - ReadWriteOnce
-    ## @param primary.persistence.size MySQL primary persistent volume size
-    ##
-    size: 5Gi
-    annotations: []
-    selector: []
-  
+  primary:
+    persistence:
+      ## @param primary.persistence.enabled Enable persistence on MariaDB primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
+      ##
+      enabled: true
+      ## @param primary.persistence.existingClaim Name of an existing `PersistentVolumeClaim` for MariaDB primary replicas
+      ## NOTE: When it's set the rest of persistence parameters are ignored
+      ##
+      existingClaim: ""
+      ## @param primary.persistence.subPath Subdirectory of the volume to mount at
+      ##
+      subPath: ""
+      ## @param primary.persistence.storageClass MariaDB primary persistent volume storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      storageClass: ""
+      ## @param primary.persistence.labels Labels for the PVC
+      ##
+      labels: {}
+      ## @param primary.persistence.annotations MariaDB primary persistent volume claim annotations
+      ##
+      annotations: {}
+      ## @param primary.persistence.accessModes MariaDB primary persistent volume access Modes
+      ##
+      accessModes:
+        - ReadWriteOnce
+      ## @param primary.persistence.size MariaDB primary persistent volume size
+      ##
+      size: 8Gi
+      ## @param primary.persistence.selector Selector to match an existing Persistent Volume
+      ## selector:
+      ##   matchLabels:
+      ##     app: my-app
+      ##
+      selector: {}
+    
   metrics:
     ## @param metrics.enabled Start a side-car prometheus exporter
     ##
