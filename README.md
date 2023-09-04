@@ -55,6 +55,7 @@ All charts are currently tested on:
 
 ### Chart Testing
 **WIP Section**
+
 To contribute, there are a many ways to do testing and many are valid. I am using Dev Containers extension from VScode to set up a consistent environment across my devices.
 
 To use the same Dev Containers, ensure you have the extension enabled and add a copy of your kubectl config in `.devcontainer/`. Name it `kube_config` and it will be ignored by git (in .gitignore) and will be used during Dev Container build.
