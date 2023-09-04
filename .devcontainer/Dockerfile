@@ -5,4 +5,4 @@ RUN apk update && \
 
 RUN mkdir -p /root/.kube
 
-COPY kube_config /root/.kube/config
+COPY --chmod=600 kube_config /root/.kube/config
