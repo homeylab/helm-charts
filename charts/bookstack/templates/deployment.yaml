@@ -42,8 +42,16 @@ spec:
           - name: DB_PASS
             value: {{ .Values.config.dbPass | quote}}
         {{- end }}
+        {{- if .Values.config.dbHost }}
           - name: DB_HOST
             value: {{ .Values.config.dbHost | quote }}
+        {{- else }}
+          # this is mainly used for chart-testing and will use dynamically created DB_HOST string if not supplied from configuration
+          # Uses chart release namespace to create a dbHost variable that works with embedded mariadb instance
+          # Since chart-testing namespaces are randomly generated, this helps
+          - name: DB_HOST
+            value: {{ include "bookstack.defaultDatabaseHost" . }}
+        {{- end }}
           - name: DB_PORT
             value: {{ .Values.config.dbPort | quote }}
           - name: DB_DATABASE
