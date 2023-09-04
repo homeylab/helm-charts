@@ -57,7 +57,7 @@ All charts are currently tested on:
 WIP Section
 ```
 ## update depedencies
-helm dep update bookstac
+helm dep update bookstack
 
 ## simple test
 ct install --chart-dirs bookstack --charts bookstack/

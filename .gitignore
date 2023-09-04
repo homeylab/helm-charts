@@ -1,5 +1,7 @@
 # For local testing or deploys
 local-values.yaml
+local_vars
+.devcontainer/config
 
 # Chart dependencies
 /charts/*/Chart.lock
