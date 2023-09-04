@@ -7,7 +7,7 @@ image:
   name: linuxserver/bookstack
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "23.08.1"
+  tag: "23.08.2"
 
 ## set image for post install helm tests
 testCurlImage:
@@ -49,11 +49,17 @@ securityContext: {}
 
 ## existing secret for credentials
 ## if supplied, dbUser and dbPass will be ignored in config section
+## You can also optionally set more credentials/secret env vars in this secret like APP_KEY
 existingSecret: ""
 
+## Default values below will work with included mariadb chart in bookstack namespace
 config:
-  ## Default values below will work with included mariadb chart in bookstack namespace
-  dbHost: bookstack-mariadb.bookstack.svc.cluster.local
+  ## dbHost should be specified and consistent!
+  ## If not included though, it will be dynamically generated and attempt to use included/embedded Bitnami mariadb instance
+  ## This to help with chart-testing dynamic namespaces
+  ## dbHost if not specified, value = "{{ .Release.Namespace }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
+  ## Example value if installed in bookstack namespace: "bookstack-mariadb.bookstack.svc.cluster.local"
+  dbHost: ""
   dbPort: 3306
   dbDatabase: bookstack
   ## Credentials below
@@ -238,7 +244,7 @@ mariadb:
   metrics:
     ## @param metrics.enabled Start a side-car prometheus exporter
     ##
-    enabled: true
+    enabled: false
     ## Prometheus Service Monitor
     ## ref: https://github.com/coreos/prometheus-operator
     ##

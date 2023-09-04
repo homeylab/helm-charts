@@ -6,7 +6,7 @@
 CHART_DIR=charts
 
 ## Local Testing on k3s single cluster
-LOCAL_NAMESPACE_SUFFIX=-local
+# LOCAL_NAMESPACE_PREFIX=local-
 LOCAL_CONTEXT=rancher-desktop
 LOCAL_VARS_DIR=local_vars
 
@@ -28,10 +28,10 @@ test_custom:
 	ct install --chart-dirs ${CHART_DIR} --charts ${CHART_DIR}/$(app)
 
 dryrun_install_local:
-	helm install $(app) ${CHART_DIR}/$(app) -n $(app)${LOCAL_NAMESPACE_SUFFIX} --create-namespace --dry-run
+	helm install $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace --dry-run
 
 install_local:
-	helm install $(app) ${CHART_DIR}/$(app) -n $(app)-${LOCAL_NAMESPACE} --create-namespace
+	helm install $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace
 
 clean_local:
 	helm delete $(app) -n $(app)-${LOCAL_NAMESPACE}

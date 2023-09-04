@@ -62,12 +62,9 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Provide a pre-defined claim or a claim based on the Release
+This is mainly for chart testing, it will try to use release namespace for dynamic namespace names
 */}}
-{{- define "portainer.pvcName" -}}
-{{- if .Values.persistence.existingClaim }}
-{{- .Values.persistence.existingClaim }}
-{{- else -}}
-{{- template "bookstack.fullname" . }}
-{{- end -}}
-{{- end -}}
+{{- define "bookstack.defaultDatabaseHost" -}}
+{{- printf "%s-%s.%s.%s" .Release.Namespace "mariadb" .Release.Namespace "svc.cluster.local"}}
+{{- end }}
+*/}}
