@@ -36,10 +36,22 @@ spec:
           image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-        {{- range $key, $val := .Values.config }}
-          - name: {{ $key | upper }}
-            value: {{ $val | quote }}
+        {{- if not .Values.existingSecret }}
+          - name: DB_USER
+            value: {{ .Values.config.dbUser | quote}}
+          - name: DB_PASS
+            value: {{ .Values.config.dbPass | quote}}
         {{- end }}
+          - name: DB_HOST
+            value: {{ .Values.config.dbHost | quote }}
+          - name: DB_PORT
+            value: {{ .Values.config.dbPort | quote }}
+          - name: DB_DATABASE
+            value: {{ .Values.config.dbDatabase | quote }}
+          - name: CACHE_DRIVER
+            value: {{ .Values.config.cacheDriver | quote }}
+          - name: SESSION_DRIVER
+            value: {{ .Values.config.sessionDriver | quote }}
         {{- range $key, $val := .Values.extraEnv }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}
@@ -53,14 +65,18 @@ spec:
             - name: "{{ .Values.service.name }}"
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: "{{ .Values.service.name }}"
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: "{{ .Values.service.name }}"
+        {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+        {{- end }}
+        {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+        {{- end }}
+        {{- if .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+        {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

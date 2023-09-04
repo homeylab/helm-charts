@@ -15,6 +15,8 @@ testCurlImage:
   name: busybox
   tag: "1.36.1"
   pullPolicy: IfNotPresent
+  # the url for post install check test
+  path: /status
 
 updateStrategy:
   type: Recreate
@@ -45,6 +47,41 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+## existing secret for credentials
+## if supplied, dbUser and dbPass will be ignored in config section
+existingSecret: ""
+
+config:
+  ## Default values below will work with included mariadb chart in bookstack namespace
+  dbHost: bookstack-mariadb.bookstack.svc.cluster.local
+  dbPort: 3306
+  dbDatabase: bookstack
+  ## Credentials below
+  ## if existingSecret is specified, these will be ignored
+  dbUser: bookstack
+  dbPass: bookstack
+  ## Cache & Session driver to use
+  ## Can be 'file', 'database', 'memcached' or 'redis'
+  cacheDriver: database
+  sessionDriver: database
+
+
+## Below options are used as env variables, choose any valid one Bookstack supports
+## Ref: https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete
+## All keys will be upper cased and values will be quoted
+## Some default values below for reference
+extraEnv: {}
+  ## If using ingress, set it to same url
+  # APP_URL: "https://bookstack.example.org"
+  # TZ: Etc/UTC
+  # APP_DEFAULT_DARK_MODE: true
+  # APP_VIEWS_BOOKS: list
+
+service:
+  type: ClusterIP
+  port: 80
+  name: http
+
 ingress:
   enabled: false
   className: ""
@@ -53,7 +90,7 @@ ingress:
     # nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     # nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   hosts:
-    - host: wiki.example.org
+    - host: bookstack.example.org
       paths:
         - path: /
           pathType: Prefix
@@ -61,38 +98,6 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
-
-## Below options are used as env variables, choose any valid one Bookstack supports
-## Ref: https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete
-## Some default values below for reference, uncomment and add your own
-## if included chart mariadb values are used, below DB host/port will work
-config: {}
-  # APP_URL: "https://wiki.example.org"
-  # DB_HOST: bookstack-mariadb.bookstack.svc.cluster.local
-  # DB_PORT: 3306
-  # DB_DATABASE: bookstack
-  # DB_USER: bookstack
-  # DB_PASS: ""
-
-  ## Cache & Session driver to use
-  ## Can be 'file', 'database', 'memcached' or 'redis'
-  # CACHE_DRIVER: database
-  # SESSION_DRIVER: database
-
-  # TZ: Etc/UTC
-  # APP_DEFAULT_DARK_MODE: true
-  # APP_VIEWS_BOOKS: list
-
-## Any additional env variables
-extraEnv: {}
-
-## existing secret for credentials
-existingSecret: ""
-
-service:
-  type: ClusterIP
-  port: 80
-  name: http
 
 persistence:
   enabled: true
@@ -115,29 +120,42 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+## Ref: https://github.com/BookStackApp/BookStack/commit/6eda1c1fb28142d432bf0ca05d7eaba9bf16f0d0#diff-5782232ec3249cb816fc3f3332f8322e351f91d9cc590d717ab9e446536a1949
+## Use `/status` path for checks
+
 ## Liveness probe
-## NOT yet tested
 livenessProbe:
-  enabled: true
   httpGet:
-    path: /health
+    path: /status
     port: http
-  initialDelaySeconds: 2
-  periodSeconds: 20
-  timeoutSeconds: 2
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
   failureThreshold: 5
   successThreshold: 1
 
 ## Readiness probe
-## NOT yet tested
 readinessProbe:
   httpGet:
-    path: /health
+    path: /status
     port: http
   initialDelaySeconds: 5
   periodSeconds: 10
   timeoutSeconds: 2
   failureThreshold: 5
+  successThreshold: 1
+
+## Startup Probe
+## Initial delay of 30 seconds and then up to 5 min wait for mariadb
+## long start up helps with chart-testing, change this as desired
+startupProbe:
+  httpGet:
+    path: /status
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 30
   successThreshold: 1
 
 nodeSelector: {}
@@ -146,8 +164,8 @@ tolerations: []
 
 affinity: {}
 
-# https://github.com/bitnami/charts/tree/main/bitnami/mariadb
-# some basic options below but look at their chart for more
+## https://github.com/bitnami/charts/tree/main/bitnami/mariadb
+## some basic options below but look at their chart for more
 mariadb:
   enabled: true
   ## @param architecture MariaDB architecture (`standalone` or `replication`)

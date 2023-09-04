@@ -54,11 +54,16 @@ All charts are currently tested on:
 - Helm `v3.12.1`
 
 ### Chart Testing
-WIP Section
-```
-## update depedencies
-helm dep update bookstack
+**WIP Section**
+To contribute, there are a many ways to do testing and many are valid. I am using Dev Containers extension from VScode to set up a consistent environment across my devices.
 
-## simple test
-ct install --chart-dirs bookstack --charts bookstack/
+To use the same Dev Containers, ensure you have the extension enabled and add a copy of your kubectl config in `.devcontainer/`. Name it `kube_config` and it will be ignored by git (in .gitignore) and will be used during Dev Container build.
+
+The provided makefile can then be used for testing via helm and [chart-testing](https://github.com/helm/chart-testing).
+
+Example:
+```
+# Use `app=` for targeting a chart
+# below runs chart-testing for the specified chart/app
+make test app=bookstack
 ```

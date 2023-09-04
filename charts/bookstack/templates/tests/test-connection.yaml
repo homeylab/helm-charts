@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: "{{ .Values.testCurlImage.repository}}/{{ .Values.testCurlImage.name }}:{{ .Values.testCurlImage.tag }}"
       command: ['wget']
-      args: ['{{ include "bookstack.fullname" . }}:{{ .Values.service.port }}']
+      args: ["{{ include "bookstack.fullname" . }}:{{ .Values.service.port }}{{ .Values.testCurlImage.path }}"]
   restartPolicy: Never
