@@ -10,6 +10,11 @@ LOCAL_NAMESPACE_SUFFIX=-local
 LOCAL_CONTEXT=rancher-desktop
 LOCAL_VARS_DIR=local_vars
 
+## Docker image for dev containers
+IMAGE_REPO=quay.io/helmpack/chart-testing
+IMAGE_TAG=v3.9.0
+
+## Replace image in dev
 
 ## lint
 ## replace with `ct lint` once we have json schema file
@@ -22,8 +27,11 @@ test:
 test_custom:
 	ct install --chart-dirs ${CHART_DIR} --charts ${CHART_DIR}/$(app)
 
+dryrun_install_local:
+	helm install $(app) ${CHART_DIR}/$(app) -n $(app)${LOCAL_NAMESPACE_SUFFIX} --create-namespace --dry-run
+
 install_local:
-	helm install -f ${LOCAL_VARS_DIR}/$(app) $(app) -n $(app)-${LOCAL_NAMESPACE} --create-namespace
+	helm install $(app) ${CHART_DIR}/$(app) -n $(app)-${LOCAL_NAMESPACE} --create-namespace
 
 clean_local:
 	helm delete $(app) -n $(app)-${LOCAL_NAMESPACE}

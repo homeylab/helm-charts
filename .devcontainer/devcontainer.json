@@ -1,45 +1,15 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/debian
 {
-	// "name": "Debian",
-	// // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "mcr.microsoft.com/devcontainers/base:bookworm",
-	// "features": {
-	// 	"ghcr.io/mpriscella/features/helm-chart-testing:1": {
-	// 		"version": "latest"
-	// 	}
-	// }
-	"name": "CT",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "quay.io/helmpack/chart-testing:v3.9.0",
+    "build": { "dockerfile": "Dockerfile" },
+    "name": "CT",
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
-	// "mounts": [
-	// 	"source=${localWorkspaceFolder}/.devcontainers,target=/root/.kube,type=bind,consistency=cached"
-	// ]
-
-	"postAttachCommand": {
-		"update": ["apk", "update", "&&", "apk", "add", "--no-cache", "make"],
-		"create_dir": ["mkdir", "-p", "/root/.kube"],
-		"cp_config": ["cp", "${containerWorkspaceFolder}/.devcontainer/config", "/root/.kube/config"],
-		"fix_perm": ["chmod", "0600", "/root/.kube/config"]
-	}
+    "customizations": {
+        "vscode": {
+            "extensions": ["streetsidesoftware.code-spell-checker"]
+        }
+    },
+    "runArgs": [
+        "--network=host"
+    ]
+  
+    // "forwardPorts": [3000]
 }
-
-// mounts following docker compose options
-// Use cached: when the host performs changes, the container is in read only mode.
-// Use delegated: when docker container performs changes, host is in read only mode.
-// Use default: When both container and host actively and continuously perform changes on data.
-
-// bind = on host
-// volume = create docker volume
