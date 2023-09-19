@@ -16,6 +16,10 @@ IMAGE_TAG=v3.9.0
 
 ## Replace image in dev
 
+## update dep
+update_dep:
+	helm dependency update ${CHART_DIR}/$(app) 
+
 ## lint
 ## replace with `ct lint` once we have json schema file
 lint:
