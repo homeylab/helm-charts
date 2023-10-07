@@ -60,6 +60,8 @@ spec:
             value: {{ .Values.config.cacheDriver | quote }}
           - name: SESSION_DRIVER
             value: {{ .Values.config.sessionDriver | quote }}
+          - name: APP_URL
+            value: {{ .Values.config.appUrl | quote }}
         {{- range $key, $val := .Values.extraEnv }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}

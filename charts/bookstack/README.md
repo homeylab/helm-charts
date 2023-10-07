@@ -35,10 +35,99 @@ helm upgrade -f my-values.yaml bookstack homeylab/bookstack -n bookstack
 ```
 
 ## Configuration Options
-For more configuration options, refer to the documented env variables available for bookstack [here](https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete).
+Specify required configuration in the `config` section of your _values.yaml_ file
+
+| property | description | example |
+| -------- | ----------- | ------- |
+| `config.appUrl` | Specify the url (with http/https) used to access Bookstack instance | `https://bookstack.domain.org`|
+| `config.dbHost` | Which backend db to use, if empty string, will attempt to use embedded mariaDB service | `bookstack-mariadb.bookstack.svc.cluster.local` |
+| `config.dbPort` | Specify the port for the backend db. | `3306` |
+| `config.dbDatabase` | Which database to use when connected to the backend db. | `bookstack` | 
+| `config.dbUser` | Username for db connection, will be ignored if `existingSecret` is given | `bookstack` |
+| `config.dbPassword` | Password for db connection, will be ignored if `existingSecret` is given | `bookstack` |
+| `config.cacheDriver` | Which driver to use for cache. | `'file', 'database', 'memcached' or 'redis` |
+| `config.sessionDriver` | Which driver to use for sessions. | `'file', 'database', 'memcached' or 'redis` |
+| `config.dbPassword` | Password for db connection, will be ignored if `existingSecret` is given | `bookstack` |
+
+For more configuration option, refer to the documented env variables available for bookstack [here](https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete).
+
+Additional configuration can be specified in the `extraEnv` section, some examples:
+```yaml
+extraEnv:
+  TZ: Etc/UTC
+  APP_DEFAULT_DARK_MODE: true
+  APP_VIEWS_BOOKS: list
+```
+
+## File Exporter (Backup Your Pages)
+This chart includes an optional [exporter](https://github.com/homeylab/bookstack-file-exporter) that will archive all your pages and their contents to a supported object storage provider(s) like minio, s3, etc.
+
+This exporter creates a `.tgz` archive in a folder-tree layout to maintain the hierarchy of shelves, books, and pages.
+
+Supported backup formats are shown [here](https://demo.bookstackapp.com/api/docs#pages-exportHtml) and below:
+
+1. html
+2. pdf
+3. markdown
+4. plaintext
+
+A valid configuration should be provided and in most cases, a valid object storage provider configuration for remote archiving. Credentials can be specified directly in the config section or via `fileBackups.existingSecret`, see [here](https://github.com/homeylab/bookstack-file-exporter#authentication) for more information on getting/setting credentials for exporting. 
+
+Example configuration below using minio:
+```yaml
+fileBackups:
+    config: |
+        ## The target bookstack instance
+        ## example value shown below
+        host: "bookstack.bookstack.svc.cluster.local"
+
+        ## if existingSecret is supplied, can omit/comment out the `credentials` section below
+        credentials:
+        token_id: XXXXXXXXXXXXXXXXXXXX
+        token_secret: YYYYYYYYYYYYYYYYYY
+
+        ## provide additional headers
+        ## comment out section if not needed
+        additional_headers:
+          User-Agent: "helm-bookstack"
+
+        ## export formats (multiple options can be chosen)
+        formats:
+        - markdown
+        # - html
+        # - pdf
+        # - plaintext
+
+        ## export json metadata about the page
+        export_meta: false
+
+        ## remove from local volume/disk after upload to object storage
+        clean_up: true
+
+        ## see minio config section for details: https://github.com/homeylab/bookstack-file-exporter#minio-backups
+        ## omit/comment out if using a different object storage provider
+        minio_config:
+            host: "minio.test.org"
+            # if existingSecret is supplied, can omit the `*_key` sections below
+            access_key: MMMMMMMMMMMM
+            secret_key: QQQQQQQQQQQQQQQQQQ
+            # required by minio
+            # if unsure, try "us-east-1"
+            region: "us-east-1"
+            # bucket to use
+            bucket: "bookstack"
+            # path to upload to
+            # optional, will use root bucket path if not set
+            # the exported archive will appear in: `<bucket_name>:<path>/bookstack_export_<timestamp>.tgz`gz`
+            path: "bookstack/file_backups/"
+        
+        # s3_config:
+```
+
+To use this feature, set `fileBackups.enabled` to `true`. For more information on how to set configuration options, see exporter [docs](https://github.com/homeylab/bookstack-file-exporter#configuration).
 
 ## Backup And Restore Of MariaDB
-When upgrading to different versions, you should do a back up of your mariadb data and have that available just in case. This can be used for other siturations like PVC resizing as well.
+When upgrading to different versions, you should do a back up of your mariadb data and have that available just in case. This can be used for other situations like PVC resizing as well.
 - Stop bookstack pod
 ```
 kubectl scale deploy -n bookstack bookstack --replicas=0

@@ -18,6 +18,8 @@ IMAGE_TAG=v3.9.0
 
 ## update dep
 update_dep:
+	helm repo add bitnami https://charts.bitnami.com/bitnami
+	helm repo update bitnami
 	helm dependency update ${CHART_DIR}/$(app) 
 
 ## lint
@@ -32,11 +34,17 @@ test_custom:
 	ct install --chart-dirs ${CHART_DIR} --charts ${CHART_DIR}/$(app)
 
 dryrun_install_local:
-	helm install $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace --dry-run
+	helm install -f ${LOCAL_VARS_DIR}/bookstack.yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace --dry-run
 
 install_local:
-	helm install $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace
+	helm install -f ${LOCAL_VARS_DIR}/bookstack.yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace
+
+dryrun_upgrade_local:
+	helm upgrade -f ${LOCAL_VARS_DIR}/bookstack.yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --dry-run
+
+upgrade_local:
+	helm upgrade -f ${LOCAL_VARS_DIR}/bookstack.yaml $(app) ${CHART_DIR}/$(app) -n local-$(app)
 
 clean_local:
-	helm delete $(app) -n $(app)-${LOCAL_NAMESPACE}
-	kubectl delete ns $(app)-${LOCAL_NAMESPACE}
+	helm delete $(app) -n local-$(app)
+	kubectl delete ns local-$(app)

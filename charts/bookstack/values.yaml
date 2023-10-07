@@ -54,10 +54,14 @@ existingSecret: ""
 
 ## Default values below will work with included mariadb chart in bookstack namespace
 config:
+  ## (http/https) url used to access bookstack
+  ## If using ingress, set it to same url
+  ## example: "https://bookstack.yourdomain.org"
+  appUrl: ""
   ## dbHost should be specified and consistent!
   ## If not included though, it will be dynamically generated and attempt to use included/embedded Bitnami mariadb instance
   ## This to help with chart-testing dynamic namespaces
-  ## dbHost if not specified, value = "{{ .Release.Namespace }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
+  ## dbHost if not specified, value = "{{ bookstack.fullname/specified chart install name }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
   ## Example value if installed in bookstack namespace: "bookstack-mariadb.bookstack.svc.cluster.local"
   dbHost: ""
   dbPort: 3306
@@ -77,8 +81,6 @@ config:
 ## All keys will be upper cased and values will be quoted
 ## Some default values below for reference
 extraEnv: {}
-  ## If using ingress, set it to same url
-  # APP_URL: "https://bookstack.example.org"
   # TZ: Etc/UTC
   # APP_DEFAULT_DARK_MODE: true
   # APP_VIEWS_BOOKS: list
@@ -152,16 +154,17 @@ readinessProbe:
   successThreshold: 1
 
 ## Startup Probe
-## Initial delay of 30 seconds and then up to 5 min wait for mariadb
+## Initial delay of 30 seconds to wait for mariadb
 ## long start up helps with chart-testing, change this as desired
+## shorter periodSeconds helps with pod restarts for db timeout conditions
 startupProbe:
   httpGet:
     path: /status
     port: http
   initialDelaySeconds: 30
-  periodSeconds: 10
+  periodSeconds: 5
   timeoutSeconds: 2
-  failureThreshold: 30
+  failureThreshold: 3
   successThreshold: 1
 
 nodeSelector: {}
@@ -170,6 +173,77 @@ tolerations: []
 
 affinity: {}
 
+## file exporter for backups of pages
+## https://github.com/homeylab/bookstack-file-exporter
+## enable if you want to export all your pages to object storage like minio
+fileBackups:
+  enabled: false
+  image:
+    repository: docker.io
+    name: homeylab/bookstack-file-exporter
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  ## default once per day
+  cronSchedule: "@daily"
+  ## existing secret for credentials loaded as env vars
+  ## can use this secret for Bookstack credentials
+  ## <BOOKSTACK_TOKEN_ID>, <BOOKSTACK_TOKEN_SECRET>
+  ## also use for object storage credentials
+  ## See ref for more details on how to get credentials: https://demo.bookstackapp.com/api/docs#authentication
+  existingSecret: ""
+  ## configuration options here: https://github.com/homeylab/bookstack-file-exporter#configuration-file
+  config: |
+    ## The target bookstack instance
+    ## example value shown below
+    host: "bookstack.bookstack.svc.cluster.local"
+
+    ## if existingSecret is supplied, can omit the `credentials` section below
+    # credentials:
+    #   token_id: ""
+    #   token_secret: ""
+
+    ## provide additional headers
+    ## comment out section if not needed
+    # additional_headers:
+      # User-Agent: "test-agent"
+
+    ## export formats (multiple options can be chosen)
+    formats:
+    - markdown
+    # - html
+    # - pdf
+    # - plaintext
+
+    ## export json metadata about the page
+    export_meta: false
+
+    ## remove from local volume/disk after upload to object storage
+    clean_up: true
+
+    ## see minio config section for details: https://github.com/homeylab/bookstack-file-exporter#minio-backups
+    ## omit/comment out if using a different object storage provider
+    minio_config:
+      host: "minio.yourdomain.com"
+      # if existingSecret is supplied, can omit the `*_key` sections below
+      access_key: ""
+      secret_key: ""
+      # required by minio
+      # if unsure, try "us-east-1"
+      region: "us-east-1"
+      # bucket to use
+      bucket: ""
+      # path to upload to
+      # optional, will use root bucket path if not set
+      # the exported archive will appear in: `<bucket_name>:<path>/bookstack_export_<timestamp>.tgz`gz`
+      path: "bookstack/file_backups/"
+    
+    # s3_config:
+  ## All keys will be upper cased and values will be quoted
+  extraEnv: {}
+
+
+## mariadb backend
 ## https://github.com/bitnami/charts/tree/main/bitnami/mariadb
 ## some basic options below but look at their chart for more
 mariadb:
