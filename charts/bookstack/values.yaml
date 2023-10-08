@@ -57,7 +57,7 @@ config:
   ## (specify http/https) url used to access bookstack
   ## If using ingress, set it to same url
   ## example: "https://bookstack.yourdomain.org"
-  appUrl: "https://bookstack.example.org"
+  appUrl: ""
   ## dbHost should be specified and consistent!
   ## If not included though, it will be dynamically generated and attempt to use included/embedded Bitnami mariadb instance
   ## This to help with chart-testing dynamic namespaces
