@@ -1,0 +1,10 @@
+{{- if .Values.fileBackups.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bookstack.fullname" . }}-file-exporter
+  labels:
+    {{- include "bookstack.labels" . | nindent 4 }}
+data:
+  config.yml: {{- .Values.fileBackups.config | toYaml | indent 1 }}
+{{- end }}

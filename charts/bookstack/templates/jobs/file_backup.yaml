@@ -1,0 +1,38 @@
+{{- if .Values.fileBackups.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "bookstack.fullname" . }}-file-exporter
+  labels:
+    {{- include "bookstack.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.fileBackups.cronSchedule }}"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ include "bookstack.fullname" . }}-file-exporter
+            image: "{{ .Values.fileBackups.image.repository }}/{{ .Values.fileBackups.image.name }}:{{ .Values.fileBackups.image.tag }}"
+            imagePullPolicy: {{ .Values.fileBackups.image.pullPolicy }}
+            env:
+          {{- range $key, $val := .Values.fileBackups.extraEnv }}
+            - name: {{ $key | upper }}
+              value: {{ $val | quote }}
+          {{- end }}
+            volumeMounts:
+            - mountPath: /export/config/config.yml
+              name: config
+              subPath: config.yml
+          {{- if .Values.fileBackups.existingSecret }}
+            envFrom:
+            - secretRef:
+                name: {{ .Values.fileBackups.existingSecret }}
+          {{- end }}
+          volumes:
+          - name: config
+            configMap:
+              name: {{ include "bookstack.fullname" . }}-file-exporter
+          restartPolicy: OnFailure
+{{- end }}

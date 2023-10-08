@@ -65,6 +65,6 @@ Create the name of the service account to use
 This is mainly for chart testing, it will try to use release namespace for dynamic namespace names
 */}}
 {{- define "bookstack.defaultDatabaseHost" -}}
-{{- printf "%s-%s.%s.%s" .Release.Namespace "mariadb" .Release.Namespace "svc.cluster.local"}}
+{{- printf "%s-%s.%s.%s" (include "bookstack.fullname" .) "mariadb" .Release.Namespace "svc.cluster.local"}}
 {{- end }}
 */}}
