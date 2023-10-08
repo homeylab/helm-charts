@@ -71,7 +71,7 @@ Supported backup formats are shown [here](https://demo.bookstackapp.com/api/docs
 3. markdown
 4. plaintext
 
-A valid configuration should be provided and in most cases, a valid object storage provider configuration for remote archiving. Credentials can be specified directly in the config section or via `fileBackups.existingSecret`, see [here](https://github.com/homeylab/bookstack-file-exporter#authentication) for more information on getting/setting credentials for exporting. 
+A valid configuration should be provided and a valid object storage provider configuration(s) for remote archiving. Credentials can be specified directly in the config section or via `fileBackups.existingSecret`, see [here](https://github.com/homeylab/bookstack-file-exporter#authentication) for more information on getting/setting credentials for exporting. 
 
 Example configuration below using minio, place inside `fileBackups.config` string block.
 ```yaml
