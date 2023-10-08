@@ -73,55 +73,71 @@ Supported backup formats are shown [here](https://demo.bookstackapp.com/api/docs
 
 A valid configuration should be provided and in most cases, a valid object storage provider configuration for remote archiving. Credentials can be specified directly in the config section or via `fileBackups.existingSecret`, see [here](https://github.com/homeylab/bookstack-file-exporter#authentication) for more information on getting/setting credentials for exporting. 
 
-Example configuration below using minio:
+Example configuration below using minio, place inside `fileBackups.config` string block.
 ```yaml
-fileBackups:
-    config: |
-        ## The target bookstack instance
-        ## example value shown below
-        host: "bookstack.bookstack.svc.cluster.local"
-
-        ## if existingSecret is supplied, can omit/comment out the `credentials` section below
-        credentials:
-        token_id: XXXXXXXXXXXXXXXXXXXX
-        token_secret: YYYYYYYYYYYYYYYYYY
-
-        ## provide additional headers
-        ## comment out section if not needed
-        additional_headers:
-          User-Agent: "helm-bookstack"
-
-        ## export formats (multiple options can be chosen)
-        formats:
-        - markdown
-        # - html
-        # - pdf
-        # - plaintext
-
-        ## export json metadata about the page
-        export_meta: false
-
-        ## remove from local volume/disk after upload to object storage
-        clean_up: true
-
-        ## see minio config section for details: https://github.com/homeylab/bookstack-file-exporter#minio-backups
-        ## omit/comment out if using a different object storage provider
-        minio_config:
-            host: "minio.test.org"
-            # if existingSecret is supplied, can omit the `*_key` sections below
-            access_key: MMMMMMMMMMMM
-            secret_key: QQQQQQQQQQQQQQQQQQ
-            # required by minio
-            # if unsure, try "us-east-1"
-            region: "us-east-1"
-            # bucket to use
-            bucket: "bookstack"
-            # path to upload to
-            # optional, will use root bucket path if not set
-            # the exported archive will appear in: `<bucket_name>:<path>/bookstack_export_<timestamp>.tgz`gz`
-            path: "bookstack/file_backups/"
-        
-        # s3_config:
+# The target bookstack instance
+# example value shown below
+# if http/https not specified, defaults to https
+# if you put http here, it will try verify=false, not to check certs
+host: "https://bookstack.example.com"
+# You could optionally set the bookstack token_id and token_secret here instead of env
+# if existingSecret is supplied, can omit/comment out the `credentials` section below
+credentials:
+    # set here or as env variable, BOOKSTACK_TOKEN_ID
+    # env var takes precedence over below
+    token_id: ""
+    # set here or as env variable, BOOKSTACK_TOKEN_SECRET
+    # env var takes precedence over below
+    token_secret: ""
+# additional headers to add, examples below
+# if not required, you can omit/comment out section
+additional_headers:
+  User-Agent: "helm-bookstack-exporter"
+# supported formats from bookstack below
+# specify one or more
+# comment/remove the ones you do not need
+formats:
+  - markdown
+  - html
+  - pdf
+  - plaintext
+# if existingSecret is supplied, can omit/comment out the `minio_config._key` sections below
+minio_config:
+  # a host/ip + port combination is also allowed
+  # example: "minio.yourdomain.com:8443"
+  host: "minio.yourdomain.com"
+  # set here or as env variable, MINIO_ACCESS_KEY
+  # env var takes precedence over below
+  access_key: ""
+  # set here or as env variable, MINIO_SECRET_KEY
+  # env var takes precedence over below
+  secret_key: ""
+  # required by minio
+  # if unsure, try "us-east-1"
+  region: "us-east-1"
+  # bucket to use
+  bucket: "bookstack-bkps"
+  # path to upload to
+  # optional, will use root bucket path if not set
+  # the exported archive will appear in: `<bucket_name>:<path>/bookstack_export_<timestamp>.tgz`
+  path: "bookstack/file_backups/"
+  # optional if specified exporter can delete older archives
+  # valid values are:
+  # set to 1+ if you want to retain a certain number of archives
+  # set to 0 or comment out section if you want no action done
+  keep_last: 5
+# optional export of metadata about the page in a json file
+# this metadata contains general information about the page
+# like: last update, owner, revision count, etc.
+# omit this or set to false if not needed
+export_meta: false
+# optional if specified exporter can delete older archives
+# valid values are:
+# set to -1 if you want to delete all archives after each run
+# - this is useful if you only want to upload to object storage
+# set to 1+ if you want to retain a certain number of archives
+# set to 0 or comment out section if you want no action done
+keep_last: -1
 ```
 
 To use this feature, set `fileBackups.enabled` to `true`. For more information on how to set configuration options, see exporter [docs](https://github.com/homeylab/bookstack-file-exporter#configuration).
@@ -160,3 +176,10 @@ $ md5sum app_db_backup.sql
 $ mysql -u root -p -D bookstack < backup.sql
 ```
 - Scale back up bookstack and it should be reading from your initial database dataset
+
+## Upgrade Matrix For Releases
+_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+
+| Start Chart Version | Target Chart Version | Upgrade Steps |
+| ------------------- | -------------------- | ------------- |
+| `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |
