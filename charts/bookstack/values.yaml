@@ -271,7 +271,7 @@ fileBackups:
 
 ## mariadb backend
 ## https://github.com/bitnami/charts/tree/main/bitnami/mariadb
-## some basic options below but look at their chart for more
+## some basic options below look at upstream chart for more
 mariadb:
   enabled: true
   ## @param architecture MariaDB architecture (`standalone` or `replication`)
