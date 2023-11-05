@@ -7,7 +7,7 @@ image:
   name: linuxserver/bookstack
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "23.08.3"
+  tag: ""
 
 ## set image for post install helm tests
 testCurlImage:

@@ -1,4 +1,4 @@
-FROM quay.io/helmpack/chart-testing:v3.9.0
+FROM quay.io/helmpack/chart-testing:v3.10.1
 
 RUN apk update && \
     apk add make
