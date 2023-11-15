@@ -69,7 +69,7 @@ settings:
       save_dpi: false
       verify_ssl: false
     ## if existing secrets is supplied, below section is ignored
-    ## to use secret, use `_0_` number for env var
+    ## to use in a secret, use `UP_UNIFI_CONTROLLER_0_{USER/PASS}` in secret key
     auth:
       ## For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller):
       ## Email field will be the `username`
@@ -120,6 +120,7 @@ extraEnv: {}
   ## Some examples below
   # UP_UNIFI_DYNAMIC: false
   # UP_UNIFI_CONTROLLER_1_USER: ""
+  ## optionally beloww could be supplied in `existingSecret` section
   # UP_UNIFI_CONTROLLER_1_PASS: ""
   # UP_UNIFI_CONTROLLER_1_SAVE_ALARMS: "true"
   # UP_UNIFI_CONTROLLER_1_SAVE_ANOMALIES: "true"
