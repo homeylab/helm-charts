@@ -59,8 +59,6 @@ settings:
   ## Uses `_0_` number (ref: https://unpoller.com/docs/install/configuration - multiple controllers section)
   ## for additional controllers to scrape, use `extraEnv section` starting with `_1_`
   unifi:
-    ## additional configuration for unifi can be specified in `extraEnv`
-    ## use `_0_` as the id for the controller env variables
     config:
       url: ""
       save_sites: true
@@ -72,9 +70,9 @@ settings:
       verify_ssl: false
     ## if existing secrets is supplied, below section is ignored
     ## to use secret, use `_0_` number for env var
-    credentials:
+    auth:
       ## For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller):
-      ## Email field will be the `username`` you will need to create the config file.
+      ## Email field will be the `username`
       ## change the below to your created user/pass
       user: ""
       pass: ""
@@ -87,7 +85,7 @@ settings:
       db: ""
       interval: ""
     ## if existing secrets is supplied, below section is ignored
-    credentials:
+    auth:
       user: ""
       pass: ""
       auth_token: ""

@@ -62,12 +62,12 @@ spec:
             value: {{ $val | quote }}
           {{- end }}
         {{- if not .Values.existingSecret }}
-          {{- range $key, $val := .Values.settings.unifi.config }}
+          {{- range $key, $val := .Values.settings.unifi.auth }}
           - name: "UP_UNIFI_CONTROLLER_0_{{ $key | upper }}"
             value: {{ $val | quote }}
           {{- end }}
           {{- if .Values.settings.influxdb.enabled }}
-          {{- range $key, $val := .Values.settings.influxdb.credentials }}
+          {{- range $key, $val := .Values.settings.influxdb.auth }}
           - name: "UP_INFLUXDB_{{ $key | upper }}"
             value: {{ $val | quote }}
           {{- end }}
