@@ -28,13 +28,13 @@ helm upgrade -f my-values.yaml unpoller homeylab/unpoller -n unpoller
 ## Prerequisites
 Ensure you have created a user in your unifi site as described here: https://unpoller.com/docs/install/controllerlogin
 
-For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller), email field will be the 'username'.
+For a Non UnifiOS Controller (like: [unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller)), email used for login will be the 'user'.
 
 ## Configuration Options
 ### Descriptions
 The default config options provided in this chart match the same values given in the docker-compose [example](https://unpoller.com/docs/install/dockercompose) from unpoller.
 
-The comments in the provided values.yaml also provide helpful descriptions. Helpful descriptions are shown below for some options:
+The comments in the provided `values.yaml` also provide helpful descriptions. Helpful descriptions are also shown below for some options:
 
 | Configuration Section | Subsection | Example/Description |
 | --------------------- | ---------- | ----------- |
@@ -44,7 +44,10 @@ The comments in the provided values.yaml also provide helpful descriptions. Help
 |  | `credentials.user` | For a Non UnifiOS Controller (like: [unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller)), email used for login, will be the `user` |
 | `setttings.influxdb.config` | `*` | Send to influxdb, use `setttings.influxdb.enabled` to use this feature. Not enabled by default. |
 | `setttings.prometheus` | `*` | Prometheus settings, uncomment `disable` and set to `true` if you want Prometheus disabled. |
-| `settings.unpoller` | `*` | additional settings for unpoller |
+| `setttings.prometheus` | `namespace` | By default unpoller is going to use the value of `UP_PROMETHEUS_NAMESPACE` (this setting) ( not your actual deployed namespace) to prepend the metrics. Since the grafana [charts](https://github.com/unpoller/dashboards) all have `unpoller` set in the prom queries, you should put this as `unpoller`. _Recommended: You can install this helm chart in any namespace you'd like, just set this var to `unpoller` to work with the provided dashboards without changes._ |
+| `settings.unpoller` | `*` | Additional settings for unpoller. |
+
+For additional configuration use the `extraEnv` section.
 
 1. `UP_PROMETHEUS_NAMESPACE`
     * By default, the image is going to use the value of UP_PROMETHEUS_NAMESPACE ( not your actual deployed namespace) to prepend the metrics
