@@ -19,8 +19,8 @@ spec:
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- if not .Values.serviceMonitor.enabled }}
-      {{- with .Values.promPodAnnotations }}
+    {{- if not .Values.metrics.serviceMonitor.enabled }}
+      {{- with .Values.metrics.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- end }}
@@ -37,18 +37,52 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          {{- range $key, $val := .Values.config }}
-          - name: {{ $key | upper }}
+          {{- range $key, $val := .Values.settings.unifi.config }}
+          - name: "UP_UNIFI_CONTROLLER_0_{{ $key | upper }}"
             value: {{ $val | quote }}
           {{- end }}
+        {{- if .Values.settings.influxdb.enabled }}
+          {{- range $key, $val := .Values.settings.influxdb.config }}
+          - name: "UP_INFLUXDB_{{ $key | upper }}"
+            value: {{ $val | quote }}
+          {{- end }}
+        {{- else }}
+          - name: "UP_INFLUXDB_DISABLE"
+            value: "true"
+        {{- end }}
+          {{- range $key, $val := .Values.settings.prometheus }}
+          - name: "UP_PROMETHEUS_{{ $key | upper }}"
+            value: {{ $val | quote }}
+          {{- end }}
+          {{- range $key, $val := .Values.settings.unpoller }}
+          - name: "UP_POLLER_{{ $key | upper }}"
+            value: {{ $val | quote }}
+          {{- end }}
+        {{- if not .Values.existingSecret }}
+          {{- range $key, $val := .Values.settings.unifi.config }}
+          - name: "UP_UNIFI_CONTROLLER_0_{{ $key | upper }}"
+            value: {{ $val | quote }}
+          {{- end }}
+          {{- if .Values.settings.influxdb.enabled }}
+          {{- range $key, $val := .Values.settings.influxdb.credentials }}
+          - name: "UP_INFLUXDB_{{ $key | upper }}"
+            value: {{ $val | quote }}
+          {{- end }}
+          {{- end }}
+        {{- end }}
         {{- if .Values.extraEnv }}
           {{- range $key, $val := .Values.extraEnv }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}
           {{- end }}
+        {{- end }}
+        {{- if .Values.existingSecret }}
+          envFrom:
+          - secretRef:
+              name: {{ .Values.existingSecret }}
         {{- end }}
           ports:
             - name: {{ .Values.service.name }}

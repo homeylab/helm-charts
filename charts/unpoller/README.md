@@ -28,31 +28,14 @@ helm upgrade -f my-values.yaml unpoller homeylab/unpoller -n unpoller
 ## Prerequisites
 Ensure you have created a user in your unifi site as described here: https://unpoller.com/docs/install/controllerlogin
 
-## Simple Deploy
-If you just want to deploy as simple as possible, create your own values.yaml file
-1. uncomment all the key/value variables in `config` section of values.yaml
-2. update the 3 variables below in config section with your values
-```
-config:
-    ...
-    UP_UNIFI_CONTROLLER_0_USER: {{ your_created_user/email }}
-    UP_UNIFI_CONTROLLER_0_PASS: {{ your_created_user_pass }}
-    UP_UNIFI_CONTROLLER_0_URL: {{ your_unifi_url }}
-```
-* A note on email vs user:
-    - For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller), email field will be the 'username'.
-
-Then deploy:
-```
-helm install -f my-values.yaml unpoller unpoller/ -n unpoller --create-namespace
-```
+For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller), email field will be the 'username'.
 
 ## Configuration Options
+### Descriptions
 I will try to explain some of the options and what they do since the wording on the docs may be confusing for some.
 
-The default config options provided in this chart match the same values given in the dockercompose example from unpoller.
+The default config options provided in this chart match the same values given in the docker-compose [example](https://unpoller.com/docs/install/dockercompose) from unpoller.
 
-### Important Options
 1. `UP_PROMETHEUS_NAMESPACE`
     * By default, the image is going to use the value of UP_PROMETHEUS_NAMESPACE ( not your actual deployed namespace) to prepend the metrics
     * example: "{{ namespace }}_client_receive_bytes_total" => "unpoller_client_receive_bytes_total"
@@ -69,6 +52,13 @@ The default config options provided in this chart match the same values given in
     * This is set to `enabled` by default and requires DPI (Deep Packet Inspection) to be enabled for your site in Unifi
     * If not `enabled`, you will see no data
 
-### References
+## Upgrade Matrix For Releases
+_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+
+| Start Chart Version | Target Chart Version | Upgrade Steps |
+| ------------------- | -------------------- | ------------- |
+| `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |
+
+## References
 * https://unpoller.com/docs/install/configuration/
 * https://unpoller.com/docs/install/dockercompose

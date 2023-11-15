@@ -1,18 +1,38 @@
-{{- if .Values.serviceMonitor.enabled }}
+{{- if .Values.metrics.serviceMonitor.enabled }}
+---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "unpoller.fullname" . }}
-  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ include "unpoller.fullname" . }}
-    {{- with .Values.serviceMonitor.labels }}
-      {{- toYaml . | nindent 4 }}
+    {{- include "unpoller.labels" . | nindent 4 }}
+    {{- range $key, $value := .Values.metrics.serviceMonitor.additionalLabels }}
+    {{ $key }}: {{ $value | quote }}
     {{- end }}
+  name: {{ include "unpoller.fullname" . }}
 spec:
+  endpoints:
+  - interval: {{ .Values.metrics.serviceMonitor.interval }}
+    path: /metrics
+    port: {{ .Values.service.name }}
+    scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
+{{- if .Values.metrics.serviceMonitor.relabelings }}
+    relabelings:
+{{ toYaml .ValuesserviceMonitor.relabelings | indent 4 }}
+{{- end }}
+{{- if .Values.metrics.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+{{ toYaml .Values.metrics.serviceMonitor.metricRelabelings | indent 4 }}
+{{- end }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      {{- include "unpoller.labels" . | nindent 6 }}
-  endpoints:
-  - port: {{ .Values.service.name }}
+      {{- include "unpoller.selectorLabels" . | nindent 8 }}
+{{- if .Values.metrics.serviceMonitor.targetLabels }}
+  targetLabels:
+{{- range .Values.metrics.serviceMonitor.targetLabels }}
+    - {{ . }}
+{{- end }}
+{{- end }}
 {{- end }}

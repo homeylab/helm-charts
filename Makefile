@@ -34,16 +34,16 @@ test_custom:
 	ct install --chart-dirs ${CHART_DIR} --charts ${CHART_DIR}/$(app)
 
 dryrun_install_local:
-	helm install -f ${LOCAL_VARS_DIR}/bookstack.yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace --dry-run
+	helm install -f ${LOCAL_VARS_DIR}/$(app).yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace --dry-run
 
 install_local:
-	helm install -f ${LOCAL_VARS_DIR}/bookstack.yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace
+	helm install -f ${LOCAL_VARS_DIR}/$(app).yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace
 
 dryrun_upgrade_local:
-	helm upgrade -f ${LOCAL_VARS_DIR}/bookstack.yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --dry-run
+	helm upgrade -f ${LOCAL_VARS_DIR}/$(app).yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --dry-run
 
 upgrade_local:
-	helm upgrade -f ${LOCAL_VARS_DIR}/bookstack.yaml $(app) ${CHART_DIR}/$(app) -n local-$(app)
+	helm upgrade -f ${LOCAL_VARS_DIR}/$(app).yaml $(app) ${CHART_DIR}/$(app) -n local-$(app)
 
 clean_local:
 	helm delete $(app) -n local-$(app)
