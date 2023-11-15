@@ -1,5 +1,5 @@
 # Unpoller
-This chart deploys unpoller, an app that gathers metrics from unifi controllers and formats it for prometheus scraping or service monitors.
+This chart deploys unpoller, an app that gathers metrics from unifi controllers and formats it for Prometheus.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
@@ -48,22 +48,6 @@ The comments in the provided `values.yaml` also provide helpful descriptions. He
 | `settings.unpoller` | `*` | Additional settings for unpoller. |
 
 For additional configuration use the `extraEnv` section.
-
-1. `UP_PROMETHEUS_NAMESPACE`
-    * By default, the image is going to use the value of UP_PROMETHEUS_NAMESPACE ( not your actual deployed namespace) to prepend the metrics
-    * example: "{{ namespace }}_client_receive_bytes_total" => "unpoller_client_receive_bytes_total"
-    * Since the grafana charts (https://github.com/unpoller/dashboards) all have `unpoller` set in the prom queries, you should put this as `unpoller`
-    * To clarify: You can install this helm chart in any namespace you'd like though, just keep it the above env variable equal to "unpoller" for metrics
-    * This info is still accurate at the time of writing
-
-2. `UP_UNIFI_CONTROLLER_0_USER`
-    * As mentioned earlier:
-        * For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller), use the email field as the username.
-        * For Cloud Key, should be the actual username
-
-3. `UP_UNIFI_CONTROLLER_0_SAVE_DPI`
-    * This is set to `enabled` by default and requires DPI (Deep Packet Inspection) to be enabled for your site in Unifi
-    * If not `enabled`, you will see no data
 
 ## Upgrade Matrix For Releases
 _The matrix below displays certain versions of this helm chart that could result in breaking changes._
