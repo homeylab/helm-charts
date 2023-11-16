@@ -28,17 +28,17 @@ helm upgrade -f my-values.yaml unpoller homeylab/unpoller -n unpoller
 ## Prerequisites
 Ensure you have created a user in your unifi site as described here: https://unpoller.com/docs/install/controllerlogin
 
-For a Non UnifiOS Controller (like: [unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller)), email used for login will be the 'user'.
+For a Non UnifiOS Controller (like: [unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller)), email used for login will be the `user` used for authentication.
 
 ## Configuration Options
 ### Descriptions
 The default config options provided in this chart match the same values given in the docker-compose [example](https://unpoller.com/docs/install/dockercompose) from unpoller.
 
-The comments in the provided `values.yaml` also provide helpful descriptions. Helpful descriptions are also shown below for some options:
+Comments in the provided `values.yaml` provide helpful descriptions. Some of the same information is also shown below for a few key options:
 
 | Configuration Section | Subsection | Example/Description |
 | --------------------- | ---------- | ----------- |
-| `existingSecret` |  | Replaces auth sections of `settings.*` with user supplied secret. Secrets should have key/value for env vars. |
+| `existingSecret` |  | Replaces auth sections of `settings.*.auth` with user supplied secret. Secrets should have key/value for env vars. |
 | `setttings.unifi.config` | `*` | If scraping multiple controllers, this section uses the `_0_` number, [reference]( https://unpoller.com/docs/install/configuration) - multiple controllers section. Use `extraEnv` section to specify more controllers. |
 |  |  `url` | `https://unifi-controller.localdomain:8443` |
 |  | `credentials.user` | For a Non UnifiOS Controller (like: [unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller)), email used for login, will be the `user` |
