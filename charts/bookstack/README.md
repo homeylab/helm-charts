@@ -23,16 +23,21 @@ helm install bookstack homeylab/bookstack -n bookstack --create-namespace
 helm install -f my-values.yaml bookstack homeylab/bookstack -n bookstack --create-namespace
 ```
 
-## Upgrade
-It is recommended to make a backup of mariadb database and also configuration files used by bookstack on it's pvc. 
+## Upgrades
+It is recommended (but not required) to make a backup of mariadb database and also configuration files used by bookstack on it's pvc. See _Backup and Restore_ section for more details.
 
-See _Backup and Restore_ section for more details. After doing so, you can upgrade via helm.
-```
+Steps:
+```bash
 helm upgrade bookstack homeylab/bookstack -n bookstack
 
 # with own values file - recommended
 helm upgrade -f my-values.yaml bookstack homeylab/bookstack -n bookstack
 ```
+
+For additional steps that need to be done for upgrade, check upstream dependencies:
+
+1. For Bookstack upgrade steps, check the [documentation](https://www.bookstackapp.com/docs/admin/updates/).
+2. If using the Mariadb instance provided in this chart, follow Mariadb chart [upgrade](https://github.com/bitnami/charts/tree/main/bitnami/mariadb#upgrading) steps for DB upgrades and follow official Mariadb [guides](https://mariadb.com/kb/en/upgrading/).
 
 ## Configuration Options
 Specify required configuration in the `config` section of your _values.yaml_ file
@@ -143,7 +148,14 @@ keep_last: -1
 To use this feature, set `fileBackups.enabled` to `true`. For more information on how to set configuration options, see exporter [docs](https://github.com/homeylab/bookstack-file-exporter#configuration).
 
 ## Backup And Restore Of MariaDB
-When upgrading to different versions, you should do a back up of your mariadb data and have that available just in case. This can be used for other situations like PVC resizing as well.
+When upgrading to different versions, you can do a back up of your mariadb data and bookstack files to have available just in case. This can be used for other situations like PVC resizing as well. Below is just an example but there any other ways to do this as well like PV backups via [Longhorn](https://longhorn.io/docs/latest/) as an example.
+
+For more information on backup/restore steps, you should follow the documentation for upstream providers: 
+
+1. [bookstack](https://www.bookstackapp.com/docs/admin/backup-restore/)
+2. [mariadb](https://mariadb.com/kb/en/full-backup-and-restore-with-mariabackup/)
+
+Example for mariadb:
 - Stop bookstack pod
 ```
 kubectl scale deploy -n bookstack bookstack --replicas=0
@@ -154,12 +166,14 @@ kubectl scale deploy -n bookstack bookstack --replicas=0
 $ k exec -it -n bookstack bookstack-mariadb-0 bash
 
 # dump
+# root password is generated during install as a secret or user defined in the included mariadb instance
 $ mariadb-dump -A -u root -p bookstack > backup.sql
 
 # check dump
 $ md5sum backup.sql
 
 # copy dump to local and do a md5sum check
+# or export to object storage/other if too large can try mounting PV with a utility pod after scaling mariadb down
 $ kubectl cp bookstack/bookstack-mariadb-0:/tmp/backup.sql app_db_backup.sql
 $ md5sum app_db_backup.sql
 ```
