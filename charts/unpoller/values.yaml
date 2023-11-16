@@ -32,23 +32,6 @@ service:
   protocol: TCP
   name: metrics
 
-## Use prometheus service monitor instead for Prom operator
-metrics:
-  podAnnotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/path: /metrics
-    prometheus.io/port: "9130"
-  ## if serviceMonitor enabled, pod annotations will be ignored
-  serviceMonitor:
-    enabled: false
-    interval: 30s
-    scrapeTimeout: 10s
-    additionalLabels: {}
-    targetLabels: []
-    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
-    relabelings: []
-    metricRelabelings: []
-
 ## Optionally place your credentials in a secret
 ## Loaded in env
 existingSecret: ""
@@ -110,6 +93,23 @@ settings:
   unpoller:
     debug: false
     quiet: false
+
+## Use prometheus service monitor instead for Prom operator
+metrics:
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9130"
+  ## if serviceMonitor enabled, pod annotations will be ignored
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+    additionalLabels: {}
+    targetLabels: []
+    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+    relabelings: []
+    metricRelabelings: []
 
 
 ## additional configuration for the above unifi config section can be specified with `_0_`
