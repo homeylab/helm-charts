@@ -2,6 +2,21 @@ apiVersion: v1
 entries:
   bookstack:
   - apiVersion: v2
+    appVersion: 23.10.4
+    created: "2023-11-22T08:12:29.59199771Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 14.1.2
+    description: bookstack documentation platform
+    digest: 1c4ee2a59796e964a4f09b5ac5722b5e6f014bed759636062ec6509541770062
+    name: bookstack
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-2.5.0/bookstack-2.5.0.tgz
+    version: 2.5.0
+  - apiVersion: v2
     appVersion: 23.10.2
     created: "2023-11-16T06:01:02.524796015Z"
     dependencies:
@@ -286,4 +301,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2023-11-16T06:01:02.524929935Z"
+generated: "2023-11-22T08:12:29.592182624Z"
