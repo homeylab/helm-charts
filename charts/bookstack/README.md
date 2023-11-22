@@ -197,3 +197,4 @@ _The matrix below displays certain versions of this helm chart that could result
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
 | `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |
+| `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
