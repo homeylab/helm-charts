@@ -183,7 +183,7 @@ fileBackups:
     name: homeylab/bookstack-file-exporter
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.0.0"
+    tag: "1.0.1"
   ## default once per day
   cronSchedule: "@daily"
   ## existing secret for credentials loaded as env vars
@@ -202,7 +202,7 @@ fileBackups:
       # set here or as env variable, BOOKSTACK_TOKEN_SECRET
       token_secret: ""
     additional_headers:
-      User-Agent: "helm-bookstack-exporter"
+      User-Agent: "bookstack-file-exporter"
     formats:
       - markdown
       - html
@@ -223,6 +223,7 @@ fileBackups:
       export_images: true
       modify_markdown: false
       export_meta: false
+      verify_ssl: true
     keep_last: -1
   
   ## All keys will be upper cased and values will be quoted
