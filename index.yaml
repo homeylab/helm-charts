@@ -286,7 +286,29 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-0.1.2/bookstack-0.1.2.tgz
     version: 0.1.2
+  nut-exporter:
+  - apiVersion: v2
+    appVersion: "3.1"
+    created: "2023-12-05T08:46:11.170044269Z"
+    description: A Helm chart for Kubernetes
+    digest: 225b9bb97c400eff40a199a7efc7d27edc426467e3d4c957bfe028d908c3fe6e
+    name: nut-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-0.0.1/nut-exporter-0.0.1.tgz
+    version: 0.0.1
   unpoller:
+  - apiVersion: v2
+    appVersion: v2.9.4
+    created: "2023-12-05T08:46:11.398081721Z"
+    description: unpoller for unifi controller metrics
+    digest: 2d2bd79feb3bef21f3ec33b12ffa97f93b535047dd1fb56b183263184955ee01
+    icon: https://unpoller.com/img/logo.png
+    name: unpoller
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-2.0.1/unpoller-2.0.1.tgz
+    version: 2.0.1
   - apiVersion: v2
     appVersion: v2.9.4
     created: "2023-11-16T02:34:50.246382332Z"
@@ -331,4 +353,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2023-11-30T05:52:13.969085007Z"
+generated: "2023-12-05T08:46:11.398151472Z"
