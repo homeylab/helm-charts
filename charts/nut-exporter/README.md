@@ -73,6 +73,5 @@ Example:
 ## Grafana Dashboards
 - Public
   - [https://grafana.com/grafana/dashboards/19308-prometheus-nut-exporter-for-druggeri/](https://grafana.com/grafana/dashboards/19308-prometheus-nut-exporter-for-druggeri/)
-  - [https://grafana.com/grafana/dashboards/15406-yet-another-prometheus-nut-exporter/](https://grafana.com/grafana/dashboards/15406-yet-another-prometheus-nut-exporter/)
 - From Provider
   - [https://github.com/DRuggeri/nut_exporter/blob/master/dashboard/dashboard.json](https://github.com/DRuggeri/nut_exporter/blob/master/dashboard/dashboard.json)
