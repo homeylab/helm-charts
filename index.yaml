@@ -289,6 +289,16 @@ entries:
   nut-exporter:
   - apiVersion: v2
     appVersion: "3.1"
+    created: "2023-12-05T09:51:01.560252587Z"
+    description: A Helm chart for Kubernetes
+    digest: 97123a5542dba6a7ba7f78f17cc9f799b89c73c77a66745a9bca05bfa4275ed6
+    name: nut-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-0.0.3/nut-exporter-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: "3.1"
     created: "2023-12-05T09:46:07.899760727Z"
     description: A Helm chart for Kubernetes
     digest: 33ea59e290a8ebb0f6d4aa378b10da89b24fd93ea663cc032b7aa4ea5c5f934a
@@ -308,6 +318,17 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-0.0.1/nut-exporter-0.0.1.tgz
     version: 0.0.1
   unpoller:
+  - apiVersion: v2
+    appVersion: v2.9.4
+    created: "2023-12-05T09:51:01.776345895Z"
+    description: unpoller for unifi controller metrics
+    digest: 5d7f900bfea6c1440527d6065383aff02c62d84278c8ff3f3730c354976f6d03
+    icon: https://unpoller.com/img/logo.png
+    name: unpoller
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-2.0.2/unpoller-2.0.2.tgz
+    version: 2.0.2
   - apiVersion: v2
     appVersion: v2.9.4
     created: "2023-12-05T08:46:11.398081721Z"
@@ -363,4 +384,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2023-12-05T09:46:08.103787424Z"
+generated: "2023-12-05T09:51:01.776425243Z"
