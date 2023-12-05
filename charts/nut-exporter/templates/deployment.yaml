@@ -39,7 +39,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- if .Values.extraRunFlags }}
+        {{- if or .Values.extraRunFlags .Values.webconfig_file }}
           args:
           {{- range $key, $value := .Values.extraRunFlags }}
             {{- if $value }}
@@ -82,23 +82,23 @@ spec:
           #     port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
+          {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- if .Values.webconfig_file }}
           - mountPath: /webconfig.yml
             name: webconfig
             subPath: webconfig.yml
           {{- end }}
-          {{- end }}
-      {{- with .Values.volumes }}
       volumes:
+      {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if .Values.webconfig_file }}
       - name: webconfig
-            configMap:
-              name: {{ include "nut-exporter.fullname" . }}
-      {{- end }}
+        configMap:
+          name: {{ include "nut-exporter.fullname" . }}-webconfig
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
