@@ -82,23 +82,23 @@ spec:
           #     port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
+          {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- if .Values.webconfig_file }}
           - mountPath: /webconfig.yml
             name: webconfig
             subPath: webconfig.yml
           {{- end }}
-          {{- end }}
-      {{- with .Values.volumes }}
       volumes:
+      {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if .Values.webconfig_file }}
       - name: webconfig
-            configMap:
-              name: {{ include "nut-exporter.fullname" . }}
-      {{- end }}
+        configMap:
+          name: {{ include "nut-exporter.fullname" . }}-webconfig
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
