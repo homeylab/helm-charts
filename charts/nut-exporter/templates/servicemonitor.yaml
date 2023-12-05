@@ -17,7 +17,7 @@ spec:
     scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
 {{- if .Values.metrics.serviceMonitor.relabelings }}
     relabelings:
-{{ toYaml .ValuesserviceMonitor.relabelings | indent 6 }}
+{{ toYaml .Values.metrics.serviceMonitor.relabelings | indent 6 }}
 {{- end }}
 {{- if .Values.metrics.serviceMonitor.metricRelabelings }}
     metricRelabelings:
