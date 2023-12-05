@@ -39,7 +39,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- if .Values.extraRunFlags }}
+        {{- if or .Values.extraRunFlags .Values.webconfig_file }}
           args:
           {{- range $key, $value := .Values.extraRunFlags }}
             {{- if $value }}
