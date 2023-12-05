@@ -41,15 +41,14 @@ existingSecret: ""
 ## Note: Anything used in `settings.config` will be used as env vars.
 ## - all keys will be upper cased and values quoted (for safety)
 ## - this can be used to set additional configuration for exporter
-## - example env var NUT_EXPORTER_STATUSES: `nut_exporter_statuses: "sample, test"`
+## - example env var {NUT_EXPORTER_STATUSES}: `nut_exporter_statuses: "sample, test"`
 settings:
   config:
     nut_exporter_server: ""
     nut_exporter_serverport: 3493
+  # ignored if `existingSecret specified`
   auth:
-    # ignored if `existingSecret specified`
     nut_exporter_username: ""
-    # ignored if `existingSecret specified`
     nut_exporter_password: ""
 
 ## Provide extra flags as args to the exporter
@@ -65,7 +64,7 @@ extraEnv: {}
 ## ref: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md
 ## optionally specify a web_config file that will be used
 ## use inline block as shown below in commented section
-## If specified, a `extraRunFlags` will be added automatically as `--web.config.file`
+## If specified, an `extraRunFlags` will be added automatically as `--web.config.file`
 webconfig_file: ""
 # webconfig_file: |
 #   [tls_server_config]
