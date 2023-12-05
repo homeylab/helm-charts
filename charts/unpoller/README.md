@@ -1,5 +1,5 @@
 # Unpoller
-This chart deploys unpoller, an app that gathers metrics from unifi controllers and formats it for Prometheus.
+This chart deploys [unpoller](https://unpoller.com/docs), an app that gathers metrics from unifi controllers and formats it for Prometheus.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
