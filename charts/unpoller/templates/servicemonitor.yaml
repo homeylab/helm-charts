@@ -17,11 +17,11 @@ spec:
     scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
 {{- if .Values.metrics.serviceMonitor.relabelings }}
     relabelings:
-{{ toYaml .ValuesserviceMonitor.relabelings | indent 4 }}
+{{ toYaml .Values.metrics.serviceMonitor.relabelings | indent 6 }}
 {{- end }}
 {{- if .Values.metrics.serviceMonitor.metricRelabelings }}
     metricRelabelings:
-{{ toYaml .Values.metrics.serviceMonitor.metricRelabelings | indent 4 }}
+{{ toYaml .Values.metrics.serviceMonitor.metricRelabelings | indent 6 }}
 {{- end }}
   namespaceSelector:
     matchNames:
