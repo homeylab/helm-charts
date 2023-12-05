@@ -289,6 +289,16 @@ entries:
   nut-exporter:
   - apiVersion: v2
     appVersion: "3.1"
+    created: "2023-12-05T10:07:45.299039631Z"
+    description: A Helm chart for Kubernetes
+    digest: ff54671ed44c01a9bb8af1d598a1b7ae809cc50d190bfafb112dd510ae06ff38
+    name: nut-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-0.0.5/nut-exporter-0.0.5.tgz
+    version: 0.0.5
+  - apiVersion: v2
+    appVersion: "3.1"
     created: "2023-12-05T09:51:01.560252587Z"
     description: A Helm chart for Kubernetes
     digest: 97123a5542dba6a7ba7f78f17cc9f799b89c73c77a66745a9bca05bfa4275ed6
@@ -384,4 +394,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2023-12-05T09:51:01.776425243Z"
+generated: "2023-12-05T10:07:45.299116073Z"
