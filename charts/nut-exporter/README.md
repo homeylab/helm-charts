@@ -33,7 +33,5 @@ helm upgrade -f my-values.yaml nut-exporter homeylab/nut-exporter -n nut-exporte
 | `extraEnv` |  | Set any additional env variables here. All keys will be upper cased and values quoted |
 | `webconfig_file` |  |  Specify optional [web-configuration](https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md) file.<br>Use inline syntax as shown in the commented section in `values.yaml`. If specified, an `extraRunFlags` will be added automatically as `--web.config.file` |
 
-For additional configuration use the `extraEnv` section.
-
 ### Scraping Multiple NUT Servers
 For setting up metrics for multiple UPS servers from a single instance, follow upstream [documentation](https://github.com/DRuggeri/nut_exporter#example-prometheus-scrape-configurations) on using multiple `scrape_configs` targets in Prometheus.
