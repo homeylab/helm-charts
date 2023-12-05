@@ -19,7 +19,7 @@ spec:
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- if not .Values.metrics.serviceMonitor.enabled }}
+    {{- if and (.Values.metrics.enabled) (not .Values.metrics.serviceMonitor.enabled) }}
       {{- with .Values.metrics.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
