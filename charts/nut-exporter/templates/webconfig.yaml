@@ -1,0 +1,8 @@
+{{- if .Values.webconfig_file }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nut-exporter.fullname" . }}
+data:
+  webconfig_file: {{- .Values.webconfig_file | toYaml | indent 1 }}
+{{- end }}
