@@ -1,5 +1,5 @@
 # nut-exporter
-This chart provides (nut_exporter)[https://github.com/DRuggeri/nut_exporter] (docker) image[https://hub.docker.com/r/druggeri/nut_exporter] from `DRuggeri` repository. 
+This chart provides [nut_exporter](https://github.com/DRuggeri/nut_exporter) [image](https://hub.docker.com/r/druggeri/nut_exporter) from `DRuggeri` repository. 
 
 ## Add Chart Repo
 ```
