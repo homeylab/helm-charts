@@ -19,15 +19,16 @@ For customizations, it is recommended to use your own values file and specify it
 Apps available
 | Application  | Description | 
 | ------------- | ------------- |
-| unpoller  | [unpoller](https://github.com/unpoller/unpoller) gathers metrics from unifi controllers and shows you metrics from your network and devices. |
-| bookstack | [bookstack](https://github.com/BookStackApp/BookStack) is an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it. |
+| [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller)  | [unpoller](https://github.com/unpoller/unpoller) gathers metrics from unifi controllers and shows you metrics from your network and devices. |
+| [bookstack](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack) | [bookstack](https://github.com/BookStackApp/BookStack) is an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it. |
+| [nut_exporter](https://github.com/homeylab/helm-charts/tree/main/charts/nut-exporter) | [nut_exporter](https://github.com/DRuggeri/nut_exporter) is a prometheus exporter that connects to a NUT server(s) and scraps UPS backup metrics. |
 
 ## Recommendations
 ### Create A Values File
 Use a values file to make changes and save your custom configuration. When using upstream helm charts and specifying your own values file, variables are handled like so:
 
 - First the base default values.yaml in the project/bundle is evaluated and all variables and values loaded.
-- When you specify your own file, your configuration is applied on top and overrides existing configuration in the base values.yaml. Certain variable types will be merged with your changes instead of overriden, for example: `config:{}` would be merged.
+- When you specify your own file, your configuration is applied on top and overrides existing configuration in the base values.yaml.
 
 General recommendation is only specify in your own values file what you are customizing or overriding. You can also include variables that are defaulted to a specific value that you need to stay constant, just in case the upstream helm chart changes. For example, maybe you are using a protocol like TCP and that is default now, it may change to UDP in the future, so you might want to keep that in your own values file. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
 
@@ -50,8 +51,8 @@ helm install -f my-values.yaml unpoller homeylab/unpoller -n unpoller --create-n
 
 ## Tested On
 All charts are currently tested on:
-- k3s `v1.27.6`
-- Helm `v3.12.3`
+- k8s `v1.27.7+k3s2`
+- Helm `v3.13.1`
 
 ### Chart Testing
 **WIP Section**
