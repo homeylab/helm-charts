@@ -1,0 +1,3 @@
+Get the application pods by running these commands:
+
+kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "exportarr.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"

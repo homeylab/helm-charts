@@ -1,0 +1,45 @@
+{{- if and .Values.exportarr.enabled .Values.exportarr.metrics.serviceMonitor.enabled  }}
+{{- range $key, $val := .Values.exportarr.apps }}
+{{- if $val.enabled }}
+{{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    {{- include "exportarr.labels" $ | nindent 4 }}
+    {{- range $key_label, $value_label := $.Values.exportarr.metrics.serviceMonitor.additionalLabels }}
+    {{ $key_label }}: {{ $value_label | quote }}
+    {{- end }}
+    app.kubernetes.io/component: {{ $appName }}
+  name: {{ $appName }}
+spec:
+  endpoints:
+  - interval: {{ $.Values.exportarr.metrics.serviceMonitor.interval }}
+    path: {{ $.Values.exportarr.metrics.serviceMonitor.path }}
+    port: {{ $.Values.exportarr.service.name }}
+    scrapeTimeout: {{ $.Values.exportarr.metrics.serviceMonitor.scrapeTimeout }}
+{{- if $.Values.exportarr.metrics.serviceMonitor.relabelings }}
+    relabelings:
+{{ toYaml $.Values.exportarr.metrics.serviceMonitor.relabelings | indent 6 }}
+{{- end }}
+{{- if $.Values.exportarr.metrics.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+{{ toYaml $.Values.exportarr.metrics.serviceMonitor.metricRelabelings | indent 6 }}
+{{- end }}
+  namespaceSelector:
+    matchNames:
+    - {{ $.Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "exportarr.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $appName }}
+{{- if $.Values.exportarr.metrics.serviceMonitor.targetLabels }}
+  targetLabels:
+{{- range $.Values.exportarr.metrics.serviceMonitor.targetLabels }}
+    - {{ . }}
+{{- end }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
