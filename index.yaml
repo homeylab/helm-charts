@@ -289,6 +289,16 @@ entries:
   exportarr:
   - apiVersion: v2
     appVersion: v1.6.0
+    created: "2023-12-11T06:05:25.377743376Z"
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 5035f3aba8047470e8d6ce4927c34ebb3dfce0069f7055966b990a326877d45e
+    name: exportarr
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-0.0.2/exportarr-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: v1.6.0
     created: "2023-12-11T06:01:58.069806991Z"
     description: A Helm Chart to export Prometheus metrics for Arr applications.
     digest: 26a678a07c95d5c3d992acbf5e3c0a9add5e1dce5aba6ad76753f3cca6cb045f
@@ -405,4 +415,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2023-12-11T06:01:58.416477745Z"
+generated: "2023-12-11T06:05:25.377819668Z"
