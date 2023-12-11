@@ -7,4 +7,4 @@ A sample Grafana dashboard is available from upstream:
     - https://github.com/onedr0p/exportarr/tree/master/examples/grafana
 
 A slightly modified version (for this chart specifically) is available in charts repo:
-    - https://github.com/homeylab/helm-charts/tree/exportarr-{{ .Chart.AppVersion }}/charts/exportarr/examples/dashboard.json
+    - https://github.com/homeylab/helm-charts/tree/exportarr-{{ .Chart.Version }}/charts/exportarr/examples/dashboard.json
