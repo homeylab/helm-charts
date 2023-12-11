@@ -19,9 +19,10 @@ For customizations, it is recommended to use your own values file and specify it
 Apps available
 | Application  | Description | 
 | ------------- | ------------- |
-| [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller)  | [unpoller](https://github.com/unpoller/unpoller) gathers metrics from unifi controllers and shows you metrics from your network and devices. |
+| [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller)  | [unpoller](https://github.com/unpoller/unpoller) is a Prometheus exporter that connects to an Unifi Controller and scraps metrics from your network and devices. |
 | [bookstack](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack) | [bookstack](https://github.com/BookStackApp/BookStack) is an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it. |
-| [nut_exporter](https://github.com/homeylab/helm-charts/tree/main/charts/nut-exporter) | [nut_exporter](https://github.com/DRuggeri/nut_exporter) is a prometheus exporter that connects to a NUT server(s) and scraps UPS backup metrics. |
+| [nut_exporter](https://github.com/homeylab/helm-charts/tree/main/charts/nut-exporter) | [nut_exporter](https://github.com/DRuggeri/nut_exporter) is a Prometheus exporter that connects to a NUT server(s) and scraps UPS backup metrics. |
+| [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) | [exportarr](https://github.com/onedr0p/exportarr) is a Prometheus exporter that connects to `Arr` applications and scraps metrics media metrics. |
 
 ## Recommendations
 ### Create A Values File
@@ -30,7 +31,7 @@ Use a values file to make changes and save your custom configuration. When using
 - First the base default values.yaml in the project/bundle is evaluated and all variables and values loaded.
 - When you specify your own file, your configuration is applied on top and overrides existing configuration in the base values.yaml.
 
-General recommendation is only specify in your own values file what you are customizing or overriding. You can also include variables that are defaulted to a specific value that you need to stay constant, just in case the upstream helm chart changes. For example, maybe you are using a protocol like TCP and that is default now, it may change to UDP in the future, so you might want to keep that in your own values file. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
+General recommendation is only specify in your own values file what you are customizing or overriding. You can also include variables that are defaulted to a specific value that you need to stay constant, just in case the upstream helm chart changes. For example, maybe you are using a port like `9090` and that is default now, it may change to `909X` in the future, so you might want to keep that in your own values file. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
 
 Use the `-f` flag like so, example
 ```

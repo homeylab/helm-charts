@@ -69,4 +69,3 @@ helm upgrade -f my-values.yaml exportarr homeylab/exportarr -n exportarr
 | `extraEnv` |  | Set any additional env variables here for all exportarr instances. All keys will be upper cased and values quoted. |
 
 In addition, `configMap` for configuration files can be supplied to all exportarr instances (via `volumes` and `volumeMounts`) or for only certain ones (via `app.{{ app_name }}.volumes` and `app.{{ app_name }}.volumeMounts`).
-

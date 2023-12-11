@@ -5,3 +5,6 @@ Get the exportarr instances by running this command:
 
 A sample Grafana dashboard is available from upstream:
     - https://github.com/onedr0p/exportarr/tree/master/examples/grafana
+
+A slightly modified version (for this chart specifically) is available in charts repo:
+    - https://github.com/homeylab/helm-charts/tree/exportarr-{{ .Chart.AppVersion }}/charts/exportarr/examples/dashboard.json
