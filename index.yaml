@@ -3,6 +3,21 @@ entries:
   bookstack:
   - apiVersion: v2
     appVersion: 23.10.4
+    created: "2023-12-11T07:00:56.096818776Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 14.1.4
+    description: bookstack documentation platform
+    digest: af2dbb54186d7e45d5bcb6def500ec9f138b205f5a9dc79e31ffc79d022569a0
+    name: bookstack
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-2.6.1/bookstack-2.6.1.tgz
+    version: 2.6.1
+  - apiVersion: v2
+    appVersion: 23.10.4
     created: "2023-11-30T05:52:13.968979049Z"
     dependencies:
     - condition: mariadb.enabled
@@ -289,6 +304,16 @@ entries:
   exportarr:
   - apiVersion: v2
     appVersion: v1.6.0
+    created: "2023-12-11T07:00:56.252386248Z"
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 6930bc5388226b2590d0d0a7ffc083b2b9b3f3bf0b9aa6cb2068317c2701b588
+    name: exportarr
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-0.0.3/exportarr-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: v1.6.0
     created: "2023-12-11T06:05:25.377743376Z"
     description: A Helm Chart to export Prometheus metrics for Arr applications.
     digest: 5035f3aba8047470e8d6ce4927c34ebb3dfce0069f7055966b990a326877d45e
@@ -308,6 +333,16 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/exportarr-0.0.1/exportarr-0.0.1.tgz
     version: 0.0.1
   nut-exporter:
+  - apiVersion: v2
+    appVersion: "3.1"
+    created: "2023-12-11T07:00:56.400361485Z"
+    description: A Helm chart for Kubernetes
+    digest: be4ffad6012e157cfc585bc65ed2a60e32eb40d2ce7bf224e797e8ceebf8e6f4
+    name: nut-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-0.0.6/nut-exporter-0.0.6.tgz
+    version: 0.0.6
   - apiVersion: v2
     appVersion: "3.1"
     created: "2023-12-05T10:07:45.299039631Z"
@@ -349,6 +384,17 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-0.0.1/nut-exporter-0.0.1.tgz
     version: 0.0.1
   unpoller:
+  - apiVersion: v2
+    appVersion: v2.9.4
+    created: "2023-12-11T07:00:56.541784286Z"
+    description: unpoller for unifi controller metrics
+    digest: 935a2a19df4f481b6a776c5a6d0d9e5ad591b3ceedb70663ef7a8ee6e9b770ed
+    icon: https://unpoller.com/img/logo.png
+    name: unpoller
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-2.0.3/unpoller-2.0.3.tgz
+    version: 2.0.3
   - apiVersion: v2
     appVersion: v2.9.4
     created: "2023-12-05T09:51:01.776345895Z"
@@ -415,4 +461,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2023-12-11T06:05:25.377819668Z"
+generated: "2023-12-11T07:00:56.541984072Z"
