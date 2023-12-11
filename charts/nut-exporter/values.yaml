@@ -31,6 +31,40 @@ service:
   name: metrics
   protocol: TCP
 
+metrics:
+  ## -- Enable and configure a Prometheus serviceMonitor for the chart under this key.
+  enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /ups_metrics
+    prometheus.io/port: "9199"
+  ## if serviceMonitor enabled, pod annotations above will be ignored
+  serviceMonitor:
+    enabled: false
+    path: /ups_metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    additionalLabels: {}
+    targetLabels: []
+    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+    relabelings: []
+    metricRelabelings: []
+  ## Enable and configure Prometheus Rules for the chart under this key.
+  prometheusRule:
+    enabled: false
+    labels: {}
+    ## -- Configure additionial rules for the chart under this key.
+    rules: []
+      # - alert: UpsStatusUnknown
+      #   annotations:
+      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
+      #     summary: UPS status unknown.
+      #   expr: |
+      #     nut_status == 0
+      #   for: 10s
+      #   labels:
+      #     severity: critical
+
 ## Optionally place credentials:
 # NUT_EXPORTER_USERNAME
 # NUT_EXPORTER_PASSWORD
@@ -73,43 +107,6 @@ webconfig_file: ""
 #   #
 #   # NOTE: If passing the cert inline, cert_file should not be specified below.
 #   [ cert: <string> ]
-
-metrics:
-  # -- Enable and configure a Prometheus serviceMonitor for the chart under this key.
-  # @default -- See values.yaml
-  enabled: false
-  podAnnotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/path: /ups_metrics
-    prometheus.io/port: "9199"
-  ## if serviceMonitor enabled, pod annotations above will be ignored
-  serviceMonitor:
-    enabled: false
-    path: /ups_metrics
-    interval: 30s
-    scrapeTimeout: 10s
-    additionalLabels: {}
-    targetLabels: []
-    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
-    relabelings: []
-    metricRelabelings: []
-  # -- Enable and configure Prometheus Rules for the chart under this key.
-  # @default -- See values.yaml
-  prometheusRule:
-    enabled: false
-    labels: {}
-    # -- Configure additionial rules for the chart under this key.
-    # @default -- See prometheusrules.yaml
-    rules: []
-      # - alert: UpsStatusUnknown
-      #   annotations:
-      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
-      #     summary: UPS status unknown.
-      #   expr: |
-      #     nut_status == 0
-      #   for: 10s
-      #   labels:
-      #     severity: critical
 
 podAnnotations: {}
 podLabels: {}

@@ -32,6 +32,40 @@ service:
   protocol: TCP
   name: metrics
 
+## Use prometheus service monitor instead for Prom operator
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9130"
+  ## if serviceMonitor enabled, pod annotations will be ignored
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+    additionalLabels: {}
+    targetLabels: []
+    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+    relabelings: []
+    metricRelabelings: []
+  ## Enable and configure Prometheus Rules for the chart under this key.
+  ## not yet implemented
+  prometheusRule:
+    enabled: false
+    labels: {}
+    # -- Configure additional rules for the chart under this key.
+    rules: []
+      # - alert: UpsStatusUnknown
+      #   annotations:
+      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
+      #     summary: UPS status unknown.
+      #   expr: |
+      #     nut_status == 0
+      #   for: 10s
+      #   labels:
+      #     severity: critical
+
 ## Optionally place your credentials in a secret
 ## Loaded in env
 existingSecret: ""
@@ -93,23 +127,6 @@ settings:
   unpoller:
     debug: false
     quiet: false
-
-## Use prometheus service monitor instead for Prom operator
-metrics:
-  podAnnotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/path: /metrics
-    prometheus.io/port: "9130"
-  ## if serviceMonitor enabled, pod annotations will be ignored
-  serviceMonitor:
-    enabled: false
-    interval: 30s
-    scrapeTimeout: 10s
-    additionalLabels: {}
-    targetLabels: []
-    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
-    relabelings: []
-    metricRelabelings: []
 
 
 ## additional configuration for the above unifi config section can be specified with `_0_`

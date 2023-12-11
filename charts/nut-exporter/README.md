@@ -15,6 +15,41 @@ helm install nut-exporter  homeylab/nut-exporter -n nut-exporter  --create-names
 helm install -f my-values.yaml homeylab/nut-exporter  -n nut-exporter  --create-namespace
 ```
 
+#### Example
+Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
+
+<details open>
+<summary>custom-values.yaml</summary>
+<br>
+
+```yaml
+# custom-values.yaml
+settings:
+  config:
+    nut_exporter_server: "10.0.100.1"
+    nut_exporter_serverport: 3493
+  # ignored if `existingSecret specified`
+  auth:
+    nut_exporter_username: "user"
+    nut_exporter_password: "samplepass"
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      app: nut_exporter
+    relabelings: # assign target nut_exporter `ups: primary` label in Prometheus
+      - targetLabel: ups
+        replacement: primary
+```
+</details>
+<br>
+
+Install with custom:
+```
+helm install -f custom-values.yaml homeylab/nut-exporter -n nut-exporter --create-namespace
+```
+
 ## Upgrade
 ```
 helm upgrade nut-exporter homeylab/nut-exporter -n nut-exporter
@@ -25,7 +60,8 @@ helm upgrade -f my-values.yaml nut-exporter homeylab/nut-exporter -n nut-exporte
 
 ## Configuration Options
 | Configuration Section | Subsection | Example/Description |
-| --------------------- | ---------- | ----------- |
+| --------------------- | ---------- | ------------------- |
+| `metrics` | `*` | This section allows users to set configuration for Prometheus `podAnnotations`, `serviceMonitors`, etc. See `values.yaml` section for more details on what can be customized. |
 | `existingSecret` |  | Replaces auth sections of `settings.*.auth` with user supplied secret. Secrets should have key/value for env vars. |
 | `setttings.config` | `*` | Provide any runtime env variables as described in [usage flags](https://github.com/DRuggeri/nut_exporter#usage). All keys will be upper cased and values quoted. You can add additional vars as needed.<br><br>Examples:<br> `nut_exporter_server: 10.0.100.1`<br>`nut_exporter_serverport: 3493` |
 | `settings.auth` |  `*` | This entire section is ignored if `existingSecret` is supplied.<br><br>Similar to `settings.config`, these are runtime env variables, specifically for auth in this case. You can add additional auth vars as needed |

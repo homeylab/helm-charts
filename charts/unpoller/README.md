@@ -17,6 +17,50 @@ helm install unpoller homeylab/unpoller -n unpoller --create-namespace
 helm install -f my-values.yaml homeylab/unpoller -n unpoller --create-namespace
 ```
 
+#### Example
+Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
+
+<details open>
+<summary>custom-values.yaml</summary>
+<br>
+
+```yaml
+# custom-values.yaml
+settings:
+  unifi:
+    config:
+      url: "https://unifi-controller.somedomain:8443"
+      save_sites: true
+      save_ids: true
+      save_events: true
+      save_alarms: true
+      save_anomalies: true
+      save_dpi: true
+      verify_ssl: false
+    auth:
+      user: "user@somedomain"
+      pass: "somepass"
+  influxdb:
+    enabled: false
+  ## additional configuration for prometheus can be specified in `extraEnv`
+  prometheus:
+    namespace: "unpoller"
+    http_listen: "0.0.0.0:9130"
+metrics:
+  ## if serviceMonitor enabled, pod annotations will be ignored
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      app: unpoller
+```
+</details>
+<br>
+
+Install with custom:
+```
+helm install -f custom-values.yaml homeylab/unpoller -n unpoller --create-namespace
+```
+
 ## Upgrade
 ```
 helm upgrade unpoller homeylab/unpoller -n unpoller
@@ -37,7 +81,8 @@ The default config options provided in this chart match the same values given in
 Comments in the provided `values.yaml` provide helpful descriptions. Some of the same information is also shown below for a few key options:
 
 | Configuration Section | Subsection | Example/Description |
-| --------------------- | ---------- | ----------- |
+| --------------------- | ---------- | ------------------- |
+| `metrics` | `*` | This section allows users to set configuration for Prometheus `podAnnotations`, `serviceMonitors`, etc. See `values.yaml` section for more details on what can be customized. |
 | `existingSecret` |  | Replaces auth sections of `settings.*.auth` with user supplied secret. Secrets should have key/value for env vars. |
 | `setttings.unifi.config` | `*` | Unifi connection configuration section.<br><br>If scraping multiple controllers, this section uses the `_0_` number, [reference]( https://unpoller.com/docs/install/configuration) - multiple controllers section. Use `extraEnv` section to specify more controllers. |
 |  |  `url` | `https://unifi-controller.localdomain:8443` |

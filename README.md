@@ -19,7 +19,7 @@ For customizations, it is recommended to use your own values file and specify it
 Apps available
 | Application  | Description | 
 | ------------- | ------------- |
-| [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller)  | [unpoller](https://github.com/unpoller/unpoller) is a Prometheus exporter that connects to an Unifi Controller and scraps metrics from your network and devices. |
+| [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller)  | [unpoller](https://github.com/unpoller/unpoller) is a Prometheus exporter that connects to an Unifi Controller(s) and scraps metrics from your network and devices. |
 | [bookstack](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack) | [bookstack](https://github.com/BookStackApp/BookStack) is an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it. |
 | [nut_exporter](https://github.com/homeylab/helm-charts/tree/main/charts/nut-exporter) | [nut_exporter](https://github.com/DRuggeri/nut_exporter) is a Prometheus exporter that connects to a NUT server(s) and scraps UPS backup metrics. |
 | [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) | [exportarr](https://github.com/onedr0p/exportarr) is a Prometheus exporter that connects to `Arr` applications and scraps metrics media metrics. |
