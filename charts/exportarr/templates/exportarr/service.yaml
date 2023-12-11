@@ -1,5 +1,4 @@
-{{- if .Values.exportarr.enabled }}
-{{- range $key, $val := .Values.exportarr.apps }}
+{{- range $key, $val := .Values.apps }}
 {{- if $val.enabled }}
 {{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
 apiVersion: v1
@@ -10,16 +9,15 @@ metadata:
     {{- include "exportarr.labels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $appName }}
 spec:
-  type: {{ $.Values.exportarr.service.type }}
+  type: {{ $.Values.service.type }}
   ports:
-    - port: {{ $.Values.exportarr.service.port }}
-      targetPort: {{ $.Values.exportarr.service.port }}
-      protocol: {{ $.Values.exportarr.service.protocol }}
-      name: {{ $.Values.exportarr.service.name }}
+    - port: {{ $.Values.service.port }}
+      targetPort: {{ $.Values.service.port }}
+      protocol: {{ $.Values.service.protocol }}
+      name: {{ $.Values.service.name }}
   selector:
     {{- include "exportarr.selectorLabels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $appName }}
 ---
-{{- end }}
 {{- end }}
 {{- end }}

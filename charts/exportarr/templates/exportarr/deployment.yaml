@@ -1,6 +1,4 @@
-{{- if .Values.exportarr.enabled }}
-# {{- $chartVersion := (split "-" .Chart.AppVersion)._0 }}
-{{- range $key, $val := .Values.exportarr.apps }}
+{{- range $key, $val := .Values.apps }}
 {{- if $val.enabled }}
 {{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
 apiVersion: apps/v1
@@ -13,7 +11,7 @@ metadata:
     app.kubernetes.io/component: {{ $appName }}
 spec:
   replicas: 1
-  {{- with $.Values.exportarr.updateStrategy }}
+  {{- with $.Values.updateStrategy }}
   strategy:
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -24,11 +22,11 @@ spec:
   template:
     metadata:
       annotations:
-      {{- with $.Values.exportarr.podAnnotations }}
+      {{- with $.Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- if and ($.Values.exportarr.metrics.enabled) (not $.Values.exportarr.metrics.serviceMonitor.enabled) }}
-      {{- with $.Values.exportarr.metrics.podAnnotations }}
+    {{- if and ($.Values.metrics.enabled) (not $.Values.metrics.serviceMonitor.enabled) }}
+      {{- with $.Values.metrics.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- end }}
@@ -42,17 +40,17 @@ spec:
       {{- end }}
       serviceAccountName: "{{ include "exportarr.serviceAccountName" $ }}"
       securityContext:
-        {{- toYaml $.Values.exportarr.podSecurityContext | nindent 8 }}
+        {{- toYaml $.Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ $appName }}
           securityContext:
-            {{- toYaml $.Values.exportarr.securityContext | nindent 12 }}
-          image: "{{ $.Values.exportarr.image.repository }}/{{ $.Values.exportarr.image.name }}:{{ $.Values.exportarr.image.tag | default $.Chart.AppVersion }}"
-          imagePullPolicy: {{ $.Values.exportarr.image.pullPolicy }}
+            {{- toYaml $.Values.securityContext | nindent 12 }}
+          image: "{{ $.Values.image.repository }}/{{ $.Values.image.name }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
           ports:
-            - name: {{ $.Values.exportarr.service.name }}
-              containerPort: {{ $.Values.exportarr.service.port }}
-              protocol: {{ $.Values.exportarr.service.protocol }}
+            - name: {{ $.Values.service.name }}
+              containerPort: {{ $.Values.service.port }}
+              protocol: {{ $.Values.service.protocol }}
           args:
             - {{ $key }}
           env:
@@ -76,20 +74,20 @@ spec:
             - name: {{ $key_chart | upper }}
               value: {{ $val_chart | quote }}
           {{- end }}
-        {{- if $.Values.exportarr.livenessProbe }}
+        {{- if $.Values.livenessProbe }}
           livenessProbe:
-            {{- toYaml $.Values.exportarr.livenessProbe | nindent 12 }}
+            {{- toYaml $.Values.livenessProbe | nindent 12 }}
         {{- end }}
         {{- if $.Values.readinessProbe }}
           readinessProbe:
-            {{- toYaml $.Values.exportarr.readinessProbe | nindent 12 }}
+            {{- toYaml $.Values.readinessProbe | nindent 12 }}
         {{- end }}
-        {{- if $.Values.exportarr.startupProbe }}
+        {{- if $.Values.startupProbe }}
           startupProbe:
-            {{- toYaml $.Values.exportarr.startupProbe | nindent 12 }}
+            {{- toYaml $.Values.startupProbe | nindent 12 }}
         {{- end }}
           resources:
-            {{- toYaml $.Values.exportarr.resources | nindent 12 }}
+            {{- toYaml $.Values.resources | nindent 12 }}
           volumeMounts:
           {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -104,19 +102,18 @@ spec:
       {{- with $val.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $.Values.exportarr.nodeSelector }}
+      {{- with $.Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $.Values.exportarr.affinity }}
+      {{- with $.Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $.Values.exportarr.tolerations }}
+      {{- with $.Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 ---
-{{- end }}
 {{- end }}
 {{- end }}

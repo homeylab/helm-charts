@@ -2,10 +2,13 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-### global variables ###
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+## base image used for all exportarr instances
+image:
+  repository: ghcr.io
+  name: onedr0p/exportarr
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
 
 ## set image for post install helm tests
 testCurlImage:
@@ -13,6 +16,234 @@ testCurlImage:
   name: busybox
   tag: "1.36.1"
   pullPolicy: IfNotPresent
+
+## update strategy for newer versions
+updateStrategy:
+    type: Recreate
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+## set service properties
+service:
+  type: ClusterIP
+  port: 9707
+  name: metrics
+  protocol: TCP
+
+## set metrics export properties
+metrics:
+  ## enable/disable metrics for all exportarr instances.
+  enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9707"
+  ## if serviceMonitor enabled, pod annotations above will be ignored
+  ## ServiceMonitor for each exportarr instance will be deployed instead
+  serviceMonitor:
+    enabled: false
+    path: /metrics
+    # how often to scrape
+    interval: 4m
+    scrapeTimeout: 90s
+    additionalLabels: {}
+    targetLabels: []
+    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+    relabelings: []
+    metricRelabelings: []
+  ## Enable and configure Prometheus Rules for the chart under this key.
+  ## not yet implemented
+  prometheusRule:
+    enabled: false
+    labels: {}
+    # -- Configure additionial rules for the chart under this key.
+    rules: []
+      # - alert: UpsStatusUnknown
+      #   annotations:
+      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
+      #     summary: UPS status unknown.
+      #   expr: |
+      #     nut_status == 0
+      #   for: 10s
+      #   labels:
+      #     severity: critical
+
+### exportarr configuration per instance/app ###
+apps:
+  radarr:
+    enabled: false
+    url: ""
+    # optional, use instead of `apiKey`
+    # this secret should provide the `apiKey` used for auth
+    # if auth is not required, do not provide any `secretKey` or `apiKey`
+    existingSecret:
+      # name of secret
+      name: ""
+      # name of key within secret to use
+      # example: "radarr_api_key"
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
+    extraEnv: {}
+      # ENABLE_ADDITIONAL_METRICS: true
+    ## Additional volumes on the output Deployment definition.
+    volumes: []
+    ## Additional volumeMounts on the output Deployment definition.
+    volumeMounts: []
+  sonarr:
+    enabled: false
+    url: ""
+    existingSecret:
+      name: ""
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
+    extraEnv: {}
+      # ENABLE_ADDITIONAL_METRICS: true
+    volumes: []
+    volumeMounts: []
+  prowlarr:
+    enabled: false
+    url: ""
+    existingSecret:
+      name: ""
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
+    extraEnv: {}
+    volumes: []
+    volumeMounts: []
+  bazarr:
+    enabled: false
+    url: ""
+    existingSecret:
+      name: ""
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
+    extraEnv: {}
+    volumes: []
+    volumeMounts: []
+  lidarr:
+    enabled: false
+    url: ""
+    existingSecret:
+      name: ""
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
+    extraEnv: {}
+    volumes: []
+    volumeMounts: []
+  sabnzbd:
+    enabled: false
+    url: ""
+    existingSecret:
+      name: ""
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
+    extraEnv: {}
+    volumes: []
+    volumeMounts: []
+  readarr:
+    enabled: false
+    url: ""
+    existingSecret:
+      name: ""
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
+    extraEnv: {}
+    volumes: []
+    volumeMounts: []
+
+### below section will be applied to all exportarr instances ###
+
+## env applied to all exportarr exporters
+## example: `ENABLE_ADDITIONAL_METRICS` to get additional metrics that take longer to scrape
+extraEnv: {}
+  # ENABLE_ADDITIONAL_METRICS: true
+
+## Additional volumes to all exportarr exporters
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+## Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+## Set resource level per exportarr deployment
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+## Use `/status` path for checks
+## Liveness probe
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 5
+  successThreshold: 1
+
+## Readiness probe
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 5
+  successThreshold: 1
+
+## Startup Probe
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: metrics
+  initialDelaySeconds: 2
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 5
+  successThreshold: 1
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -22,221 +253,3 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-
-### exportarr configuration ###
-## - configure per exportarr instance
-## - or for all exportarr instances
-exportarr:
-  # enable/disable all exportarr pods
-  enabled: true
-  updateStrategy:
-    type: Recreate
-  image:
-    repository: ghcr.io
-    name: onedr0p/exportarr
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
-  ## set service properties
-  ## can be overwritten at exportarr instance level
-  service:
-    type: ClusterIP
-    port: 9707
-    name: metrics
-    protocol: TCP
-  ## set metrics configuration for Prometheus
-  ## can be overwritten at exportarr instance level
-  metrics:
-    # -- Enable and configure a Prometheus monitoring
-    enabled: true
-    podAnnotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/path: /metrics
-      prometheus.io/port: "9707"
-    ## if serviceMonitor enabled, pod annotations above will be ignored
-    serviceMonitor:
-      enabled: false
-      path: /metrics
-      interval: 4m
-      scrapeTimeout: 90s
-      additionalLabels: {}
-      targetLabels: []
-      # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
-      relabelings: []
-      metricRelabelings: []
-    ## -- Enable and configure Prometheus Rules
-    ## not yet implemented
-    prometheusRule:
-      enabled: false
-      labels: {}
-      # -- Configure additionial rules for the chart under this key.
-      rules: []
-  ## individual configuration for each exporter below
-  apps:
-    radarr:
-      enabled: false
-      url: ""
-      # optional, use instead of `apiKey`
-      existingSecret:
-        # name of secret
-        name: ""
-        # name of key within secret to use
-        secretKey: ""
-      # ignored if `existingSecret` is used
-      apiKey: ""
-      extraEnv: {}
-        # ENABLE_ADDITIONAL_METRICS: true
-      ## Additional volumes on the output Deployment definition.
-      volumes: []
-      ## Additional volumeMounts on the output Deployment definition.
-      volumeMounts: []
-    sonarr:
-      enabled: false
-      url: ""
-      existingSecret:
-        name: ""
-        secretKey: ""
-      # ignored if `existingSecret` is used
-      apiKey: ""
-      extraEnv: {}
-        # ENABLE_ADDITIONAL_METRICS: true
-      volumes: []
-      volumeMounts: []
-    prowlarr:
-      enabled: false
-      url: ""
-      existingSecret:
-        name: ""
-        secretKey: ""
-      # ignored if `existingSecret` is used
-      apiKey: ""
-      extraEnv: {}
-      volumes: []
-      volumeMounts: []
-    bazarr:
-      enabled: false
-      url: ""
-      existingSecret:
-        name: ""
-        secretKey: ""
-      # ignored if `existingSecret` is used
-      apiKey: ""
-      extraEnv: {}
-      volumes: []
-      volumeMounts: []
-    lidarr:
-      enabled: false
-      url: ""
-      existingSecret:
-        name: ""
-        secretKey: ""
-      # ignored if `existingSecret` is used
-      apiKey: ""
-      extraEnv: {}
-      volumes: []
-      volumeMounts: []
-    sabnzbd:
-      enabled: false
-      url: ""
-      existingSecret:
-        name: ""
-        secretKey: ""
-      # ignored if `existingSecret` is used
-      apiKey: ""
-      extraEnv: {}
-      volumes: []
-      volumeMounts: []
-    readarr:
-      enabled: false
-      url: ""
-      existingSecret:
-        name: ""
-        secretKey: ""
-      # ignored if `existingSecret` is used
-      apiKey: ""
-      extraEnv: {}
-      volumes: []
-      volumeMounts: []
-  
-  ## env applied to all exportarr exporters
-  ## example: `ENABLE_ADDITIONAL_METRICS` to get additional metrics that take longer to scrape
-  extraEnv: {}
-    # ENABLE_ADDITIONAL_METRICS: true
-
-  ## Additional volumes to all exportarr exporters
-  volumes: []
-  # - name: foo
-  #   secret:
-  #     secretName: mysecret
-  #     optional: false
-  ## Additional volumeMounts on the output Deployment definition.
-  volumeMounts: []
-  # - name: foo
-  #   mountPath: "/etc/foo"
-  #   readOnly: true
-
-
-  podAnnotations: {}
-
-  podSecurityContext: {}
-    # fsGroup: 2000
-
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-  
-  ## Set resource level per exportarr deployment
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-
-  nodeSelector: {}
-
-  tolerations: []
-
-  affinity: {}
-  ## Use `/status` path for checks
-  ## Liveness probe
-  livenessProbe:
-    httpGet:
-      path: /healthz
-      port: metrics
-    initialDelaySeconds: 5
-    periodSeconds: 10
-    timeoutSeconds: 3
-    failureThreshold: 5
-    successThreshold: 1
-
-  ## Readiness probe
-  readinessProbe:
-    httpGet:
-      path: /healthz
-      port: metrics
-    initialDelaySeconds: 5
-    periodSeconds: 10
-    timeoutSeconds: 2
-    failureThreshold: 5
-    successThreshold: 1
-
-  ## Startup Probe
-  startupProbe:
-    httpGet:
-      path: /healthz
-      port: metrics
-    initialDelaySeconds: 2
-    periodSeconds: 5
-    timeoutSeconds: 2
-    failureThreshold: 3
-    successThreshold: 1

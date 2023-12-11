@@ -1,5 +1,4 @@
-{{- if .Values.exportarr.enabled }}
-{{- range $key, $val := .Values.exportarr.apps }}
+{{- range $key, $val := .Values.apps }}
 {{- if $val.enabled }}
 {{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
 apiVersion: v1
@@ -16,9 +15,8 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ $appName }}:{{ $.Values.exportarr.service.port }}{{ $.Values.exportarr.startupProbe.httpGet.path}}']
+      args: ['{{ $appName }}:{{ $.Values.service.port }}{{ $.Values.startupProbe.httpGet.path}}']
   restartPolicy: Never
 ---
-{{- end }}
 {{- end }}
 {{- end }}
