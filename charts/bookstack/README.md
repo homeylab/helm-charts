@@ -15,12 +15,92 @@ Ensure you either enable mariadb dependency, `mariadb.enabled`, or have an exist
 This chart provides the option to install mariadb by default from [bitnami](https://github.com/bitnami/charts/tree/main/bitnami/mariadb).
 
 ## Install
-**Note it is recommended to set your own variables as required and store them in a custom values.yaml file.**
 ```
 helm install bookstack homeylab/bookstack -n bookstack --create-namespace
 
 # with own values file - recommended
 helm install -f my-values.yaml bookstack homeylab/bookstack -n bookstack --create-namespace
+```
+
+#### Example
+Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
+
+<details open>
+<summary>custom-values.yaml</summary>
+<br>
+
+```yaml
+# custom-values.yaml
+config:
+  appUrl: "https://bookstack.somedomain"
+  ## Default values below will work with included mariadb chart in bookstack namespace
+  dbHost: bookstack-mariadb.bookstack.svc.cluster.local
+  dbPort: 3306
+  dbDatabase: bookstack
+  dbUser: sampleuser
+  dbPass: samplepass
+  cacheDriver: database
+  sessionDriver: database
+
+extraEnv:
+  TZ: Etc/UTC
+  APP_DEFAULT_DARK_MODE: true
+  APP_VIEWS_BOOKS: list
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "36000"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "36000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "36000"
+    cert-manager.io/cluster-issuer: "letsencrypt-issuer"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  hosts:
+    - host: bookstack.somedomain
+      paths:
+        - path: /
+          pathType: Prefix
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 5Gi
+  accessModes:
+    - ReadWriteOnce
+
+## https://github.com/bitnami/charts/tree/main/bitnami/mariadb
+## some basic options below but look at their chart for more
+mariadb:
+  enabled: true
+  architecture: standalone
+  auth:
+    rootPassword: "root"
+    existingSecret: ""
+    database: "bookstack"
+    username: "sampleuser"
+    password: "samplepass"
+  primary:
+    persistence:
+      enabled: true
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 5Gi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      labels:
+        app: mariadb
+```
+</details>
+<br>
+
+Install with custom:
+```
+helm install -f custom-values.yaml homeylab/bookstack -n bookstack --create-namespace
 ```
 
 ## Upgrades
@@ -52,7 +132,6 @@ Specify required configuration in the `config` section of your _values.yaml_ fil
 | `config.dbPassword` | Password for db connection, will be ignored if `existingSecret` is given | `bookstack` |
 | `config.cacheDriver` | Which driver to use for cache. | `'file', 'database', 'memcached' or 'redis` |
 | `config.sessionDriver` | Which driver to use for sessions. | `'file', 'database', 'memcached' or 'redis` |
-| `config.dbPassword` | Password for db connection, will be ignored if `existingSecret` is given | `bookstack` |
 
 For more configuration option, refer to the documented env variables available for bookstack [here](https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete).
 
@@ -131,11 +210,21 @@ minio_config:
   # set to 1+ if you want to retain a certain number of archives
   # set to 0 or comment out section if you want no action done
   keep_last: 5
-# optional export of metadata about the page in a json file
-# this metadata contains general information about the page
-# like: last update, owner, revision count, etc.
-# omit this or set to false if not needed
-export_meta: false
+# optional how to handle additional content for pages
+assets:
+  # optional export of all the images used in a page(s).
+  # omit this or set to false if not needed
+  export_images: false
+  # optional modify markdown files to replace image url links
+  # with local exported image paths
+  modify_markdown: false
+  ## optional export of metadata about the page in a json file
+  # this metadata contains general information about the page
+  # like: last update, owner, revision count, etc.
+  # omit this or set to false if not needed
+  export_meta: false
+  # optional whether or not to check ssl certificates when requesting content from Bookstack host
+  verify_ssl: true
 # optional if specified exporter can delete older archives
 # valid values are:
 # set to -1 if you want to delete all archives after each run
@@ -196,5 +285,5 @@ _The matrix below displays certain versions of this helm chart that could result
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |
 | `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
+| `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |

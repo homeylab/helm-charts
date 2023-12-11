@@ -16,7 +16,12 @@ helm install -f my-values.yaml homeylab/exportarr -n exportarr --create-namespac
 ```
 
 #### Example
-Using a sample `custom-values.yaml` file:
+Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
+
+<details open>
+<summary>custom-values.yaml</summary>
+<br>
+
 ```yaml
 # custom-values.yaml
 metrics:
@@ -28,22 +33,24 @@ apps:
   radarr:
     enabled: true
     url: "https://radarr.somedomain/"
-    apiKey: "" # provide here or `existingSecret` section
+    apiKey: "someApiKey" # provide here or `existingSecret` section
   sonarr:
     enabled: true
     url: "https://sonarr.somedomain/"
-    apiKey: ""
+    apiKey: "someApiKey"
     extraEnv:
       ENABLE_ADDITIONAL_METRICS: true # example specifying extraEnv
   prowlarr:
     enabled: true
     url: "https://prowlarr.somedomain/"
-    apiKey: ""
+    apiKey: "someApiKey"
   bazarr:
     enabled: true
     url: "https://bazarr.somedomain/"
-    apiKey: ""
+    apiKey: "someApiKey"
 ```
+</details>
+<br>
 
 Install with custom:
 ```
@@ -60,7 +67,7 @@ helm upgrade -f my-values.yaml exportarr homeylab/exportarr -n exportarr
 
 ## Configuration Options
 | Configuration Section | Subsection | Example/Description |
-| --------------------- | ---------- | ----------- |
+| --------------------- | ---------- | ------------------- |
 | `metrics` | `*` | This section allows users to set configuration for Prometheus `podAnnotations`, `serviceMonitors`, etc. See `values.yaml` section for more details on what can be customized. These sections are applied to all exportarrs.<br><br>**In the future, plan is to provide override sections in each `app.{{ app_name }}` section.** |
 | `apps` | `*` | For each supported `Arr` app, provide configuration and properties. Note the `apps` is iterated over (`key` is used as an arg), it is technically possible to add new apps with a new `key` and same `value` structure, as long as exportarr supports it. |
 | `apps.{{ app_name }}` | `enabled` | For each supported `Arr` app, choose which are enabled/disabled. For each app that is enabled, an exportarr instance will be deployed. |

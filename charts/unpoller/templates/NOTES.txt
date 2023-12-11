@@ -1,7 +1,7 @@
-1. Get the application URL by running these commands:
-  
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "unpoller.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  
-  export POD_IP=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.status.podIP}")
-  
-  echo "curl http://$POD_IP:{{ .Values.service.port }}/"
+~~Thanks for using homeylab charts!~~
+
+Get the {{ .Chart.Name }} instances by running this command:
+    - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "unpoller.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+Sample Grafana dashboards are available from upstream:
+    - https://github.com/unpoller/dashboards

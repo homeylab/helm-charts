@@ -17,18 +17,18 @@ spec:
     scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
 {{- if .Values.metrics.serviceMonitor.relabelings }}
     relabelings:
-{{ toYaml .Values.metrics.serviceMonitor.relabelings | indent 6 }}
+      {{- toYaml .Values.metrics.serviceMonitor.relabelings | nindent 6 }}
 {{- end }}
 {{- if .Values.metrics.serviceMonitor.metricRelabelings }}
     metricRelabelings:
-{{ toYaml .Values.metrics.serviceMonitor.metricRelabelings | indent 6 }}
+      {{- toYaml .Values.metrics.serviceMonitor.metricRelabelings | nindent 6 }}
 {{- end }}
   namespaceSelector:
     matchNames:
     - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      {{- include "nut-exporter.selectorLabels" . | nindent 8 }}
+      {{- include "nut-exporter.selectorLabels" . | nindent 6 }}
 {{- if .Values.metrics.serviceMonitor.targetLabels }}
   targetLabels:
 {{- range .Values.metrics.serviceMonitor.targetLabels }}

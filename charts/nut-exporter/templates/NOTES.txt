@@ -1,3 +1,7 @@
-Get the application pods by running these commands:
+~~Thanks for using homeylab charts!~~
 
-kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "nut-exporter.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+Get the {{ .Chart.Name }} instances by running this command:
+    - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "nut-exporter.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+Sample Grafana dashboards are available from upstream:
+    - https://grafana.com/grafana/dashboards/19308-prometheus-nut-exporter-for-druggeri
