@@ -1,0 +1,10 @@
+~~Thanks for using homeylab charts!~~
+
+Get the exportarr instances by running this command:
+    - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "exportarr.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+A sample Grafana dashboard is available from upstream:
+    - https://github.com/onedr0p/exportarr/tree/master/examples/grafana
+
+A slightly modified version (for this chart specifically) is available in charts repo:
+    - https://github.com/homeylab/helm-charts/tree/exportarr-{{ .Chart.AppVersion }}/charts/exportarr/examples/dashboard.json

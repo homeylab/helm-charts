@@ -1,0 +1,22 @@
+{{- range $key, $val := .Values.apps }}
+{{- if $val.enabled }}
+{{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ $appName }}-test-connection"
+  labels:
+    {{- include "exportarr.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $appName }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ $appName }}:{{ $.Values.service.port }}{{ $.Values.startupProbe.httpGet.path}}']
+  restartPolicy: Never
+---
+{{- end }}
+{{- end }}

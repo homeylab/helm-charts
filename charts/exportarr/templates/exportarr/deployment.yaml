@@ -1,0 +1,119 @@
+{{- range $key, $val := .Values.apps }}
+{{- if $val.enabled }}
+{{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # $ = global scope, . = current scope
+  name: {{ $appName }}
+  labels:
+    {{- include "exportarr.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $appName }}
+spec:
+  replicas: 1
+  {{- with $.Values.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "exportarr.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $appName }}
+  template:
+    metadata:
+      annotations:
+      {{- with $.Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- if and ($.Values.metrics.enabled) (not $.Values.metrics.serviceMonitor.enabled) }}
+      {{- with $.Values.metrics.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- end }}
+      labels:
+        {{- include "exportarr.selectorLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $appName }}
+    spec:
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: "{{ include "exportarr.serviceAccountName" $ }}"
+      securityContext:
+        {{- toYaml $.Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ $appName }}
+          securityContext:
+            {{- toYaml $.Values.securityContext | nindent 12 }}
+          image: "{{ $.Values.image.repository }}/{{ $.Values.image.name }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            - name: {{ $.Values.service.name }}
+              containerPort: {{ $.Values.service.port }}
+              protocol: {{ $.Values.service.protocol }}
+          args:
+            - {{ $key }}
+          env:
+            - name: URL
+              value: {{ $val.url | quote }}
+            {{- if $val.existingSecret.name }}
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $val.existingSecret.name  }}
+                  key: {{ $val.existingSecret.secretKey }}
+            {{- else if $val.apiKey }}
+            - name: API_KEY
+              value: {{ $val.apiKey | quote }}
+            {{- end }}
+          {{- range $key_extra, $val_extra := $val.extraEnv }}
+            - name: {{ $key_extra | upper }}
+              value: {{ $val_extra | quote }}
+          {{- end }}
+          {{- range $key_chart, $val_chart := $.Values.extraEnv }}
+            - name: {{ $key_chart | upper }}
+              value: {{ $val_chart | quote }}
+          {{- end }}
+        {{- if $.Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml $.Values.livenessProbe | nindent 12 }}
+        {{- end }}
+        {{- if $.Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml $.Values.readinessProbe | nindent 12 }}
+        {{- end }}
+        {{- if $.Values.startupProbe }}
+          startupProbe:
+            {{- toYaml $.Values.startupProbe | nindent 12 }}
+        {{- end }}
+          resources:
+            {{- toYaml $.Values.resources | nindent 12 }}
+          volumeMounts:
+          {{- with $.Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $val.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+      {{- with $.Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $val.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+{{- end }}
+{{- end }}
