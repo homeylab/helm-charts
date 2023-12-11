@@ -1,3 +1,7 @@
-Get the application pods by running these commands:
+~~Thanks for using homeylab charts!~~
 
-kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "exportarr.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+Get the exportarr instances by running this command:
+    - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "exportarr.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+A sample Grafana dashboard is available from upstream:
+    - https://github.com/onedr0p/exportarr/tree/master/examples/grafana
