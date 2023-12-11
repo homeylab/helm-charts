@@ -1,6 +1,6 @@
 apiVersion: v2
 name: exportarr
-description: A Helm Chart to export Prometheus metrics for Arr stack and Plex.
+description: A Helm Chart to export Prometheus metrics for Arr applications.
 
 # A chart can be either an 'application' or a 'library' chart.
 #
