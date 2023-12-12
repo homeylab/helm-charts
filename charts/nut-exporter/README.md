@@ -18,7 +18,7 @@ helm install -f my-values.yaml homeylab/nut-exporter  -n nut-exporter  --create-
 #### Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
-<details open>
+<details closed>
 <summary>custom-values.yaml</summary>
 <br>
 

@@ -12,7 +12,7 @@ LOCAL_VARS_DIR=local_vars
 
 ## Docker image for dev containers
 IMAGE_REPO=quay.io/helmpack/chart-testing
-IMAGE_TAG=v3.9.0
+IMAGE_TAG=v3.10.1
 
 ## Replace image in dev
 

@@ -1,0 +1,151 @@
+# Default values for qbittorrent-exporter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: docker.io
+  name: caseyscarborough/qbittorrent-exporter
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+## set image for post install helm tests
+testCurlImage:
+  repository: docker.io
+  name: busybox
+  tag: "1.36.1"
+  pullPolicy: IfNotPresent
+  # the url for post install check test
+  path: /metrics
+
+## update strategy for newer versions
+updateStrategy:
+    type: Recreate
+
+## service properties
+service:
+  type: ClusterIP
+  port: 17871
+  name: metrics
+  protocol: TCP
+
+## metrics properties
+metrics:
+  ## -- Enable and configure a Prometheus serviceMonitor for the chart under this key.
+  enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: "17871"
+  ## if serviceMonitor enabled, pod annotations above will be ignored
+  serviceMonitor:
+    enabled: false
+    path: /metrics
+    interval: 2m
+    scrapeTimeout: 30s
+    additionalLabels: {}
+    targetLabels: []
+    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+    relabelings: []
+    metricRelabelings: []
+  ## Enable and configure Prometheus Rules for the chart under this key.
+  ## not yet implemented
+  prometheusRule:
+    enabled: false
+    labels: {}
+    ## -- Configure additional rules for the chart under this key.
+    rules: []
+      # - alert: UpsStatusUnknown
+      #   annotations:
+      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
+      #     summary: UPS status unknown.
+      #   expr: |
+      #     nut_status == 0
+      #   for: 10s
+      #   labels:
+      #     severity: critical
+
+## provide settings for exporter
+settings:
+  ## core configuration
+  ## ref: https://github.com/caseyscarborough/qbittorrent-exporter#parameters
+  config:
+    # examples: `http://somehost:8080`, `https://qbit.somedomain.org`
+    base_url: ""
+    # optionally provide host information by pieces
+    # if `base_url` is empty, we will try 3 below: `host`, `port`, `protocol`
+    host: ""
+    port: ""
+    protocol: "http"
+  ## provide auth settings
+  ## if no auth fields provided, no auth used
+  auth:
+    # can optionally provide `QBITTORRENT_USERNAME` and `QBITTORRENT_PASSWORD` in existingSecret
+    existingSecret: ""
+    # if existingSecret is given, username will be ignored
+    username: ""
+    # if existingSecret is given, password will be ignored
+    password: ""
+  ## extra env applied to exporter
+  extraEnv: {}
+    # SOME_VAR: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

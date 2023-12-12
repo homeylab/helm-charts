@@ -25,7 +25,7 @@ helm install -f my-values.yaml bookstack homeylab/bookstack -n bookstack --creat
 #### Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
-<details open>
+<details closed>
 <summary>custom-values.yaml</summary>
 <br>
 
