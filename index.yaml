@@ -304,6 +304,21 @@ entries:
   exportarr:
   - apiVersion: v2
     appVersion: v1.6.0
+    created: "2023-12-12T08:31:59.628134687Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: https://homeylab.github.io/helm-charts
+      version: 0.0.1
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 2825a0ebc7183f29bfb63508318a449f24b9214b2fd3b947104a5f3f5c2a3259
+    name: exportarr
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-0.2.0/exportarr-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: v1.6.0
     created: "2023-12-12T08:00:43.165182877Z"
     dependencies:
     - condition: qbittorrent.enabled
@@ -487,4 +502,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2023-12-12T08:00:43.165265954Z"
+generated: "2023-12-12T08:31:59.628214575Z"
