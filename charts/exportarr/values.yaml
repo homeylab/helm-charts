@@ -258,7 +258,7 @@ exportarr:
 ## some sample values below but look at upstream chart for more options
 ## set `enabled: true` to install qbittorrent prometheus exporter from separate chart
 ## Ref: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
-qbittorrent:
+qbittorrent-exporter:
   # enable/disable
   enabled: false
   # more options available than shown

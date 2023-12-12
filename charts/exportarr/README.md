@@ -53,7 +53,7 @@ exportarr:
       apiKey: "someApiKey"
 
 ## additional exporters ##
-qbittorrent:
+qbittorrent-exporter:
   enabled: false
 ```
 </details>
@@ -92,14 +92,14 @@ Below are some key options explained for this helm chart. For an exhaustive list
 | `exportarr.extraEnv`                           | Set any additional env variables here for all exportarr instances. All keys will be upper cased and values quoted.                           | `{}`    |
 | `exportarr.volumes`                            | Set `volumes` to use for all exportarr instance like `configMaps` or `secrets`.                                                              | `{}`    |
 | `exportarr.volumeMounts`                       | Set `volumeMounts` for your `volumes` for all exportarr instance.                                                                            | `{}`    |
-| `qbittorrent.enabled`                          | Setting this value to `true` deploys an additional exporter for a `qbittorrent`. See [Additional Exporter](#qbittorrent) for more details.   | `false` |
+| `qbittorrent-exporter.enabled`                 | Setting this value to `true` deploys an additional exporter for `qbittorrent`. See [Additional Exporter](#qbittorrent) for more details.     | `false` |
 
 
 ## Additional Exporters
 #### qbittorrent
-Enable additional exporter for `qbitorrent` by setting `qbittorrent.enabled` to `true.`
+Enable additional exporter for `qbittorrent-exporter` by setting `qbittorrent-exporter.enabled` to `true.`
 ```
-qbittorrent:
+qbittorrent-exporter:
   # enable/disable
   enabled: true
   # more options available than shown
