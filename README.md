@@ -18,11 +18,12 @@ For customizations, it is recommended to use your own values file and specify it
 
 Apps available
 | Application  | Description | 
-| ------------- | ------------- |
+| ------------ | ----------- |
 | [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller)  | [unpoller](https://github.com/unpoller/unpoller) is a Prometheus exporter that connects to an Unifi Controller(s) and scrapes metrics from your network and devices. |
 | [bookstack](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack) | [bookstack](https://github.com/BookStackApp/BookStack) is an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it. |
 | [nut_exporter](https://github.com/homeylab/helm-charts/tree/main/charts/nut-exporter) | [nut_exporter](https://github.com/DRuggeri/nut_exporter) is a Prometheus exporter that connects to a NUT server(s) and scrapes UPS backup metrics. |
-| [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) | [exportarr](https://github.com/onedr0p/exportarr) is a Prometheus exporter that connects to `Arr` applications and scrapes metrics. |
+| [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) | [exportarr](https://github.com/onedr0p/exportarr) is a Prometheus exporter that connects to `Arr` applications and scrapes metrics. This chart has an option to additionally deploy [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) chart.|
+| [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) | [qbittorrent-exporter](https://github.com/caseyscarborough/qbittorrent-exporter) is a Prometheus exporter that connects to a qbittorrent instance and scrapes metrics.  |
 
 ## Recommendations
 ### Create A Values File
