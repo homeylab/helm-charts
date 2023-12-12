@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "qbittorrent-exporter.fullname" . }}
+  labels:
+    {{- include "qbittorrent-exporter.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  {{- with .Values.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "qbittorrent-exporter.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- if and (.Values.metrics.enabled) (not .Values.metrics.serviceMonitor.enabled) }}
+      {{- with .Values.metrics.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- end }}
+      labels:
+        {{- include "qbittorrent-exporter.labels" . | nindent 8 }}
+	{{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "qbittorrent-exporter.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: {{ .Values.service.name }}
+              containerPort: {{ .Values.service.port }}
+              protocol: {{ .Values.service.protocol }}
+          env:
+        {{- if .Values.settings.config.base_url }}
+          - name: QBITTORRENT_BASE_URL
+            value: {{ .Values.settings.config.base_url | quote }}
+        {{- else }}
+          - name: QBITTORRENT_HOST
+            value: {{ .Values.settings.config.host | quote }}
+          - name: QBITTORRENT_PORT
+            value: {{ .Values.settings.config.port | quote }}
+          - name: QBITTORRENT_PROTOCOL
+            value: {{ .Values.settings.config.protocol | quote }}
+        {{- end }}
+        {{- if and (not .Values.settings.auth.existingSecret) (.Values.settings.auth.username) (.Values.settings.auth.password) }}
+          - name: QBITTORRENT_USERNAME
+            value: {{ .Values.settings.auth.username | quote }}
+          - name: QBITTORRENT_PASSWORD
+            value: {{ .Values.settings.auth.password | quote }}
+        {{- end }}
+        {{- range $key, $val := .Values.settings.extraEnv }}
+          - name: {{ $key | upper }}
+            value: {{ $val | quote }}
+        {{- end }}
+        {{- if .Values.settings.auth.existingSecret }}
+          envFrom:
+          - secretRef:
+              name: {{ .Values.settings.auth.existingSecret }}
+        {{- end }}
+          ## to be implemented
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
