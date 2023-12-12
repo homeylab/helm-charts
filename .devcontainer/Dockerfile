@@ -3,6 +3,10 @@ FROM quay.io/helmpack/chart-testing:v3.10.1
 RUN apk update && \
     apk add make
 
-RUN mkdir -p /root/.kube
+RUN adduser -D -s /bin/ash -u 1000 vscode
 
-COPY --chmod=600 kube_config /root/.kube/config
+USER vscode
+
+RUN mkdir -p /home/vscode/.kube
+
+COPY --chmod=600 kube_config /home/vscode/.kube/config

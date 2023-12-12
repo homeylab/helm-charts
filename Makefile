@@ -18,6 +18,9 @@ IMAGE_TAG=v3.10.1
 
 ## update dep
 update_dep:
+	helm dependency update ${CHART_DIR}/$(app) 
+
+bookstack_update_dep:
 	helm repo add bitnami https://charts.bitnami.com/bitnami
 	helm repo update bitnami
 	helm dependency update ${CHART_DIR}/$(app) 
