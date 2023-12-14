@@ -36,11 +36,14 @@ jobs:
           version: v3.13.1 # default is latest (stable)
         # id: install
       - name: Helm Registry Login
+        shell: bash
         run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | helm registry login registry-1.docker.io -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          echo ${{ secrets.DOCKERHUB_TOKEN }} | helm registry login registry-1.docker.io -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
       - name: Helm Package Charts
+        shell: bash
         run: |
           for x in $(ls charts); do make pkg app=${x}; done
       - name: Helm Push Charts
+        shell: bash
         run: |
           for x in $(ls *.tgz); do make oci_push ${x}; done
