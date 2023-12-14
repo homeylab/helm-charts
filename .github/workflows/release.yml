@@ -16,7 +16,7 @@ jobs:
         # id: install
       - name: Helm Registry Login
         run: |
-          echo "${TEST_VAR}" | helm registry login registry-1.docker.io -u ${USER} --password-stdin
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | helm registry login registry-1.docker.io -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
       - name: Helm Package Charts
         run: |
           for x in $(ls charts); do make pkg app=${x}; done
