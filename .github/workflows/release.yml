@@ -42,4 +42,4 @@ jobs:
       - name: Helm Package Charts
         run: for x in $(ls charts); do make pkg_with_dep app=${x}; done
       - name: Helm Push Charts
-        run: for x in $(ls *.tgz); do make oci_push ${x}; done
+        run: for x in $(ls *.tgz); do make oci_push file=${x}; done
