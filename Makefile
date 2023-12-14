@@ -25,6 +25,17 @@ bookstack_update_dep:
 	helm repo update bitnami
 	helm dependency update ${CHART_DIR}/$(app) 
 
+## oci
+pkg:
+	helm package ${CHART_DIR}/$(app)
+
+## includes depedency in `$(app)/charts` directory
+pkg_with_dep:
+	helm package ${CHART_DIR}/$(app)
+
+oci_push:
+	helm push $(file) oci://registry-1.docker.io/homeylab
+
 ## lint
 ## replace with `ct lint` once we have json schema file
 lint:
