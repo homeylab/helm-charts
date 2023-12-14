@@ -38,7 +38,7 @@ jobs:
       - name: Helm Registry Login
         shell: bash
         run: |
-          echo ${{ secrets.DOCKERHUB_TOKEN }} | helm registry login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin registry-1.docker.io
+          echo ${{ secrets.DOCKERHUB_TOKEN }} | helm registry login registry-1.docker.io --password-stdin -u ${{ secrets.DOCKERHUB_USERNAME }}
       - name: Helm Package Charts
         shell: bash
         run: |
