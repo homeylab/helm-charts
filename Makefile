@@ -31,7 +31,7 @@ pkg:
 
 ## includes depedency in `$(app)/charts` directory
 pkg_with_dep:
-	helm package ${CHART_DIR}/$(app)
+	helm package ${CHART_DIR}/$(app) -u
 
 oci_push:
 	helm push $(file) oci://registry-1.docker.io/homeylab
