@@ -28,6 +28,7 @@ jobs:
           CR_SKIP_EXISTING: true # https://github.com/helm/chart-releaser-action/issues/97
   oci:
     runs-on: ubuntu-latest
+    environment: 'dockerhub' 
     steps:
       - name: Install Helm
         uses: azure/setup-helm@v3
