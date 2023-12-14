@@ -42,6 +42,7 @@ jobs:
       - name: Helm Package Charts
         shell: bash
         run: |
+          ls -lrt
           for x in $(ls charts); do make pkg app=${x}; done
       - name: Helm Push Charts
         shell: bash
