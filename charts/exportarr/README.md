@@ -19,7 +19,7 @@ helm install -f my-values.yaml exportarr homeylab/exportarr -n exportarr --creat
 
 #### OCI Registry Support
 ```bash
-helm install exportarr -n bookstack oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z --create-namespace
+helm install exportarr -n exportarr oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z --create-namespace
 
 # with own values file - recommended
 helm install -f my-values.yaml exportarr -n exportarr oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z --create-namespace
@@ -85,7 +85,7 @@ helm upgrade -f my-values.yaml exportarr homeylab/exportarr -n exportarr
 helm upgrade exportarr -n exportarr oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z
 
 # with own values file - recommended
-helm upgrade -f my-values.yaml exportarr -n bookstack oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z
+helm upgrade -f my-values.yaml exportarr -n exportarr oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z
 ```
 
 

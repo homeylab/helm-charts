@@ -4,18 +4,27 @@ This chart deploys [unpoller](https://unpoller.com/docs), an app that gathers me
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
 ## Add Chart Repo
-```
+```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
 helm repo update homeylab
 ```
 
 ## Install
-```
+```bash
 helm install unpoller homeylab/unpoller -n unpoller --create-namespace
 
 # with own values file - recommended
 helm install -f my-values.yaml homeylab/unpoller -n unpoller --create-namespace
 ```
+
+#### OCI Registry Support
+```bash
+helm install unpoller -n unpoller oci://registry-1.docker.io/homeylab/unpoller --version X.Y.Z --create-namespace
+
+# with own values file - recommended
+helm install -f my-values.yaml unpoller -n unpoller oci://registry-1.docker.io/homeylab/unpoller --version X.Y.Z --create-namespace
+```
+
 
 #### Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
@@ -57,16 +66,24 @@ metrics:
 <br>
 
 Install with custom:
-```
+```bash
 helm install -f custom-values.yaml homeylab/unpoller -n unpoller --create-namespace
 ```
 
 ## Upgrade
-```
+```bash
 helm upgrade unpoller homeylab/unpoller -n unpoller
 
 # with own values file - recommended
 helm upgrade -f my-values.yaml unpoller homeylab/unpoller -n unpoller
+```
+
+#### OCI Registry Support
+```bash
+helm upgrade unpoller -n unpoller oci://registry-1.docker.io/homeylab/unpoller --version X.Y.Z
+
+# with own values file - recommended
+helm upgrade -f my-values.yaml unpoller -n unpoller oci://registry-1.docker.io/homeylab/unpoller --version X.Y.Z
 ```
 
 ## Prerequisites
