@@ -8,14 +8,22 @@ helm repo update homeylab
 ```
 
 ## Install
-```
-helm install nut-exporter  homeylab/nut-exporter -n nut-exporter  --create-namespace
+```bash
+helm install nut-exporter  homeylab/nut-exporter -n nut-exporter --create-namespace
 
 # with own values file - recommended
-helm install -f my-values.yaml homeylab/nut-exporter  -n nut-exporter  --create-namespace
+helm install -f my-values.yaml nut-exporter homeylab/nut-exporter -n nut-exporter --create-namespace
 ```
 
-#### Example
+#### OCI Registry Support
+```bash
+helm install nut-exporter -n nut-exporter oci://registry-1.docker.io/homeylab/nut-exporter --version X.Y.Z --create-namespace
+
+# with own values file - recommended
+helm install -f my-values.yaml nut-exporter -n nut-exporter oci://registry-1.docker.io/homeylab/nut-exporter --version X.Y.Z --create-namespace
+```
+
+### Install Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
 <details closed>
@@ -46,19 +54,29 @@ metrics:
 <br>
 
 Install with custom:
-```
-helm install -f custom-values.yaml homeylab/nut-exporter -n nut-exporter --create-namespace
+```bash
+helm install -f custom-values.yaml nut-exporter homeylab/nut-exporter -n nut-exporter --create-namespace
 ```
 
 ## Upgrade
-```
+```bash
 helm upgrade nut-exporter homeylab/nut-exporter -n nut-exporter
 
 # with own values file - recommended
 helm upgrade -f my-values.yaml nut-exporter homeylab/nut-exporter -n nut-exporter
 ```
 
+#### OCI Registry Support
+```bash
+helm upgrade nut-exporter -n nut-exporter oci://registry-1.docker.io/homeylab/nut-exporter --version X.Y.Z
+
+# with own values file - recommended
+helm upgrade -f my-values.yaml nut-exporter -n nut-exporter oci://registry-1.docker.io/homeylab/nut-exporter --version X.Y.Z
+```
+
 ## Configuration Options
+For a full list of options, see `values.yaml` file.
+
 | Configuration Section | Subsection | Example/Description |
 | --------------------- | ---------- | ------------------- |
 | `metrics` | `*` | This section allows users to set configuration for Prometheus `podAnnotations`, `serviceMonitors`, etc. See `values.yaml` section for more details on what can be customized. |
@@ -85,7 +103,7 @@ metrics:
 For setting up metrics for multiple UPS servers from a single instance, follow upstream [documentation](https://github.com/DRuggeri/nut_exporter#example-prometheus-scrape-configurations) on using multiple `scrape_configs` targets in Prometheus.
 
 Example:
-```
+```yaml
 - job_name: nut-primary
     metrics_path: /ups_metrics
     static_configs:

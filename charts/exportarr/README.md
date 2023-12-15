@@ -4,20 +4,28 @@ This chart deploys [exportarr](https://github.com/onedr0p/exportarr), an app tha
 This chart can optionally install a Prometheus exporter for `qbittorrent` using a separate helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter), allowing users to consolidate different exporters into a single helm chart. See [Additional Exporters](#additional-exporters) section for more information.
 
 ## Add Chart Repo
-```
+```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
 helm repo update homeylab
 ```
 
 ## Install
-```
+```bash
 helm install exportarr  homeylab/exportarr -n exportarr --create-namespace
 
 # with own values file - recommended
-helm install -f my-values.yaml homeylab/exportarr -n exportarr --create-namespace
+helm install -f my-values.yaml exportarr homeylab/exportarr -n exportarr --create-namespace
 ```
 
-#### Example
+#### OCI Registry Support
+```bash
+helm install exportarr -n exportarr oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z --create-namespace
+
+# with own values file - recommended
+helm install -f my-values.yaml exportarr -n exportarr oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z --create-namespace
+```
+
+### Install Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
 <details closed>
@@ -60,17 +68,26 @@ qbittorrent-exporter:
 <br>
 
 Install with custom:
-```
-helm install -f custom-values.yaml homeylab/exportarr -n exportarr --create-namespace
+```bash
+helm install -f custom-values.yaml exportarr homeylab/exportarr -n exportarr --create-namespace
 ```
 
 ## Upgrade
-```
+```bash
 helm upgrade exportarr homeylab/exportarr -n exportarr
 
 # with own values file - recommended
 helm upgrade -f my-values.yaml exportarr homeylab/exportarr -n exportarr
 ```
+
+#### OCI Registry Support
+```bash
+helm upgrade exportarr -n exportarr oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z
+
+# with own values file - recommended
+helm upgrade -f my-values.yaml exportarr -n exportarr oci://registry-1.docker.io/homeylab/exportarr --version X.Y.Z
+```
+
 
 ## Configuration Options
 Below are some key options explained for this helm chart. For an exhaustive list, look at `values.yaml` file.
