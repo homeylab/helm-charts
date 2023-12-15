@@ -12,7 +12,7 @@ helm search repo homeylab
 ```
 
 ## OCI Support
-An OCI supported registry is available, example using [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller) chart.
+An OCI supported registry is available for all charts, example using [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller) chart.
 
 <details closed>
 <summary>Click to Show Example Commands</summary>
