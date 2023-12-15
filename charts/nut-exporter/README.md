@@ -23,7 +23,7 @@ helm install nut-exporter -n nut-exporter oci://registry-1.docker.io/homeylab/nu
 helm install -f my-values.yaml nut-exporter -n nut-exporter oci://registry-1.docker.io/homeylab/nut-exporter --version X.Y.Z --create-namespace
 ```
 
-#### Install Example
+### Install Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
 <details closed>

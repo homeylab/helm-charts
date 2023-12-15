@@ -30,7 +30,7 @@ helm install bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstac
 helm install -f my-values.yaml bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z --create-namespace
 ```
 
-#### Install Example
+### Install Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
 <details closed>
