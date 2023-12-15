@@ -2,20 +2,28 @@
 This chart deploys [qbittorrent-exporter](https://github.com/caseyscarborough/qbittorrent-exporter), an app that gathers Prometheus metrics from `qbittorrent` instances.
 
 ## Add Chart Repo
-```
+```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
 helm repo update homeylab
 ```
 
 ## Install
-```
-helm install qbittorrent-exporter  homeylab/qbittorrent-exporter -n qbittorrent-exporter --create-namespace
+```bash
+helm install qbittorrent-exporter homeylab/qbittorrent-exporter -n qbittorrent-exporter --create-namespace
 
 # with own values file - recommended
-helm install -f my-values.yaml homeylab/qbittorrent-exporter -n qbittorrent-exporter --create-namespace
+helm install -f my-values.yaml qbittorrent-exporter homeylab/qbittorrent-exporter -n qbittorrent-exporter --create-namespace
 ```
 
-#### Example
+#### OCI Registry Support
+```bash
+helm install qbittorrent-exporter -n qbittorrent-exporter oci://registry-1.docker.io/homeylab/qbittorrent-exporter --version X.Y.Z --create-namespace
+
+# with own values file - recommended
+helm install -f my-values.yaml qbittorrent-exporter -n qbittorrent-exporter oci://registry-1.docker.io/homeylab/qbittorrent-exporter --version X.Y.Z --create-namespace
+```
+
+#### Install Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
 <details closed>
@@ -53,19 +61,29 @@ settings:
 <br>
 
 Install with custom:
-```
-helm install -f custom-values.yaml homeylab/qbittorrent-exporter -n qbittorrent-exporter --create-namespace
+```bash
+helm install -f custom-values.yaml qbittorrent-exporter homeylab/qbittorrent-exporter -n qbittorrent-exporter --create-namespace
 ```
 
 ## Upgrade
-```
+```bash
 helm upgrade qbittorrent-exporter homeylab/qbittorrent-exporter -n qbittorrent-exporter
 
 # with own values file - recommended
 helm upgrade -f my-values.yaml qbittorrent-exporter homeylab/qbittorrent-exporter -n qbittorrent-exporter
 ```
 
+#### OCI Registry Support
+```bash
+helm upgrade qbittorrent-exporter -n qbittorrent-exporter oci://registry-1.docker.io/homeylab/qbittorrent-exporter --version X.Y.Z
+
+# with own values file - recommended
+helm upgrade -f my-values.yaml qbittorrent-exporter -n qbittorrent-exporter oci://registry-1.docker.io/homeylab/qbittorrent-exporter --version X.Y.Z
+```
+
 ## Configuration Options
+For a full list of options, see `values.yaml` file.
+
 | Configuration Section | Subsection | Example/Description |
 | --------------------- | ---------- | ------------------- |
 | `metrics` | `*` | This section allows users to set configuration for Prometheus `podAnnotations`, `serviceMonitors`, etc. See `values.yaml` section for more details on what can be customized. |

@@ -4,7 +4,7 @@ This chart deploys bookstack, an app for self and/or collaborated documentation 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
 ## Add Chart Repo
-```
+```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
 helm repo update homeylab
 ```
@@ -15,14 +15,22 @@ Ensure you either enable mariadb dependency, `mariadb.enabled`, or have an exist
 This chart provides the option to install mariadb by default from [bitnami](https://github.com/bitnami/charts/tree/main/bitnami/mariadb).
 
 ## Install
-```
+```bash
 helm install bookstack homeylab/bookstack -n bookstack --create-namespace
 
 # with own values file - recommended
 helm install -f my-values.yaml bookstack homeylab/bookstack -n bookstack --create-namespace
 ```
 
-#### Example
+#### OCI Registry Support
+```bash
+helm install bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z --create-namespace
+
+# with own values file - recommended
+helm install -f my-values.yaml bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z --create-namespace
+```
+
+#### Install Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
 <details closed>
@@ -99,14 +107,18 @@ mariadb:
 <br>
 
 Install with custom:
-```
-helm install -f custom-values.yaml homeylab/bookstack -n bookstack --create-namespace
+```bash
+helm install -f custom-values.yaml bookstack homeylab/bookstack -n bookstack --create-namespace
 ```
 
 ## Upgrades
-It is recommended (but not required) to make a backup of mariadb database and also configuration files used by bookstack on it's pvc. See _Backup and Restore_ section for more details.
+It is recommended to make a backup of mariadb database and also configuration files used by bookstack on it's pvc. See _Backup and Restore_ section for more details.
 
-Steps:
+For additional steps that need to be done for upgrade, check upstream dependencies:
+1. For Bookstack upgrade steps, check the [documentation](https://www.bookstackapp.com/docs/admin/updates/).
+2. If using the Mariadb instance provided in this chart, follow Mariadb chart [upgrade](https://github.com/bitnami/charts/tree/main/bitnami/mariadb#upgrading) steps for DB upgrades and follow official Mariadb [guides](https://mariadb.com/kb/en/upgrading/).
+
+
 ```bash
 helm upgrade bookstack homeylab/bookstack -n bookstack
 
@@ -114,13 +126,16 @@ helm upgrade bookstack homeylab/bookstack -n bookstack
 helm upgrade -f my-values.yaml bookstack homeylab/bookstack -n bookstack
 ```
 
-For additional steps that need to be done for upgrade, check upstream dependencies:
+#### OCI Registry Support
+```bash
+helm upgrade bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z
 
-1. For Bookstack upgrade steps, check the [documentation](https://www.bookstackapp.com/docs/admin/updates/).
-2. If using the Mariadb instance provided in this chart, follow Mariadb chart [upgrade](https://github.com/bitnami/charts/tree/main/bitnami/mariadb#upgrading) steps for DB upgrades and follow official Mariadb [guides](https://mariadb.com/kb/en/upgrading/).
+# with own values file - recommended
+helm upgrade -f my-values.yaml bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z
+```
 
 ## Configuration Options
-Specify required configuration in the `config` section of your _values.yaml_ file
+For a full list of options, see `values.yaml` file.
 
 | property | description | example |
 | -------- | ----------- | ------- |

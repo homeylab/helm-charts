@@ -11,6 +11,35 @@ helm repo update homeylab
 helm search repo homeylab
 ```
 
+## OCI Support
+For any of the helm charts, you can use the available OCI registry, example using [unpoller](https://github.com/homeylab/helm-charts/tree/main/charts/unpoller) chart.
+
+<details closed>
+<summary>Click to Show Example Commands</summary>
+<br>
+
+```bash
+# pulls chart files locally for you to inspect
+helm pull oci://registry-1.docker.io/homeylab/unpoller --version 2.X.X
+
+# outputs all the chart files as stdout
+helm show all oci://registry-1.docker.io/homeylab/unpoller --version 2.X.X
+
+# outputs manifests as if an install was being made
+# - optionally can use your own values file:  `-f custom-values.yaml`
+helm template unpoller oci://registry-1.docker.io/homeylab/unpoller --version 2.X.X
+
+# install chart into your namespace
+# - optionally can use your own values file:  `-f custom-values.yaml`
+helm install unpoller -n <namespace> oci://registry-1.docker.io/homeylab/unpoller --version 2.X.X
+
+# upgrade existing chart in your namespace
+# - optionally can use your own values file:  `-f custom-values.yaml`
+helm upgrade unpoller -n <namespace> oci://registry-1.docker.io/homeylab/unpoller --version 3.X.X
+```
+</details>
+<br>
+
 ## Chart Collection
 A collection of helm charts that I created for some apps that either do not have an existing chart or the chart has grown stale.
 
@@ -53,7 +82,7 @@ helm install -f my-values.yaml unpoller homeylab/unpoller -n unpoller --create-n
 
 ## Tested On
 All charts are currently tested on:
-- k8s `v1.27.7+k3s2`
+- k8s `v1.28.4+k3s2`
 - Helm `v3.13.1`
 
 ### Chart Testing
