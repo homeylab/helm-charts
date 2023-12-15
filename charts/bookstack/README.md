@@ -1,5 +1,5 @@
 # Bookstack
-This chart deploys bookstack, an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it, enabled by default.
+This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it, enabled by default.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
