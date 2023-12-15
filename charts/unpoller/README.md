@@ -26,7 +26,7 @@ helm install -f my-values.yaml unpoller -n unpoller oci://registry-1.docker.io/h
 ```
 
 
-#### Example
+### Install Example
 Click below to expand for an example of a valid `custom-values.yaml` file. You can add/change more properties as needed.
 
 <details closed>
