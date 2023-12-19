@@ -272,4 +272,4 @@ qbittorrent-exporter:
       existingSecret: ""
       username: ""
       password: ""
-    extraEnv: {}
+  extraEnv: {}
