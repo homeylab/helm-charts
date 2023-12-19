@@ -134,4 +134,4 @@ qbittorrent-exporter:
     extraEnv: {}
 ```
 
-More options and details are available from upstream helm [chart] (https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter).
+More options and details are available from upstream helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter).
