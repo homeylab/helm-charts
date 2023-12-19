@@ -94,10 +94,10 @@ To set the `ups` label for Prometheus metrics, use the following fields in `metr
 
 ```yaml
 metrics:
-    serviceMonitor:
-        relabelings:
-        - targetLabel: ups #label key
-          replacement: primary #value
+  serviceMonitor:
+    relabelings:
+    - targetLabel: ups #label key
+      replacement: primary #value
 ```
 
 ### Scraping Multiple NUT Servers

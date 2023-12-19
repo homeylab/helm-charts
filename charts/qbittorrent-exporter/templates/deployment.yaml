@@ -65,7 +65,7 @@ spec:
           - name: QBITTORRENT_PASSWORD
             value: {{ .Values.settings.auth.password | quote }}
         {{- end }}
-        {{- range $key, $val := .Values.settings.extraEnv }}
+        {{- range $key, $val := .Values.extraEnv }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}
         {{- end }}

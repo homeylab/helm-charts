@@ -82,6 +82,14 @@ helm upgrade qbittorrent-exporter -n qbittorrent-exporter oci://registry-1.docke
 helm upgrade -f my-values.yaml qbittorrent-exporter -n qbittorrent-exporter oci://registry-1.docker.io/homeylab/qbittorrent-exporter --version X.Y.Z
 ```
 
+### Upgrade Matrix For Releases
+_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+
+| Start Chart Version | Target Chart Version | Upgrade Steps |
+| ------------------- | -------------------- | ------------- |
+| `0.0.1` | `0.1.0` | `settiings.extraEnv` moved to root of `values.yaml`, move your values to `extraEnv` instead. |
+
+
 ## Configuration Options
 For a full list of options, see `values.yaml` file.
 
@@ -92,7 +100,7 @@ For a full list of options, see `values.yaml` file.
 | `settings.auth` | `existingSecret` | Overrides `auth.username` and `auth.password` with user supplied secret. Secrets should have key/value for env vars in the form of `QBITTORRENT_USERNAME: {base_64_encoded username}`. |
 |  | `username` | Provide username for qbit instance here if not using `existingSecret`. |
 |  | `password` | Provide password for qbit instance here if not using `existingSecret`. |
-| `settings.extraEnv` |  | Set any additional env variables here for exporter instance. All keys will be upper cased and values quoted. |
+| `extraEnv` |  | Set any additional env variables here for exporter instance. All keys will be upper cased and values quoted. |
 
 ## Grafana Dashboards
 - Public

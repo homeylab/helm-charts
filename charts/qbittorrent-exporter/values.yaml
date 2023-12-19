@@ -90,9 +90,10 @@ settings:
     username: ""
     # if existingSecret is given, password will be ignored
     password: ""
-  ## extra env applied to exporter
-  extraEnv: {}
-    # SOME_VAR: true
+
+## extra env applied to exporter
+extraEnv: {}
+  # SOME_VAR: true
 
 serviceAccount:
   # Specifies whether a service account should be created
