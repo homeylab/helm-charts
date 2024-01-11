@@ -1,0 +1,178 @@
+# Default values for tdarr-exporter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  repository: docker.io
+  name: homeylab/tdarr-exporter
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+## set image for post install helm tests
+testCurlImage:
+  repository: docker.io
+  name: busybox
+  tag: "1.36.1"
+  pullPolicy: IfNotPresent
+  # the url for post install check test
+  path: /healthz
+
+## update strategy for newer versions
+updateStrategy:
+    type: Recreate
+
+service:
+  type: ClusterIP
+  port: 9090
+  name: metrics
+  protocol: TCP
+
+## metrics properties
+metrics:
+  ## -- Enable and configure a Prometheus serviceMonitor for the chart under this key.
+  enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9090"
+  ## if serviceMonitor enabled, pod annotations above will be ignored
+  serviceMonitor:
+    enabled: false
+    path: /metrics
+    # change frequency of scrapes on tdarr here
+    interval: 2m
+    scrapeTimeout: 15s
+    additionalLabels: {}
+    targetLabels: []
+    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+    relabelings: []
+    metricRelabelings: []
+  ## Enable and configure Prometheus Rules for the chart under this key.
+  ## not yet implemented
+  prometheusRule:
+    enabled: false
+    labels: {}
+    ## -- Configure additional rules for the chart under this key.
+    rules: []
+      # - alert: UpsStatusUnknown
+      #   annotations:
+      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
+      #     summary: UPS status unknown.
+      #   expr: |
+      #     nut_status == 0
+      #   for: 10s
+      #   labels:
+      #     severity: critical
+
+## define configuration for the exporter
+settings:
+  ## tdarr connection settings
+  config:
+    url: ""
+    verify_ssl: true
+    log_level: "info"
+  ## if you change these, ensure you change `service` and `metrics.*` sections
+  prometheus:
+    port: "9090"
+    path: "/metrics"
+
+## Specify any additional env vars here
+extraEnv: {}
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+## Liveness probe
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 5
+  successThreshold: 1
+
+## Readiness probe
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 5
+  successThreshold: 1
+
+## Startup Probe
+## Initial delay of 30 seconds to wait for mariadb
+## long start up helps with chart-testing, change this as desired
+## shorter periodSeconds helps with pod restarts for db timeout conditions
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: metrics
+  initialDelaySeconds: 2
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 5
+  successThreshold: 1
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

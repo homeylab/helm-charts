@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "tdarr-exporter.fullname" . }}-test-connection"
+  labels:
+    {{- include "tdarr-exporter.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: "{{ .Values.testCurlImage.repository}}/{{ .Values.testCurlImage.name }}:{{ .Values.testCurlImage.tag }}"
+      command: ['wget']
+      args: ['{{ include "tdarr-exporter.fullname" . }}:{{ .Values.service.port }}{{ .Values.testCurlImage.path }}']
+  restartPolicy: Never
