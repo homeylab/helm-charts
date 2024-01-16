@@ -1,4 +1,14 @@
 # Unpoller
+Table of Contents
+- [Unpoller](#unpoller)
+  - [Add Chart Repo](#add-chart-repo)
+  - [Install](#install)
+  - [Upgrade](#upgrade)
+  - [Prerequisites](#prerequisites)
+  - [Configuration Options](#configuration-options)
+  - [Grafana Dashboards](#grafana-dashboards)
+  - [References](#references)
+
 This chart deploys [unpoller](https://unpoller.com/docs), an app that gathers metrics from unifi controllers and formats it for Prometheus.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
@@ -6,6 +16,7 @@ This chart deploys [unpoller](https://unpoller.com/docs), an app that gathers me
 ## Add Chart Repo
 ```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
+# update the chart, this can also be run to pull new versions of the chart for upgrades
 helm repo update homeylab
 ```
 
@@ -87,6 +98,14 @@ helm upgrade unpoller -n unpoller oci://registry-1.docker.io/homeylab/unpoller -
 helm upgrade -f my-values.yaml unpoller -n unpoller oci://registry-1.docker.io/homeylab/unpoller --version X.Y.Z
 ```
 
+#### Upgrade Matrix For Releases
+_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+
+| Start Chart Version | Target Chart Version | Upgrade Steps |
+| ------------------- | -------------------- | ------------- |
+| `1.X.X` | `2.0.0` | Configuration is no longer specified in `config` section as a single key/value object. There is now dedicated sections in the `config` section for each part of unpoller. This allows for easier usability. |
+
+
 ## Prerequisites
 Ensure you have created a user in your unifi site as described here: https://unpoller.com/docs/install/controllerlogin
 
@@ -113,13 +132,6 @@ Comments in the provided `values.yaml` provide helpful descriptions. Some of the
 | `settings.unpoller` | `*` | Additional settings for unpoller. |
 
 For additional configuration use the `extraEnv` section.
-
-## Upgrade Matrix For Releases
-_The matrix below displays certain versions of this helm chart that could result in breaking changes._
-
-| Start Chart Version | Target Chart Version | Upgrade Steps |
-| ------------------- | -------------------- | ------------- |
-| `1.X.X` | `2.0.0` | Configuration is no longer specified in `config` section as a single key/value object. There is now dedicated sections in the `config` section for each part of unpoller. This allows for easier usability. |
 
 ## Grafana Dashboards
 Official dashboards can be imported via json [here](https://github.com/unpoller/dashboards).

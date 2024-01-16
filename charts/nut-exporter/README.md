@@ -1,9 +1,18 @@
 # nut-exporter
+Table of Contents
+- [nut-exporter](#nut-exporter)
+  - [Add Chart Repo](#add-chart-repo)
+  - [Install](#install)
+  - [Upgrade](#upgrade)
+  - [Configuration Options](#configuration-options)
+  - [Grafana Dashboards](#grafana-dashboards)
+
 This chart provides [nut_exporter](https://github.com/DRuggeri/nut_exporter) [image](https://hub.docker.com/r/druggeri/nut_exporter) from `DRuggeri` repository. 
 
 ## Add Chart Repo
-```
+```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
+# update the chart, this can also be run to pull new versions of the chart for upgrades
 helm repo update homeylab
 ```
 

@@ -1,4 +1,13 @@
 # exportarr
+Table of Contents
+- [exportarr](#exportarr)
+  - [Add Chart Repo](#add-chart-repo)
+  - [Install](#install)
+  - [Upgrade](#upgrade)
+  - [Configuration Options](#configuration-options)
+  - [Additional Exporters](#additional-exporters)
+
+
 This chart deploys [exportarr](https://github.com/onedr0p/exportarr), an app that gathers Prometheus metrics from `Arr` instances. See upstream repository for supported applications.
 
 This chart can optionally install a Prometheus exporter for `qbittorrent` using a separate helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter), allowing users to consolidate different exporters into a single helm chart. See [Additional Exporters](#additional-exporters) section for more information.
@@ -6,6 +15,7 @@ This chart can optionally install a Prometheus exporter for `qbittorrent` using 
 ## Add Chart Repo
 ```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
+# update the chart, this can also be run to pull new versions of the chart for upgrades
 helm repo update homeylab
 ```
 
