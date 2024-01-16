@@ -479,6 +479,17 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/qbittorrent-exporter-0.0.1/qbittorrent-exporter-0.0.1.tgz
     version: 0.0.1
+  tdarr-exporter:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2024-01-16T10:40:45.878925444Z"
+    description: A Helm chart for Kubernetes
+    digest: ecf386edfff6cfcb5f4170e1f7260d5bc51d4718446caf5e0d5320a1de4f2c3a
+    name: tdarr-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/tdarr-exporter-0.0.1/tdarr-exporter-0.0.1.tgz
+    version: 0.0.1
   unpoller:
   - apiVersion: v2
     appVersion: v2.9.4
@@ -557,4 +568,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2024-01-11T06:08:34.252694483Z"
+generated: "2024-01-16T10:40:46.000476105Z"
