@@ -4,7 +4,7 @@
 image:
   repository: docker.io
   name: homeylab/tdarr-exporter
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
@@ -44,7 +44,10 @@ metrics:
     enabled: false
     path: /metrics
     # change frequency of scrapes on tdarr here
-    interval: 2m
+    # a decent value range to start from is 1m to 2m
+    # if you want your running transcode/health jobs to refresh more often, try lowering this
+    # if you find it hitting your tdarr instance too often, try increasing this
+    interval: 1m
     scrapeTimeout: 15s
     additionalLabels: {}
     targetLabels: []
@@ -72,10 +75,16 @@ metrics:
 settings:
   ## tdarr connection settings
   config:
+    # `url` - This is a required property and must be provided.
+    # If no protocol is provided (http/https), defaults to using https. 
+    # Examples: `tdarr.example.com`, `http://tdarr.example.com`
     url: ""
+    # `verify_ssl` - This is an optional property and defaults to `true`.
+    # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
     verify_ssl: true
     log_level: "info"
   ## if you change these, ensure you change `service` and `metrics.*` sections
+  ## Generally you should not need to change below
   prometheus:
     port: "9090"
     path: "/metrics"

@@ -1,4 +1,15 @@
 # Bookstack
+Table of Contents
+- [Bookstack](#bookstack)
+  - [Add Chart Repo](#add-chart-repo)
+  - [Prerequisites](#prerequisites)
+  - [Install](#install)
+  - [Upgrades](#upgrades)
+  - [Configuration Options](#configuration-options)
+  - [File Exporter (Backup Your Pages)](#file-exporter-backup-your-pages)
+  - [Backup And Restore Of MariaDB](#backup-and-restore-of-mariadb)
+
+
 This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it, enabled by default.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
@@ -6,6 +17,7 @@ This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an ap
 ## Add Chart Repo
 ```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
+# update the chart, this can also be run to pull new versions of the chart for upgrades
 helm repo update homeylab
 ```
 
@@ -119,7 +131,6 @@ For additional steps that need to be done for upgrade, check upstream dependenci
 1. For Bookstack upgrade steps, check the [documentation](https://www.bookstackapp.com/docs/admin/updates/).
 2. If using the Mariadb instance provided in this chart, follow Mariadb chart [upgrade](https://github.com/bitnami/charts/tree/main/bitnami/mariadb#upgrading) steps for DB upgrades and follow official Mariadb [guides](https://mariadb.com/kb/en/upgrading/).
 
-
 ```bash
 helm upgrade bookstack homeylab/bookstack -n bookstack
 
@@ -134,6 +145,14 @@ helm upgrade bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstac
 # with own values file - recommended
 helm upgrade -f my-values.yaml bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z
 ```
+
+#### Upgrade Matrix For Releases
+_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+
+| Start Chart Version | Target Chart Version | Upgrade Steps |
+| ------------------- | -------------------- | ------------- |
+| `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
+| `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |
 
 ## Configuration Options
 For a full list of options, see `values.yaml` file.
@@ -295,11 +314,3 @@ $ md5sum app_db_backup.sql
 $ mysql -u root -p -D bookstack < backup.sql
 ```
 - Scale back up bookstack and it should be reading from your initial database dataset
-
-## Upgrade Matrix For Releases
-_The matrix below displays certain versions of this helm chart that could result in breaking changes._
-
-| Start Chart Version | Target Chart Version | Upgrade Steps |
-| ------------------- | -------------------- | ------------- |
-| `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
-| `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |

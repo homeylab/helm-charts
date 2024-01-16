@@ -1,9 +1,18 @@
 # qbittorrent-exporter
+Table of Contents
+- [qbittorrent-exporter](#qbittorrent-exporter)
+  - [Add Chart Repo](#add-chart-repo)
+  - [Install](#install)
+  - [Upgrade](#upgrade)
+  - [Configuration Options](#configuration-options)
+  - [Grafana Dashboards](#grafana-dashboards)
+
 This chart deploys [qbittorrent-exporter](https://github.com/caseyscarborough/qbittorrent-exporter), an app that gathers Prometheus metrics from `qbittorrent` instances.
 
 ## Add Chart Repo
 ```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
+# update the chart, this can also be run to pull new versions of the chart for upgrades
 helm repo update homeylab
 ```
 
@@ -82,7 +91,7 @@ helm upgrade qbittorrent-exporter -n qbittorrent-exporter oci://registry-1.docke
 helm upgrade -f my-values.yaml qbittorrent-exporter -n qbittorrent-exporter oci://registry-1.docker.io/homeylab/qbittorrent-exporter --version X.Y.Z
 ```
 
-### Upgrade Matrix For Releases
+#### Upgrade Matrix For Releases
 _The matrix below displays certain versions of this helm chart that could result in breaking changes._
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |

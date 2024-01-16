@@ -1,4 +1,13 @@
 # Homeylab Helm Charts
+Table of Contents
+- [Homeylab Helm Charts](#homeylab-helm-charts)
+  - [Add Chart Repo to Use these charts](#add-chart-repo-to-use-these-charts)
+  - [Search For Apps and Versions](#search-for-apps-and-versions)
+  - [OCI Support](#oci-support)
+  - [Chart Collection](#chart-collection)
+  - [Recommendations](#recommendations)
+  - [Tested On](#tested-on)
+
 
 ## Add Chart Repo to Use these charts
 ```
@@ -53,6 +62,7 @@ Apps available
 | [nut_exporter](https://github.com/homeylab/helm-charts/tree/main/charts/nut-exporter) | [nut_exporter](https://github.com/DRuggeri/nut_exporter) is a Prometheus exporter that connects to a NUT server(s) and scrapes UPS backup metrics. |
 | [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) | [exportarr](https://github.com/onedr0p/exportarr) is a Prometheus exporter that connects to `Arr` applications and scrapes metrics. This chart has an option to additionally deploy [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) chart.|
 | [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) | [qbittorrent-exporter](https://github.com/caseyscarborough/qbittorrent-exporter) is a Prometheus exporter that connects to a qbittorrent instance and scrapes metrics.  |
+| [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) | [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) is a Prometheus exporter that connects to a `Tdarr` instance and scrapes general statistics and for nodes and their running worker processes including transcode and health check jobs. |
 
 ## Recommendations
 ### Create A Values File
@@ -82,7 +92,7 @@ helm install -f my-values.yaml unpoller homeylab/unpoller -n unpoller --create-n
 
 ## Tested On
 All charts are currently tested on:
-- k8s `v1.28.4+k3s2`
+- k8s `v1.28.5+k3s1`
 - Helm `v3.13.1`
 
 ### Chart Testing
