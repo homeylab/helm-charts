@@ -104,6 +104,8 @@ For a full list of options, see `values.yaml` file.
 | `settings.config.verify_ssl` | `true`                                                                                         | If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance. |
 | `settings.config.log_level` | `info`                                                                                          | Log level to use: `debug`, `info`, `warn`, `error`. |
 
+Additional environment variables can be specified in `extraEnv` section.
+
 ## Grafana Dashboards
 - From Provider
   - [https://github.com/homeylab/tdarr-exporter/tree/main/examples](https://github.com/homeylab/tdarr-exporter/tree/main/examples)
