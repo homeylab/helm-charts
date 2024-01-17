@@ -14,11 +14,13 @@ LOCAL_VARS_DIR=local_vars
 IMAGE_REPO=quay.io/helmpack/chart-testing
 IMAGE_TAG=v3.10.1
 
+OCI_REGISTRY=oci://registry-1.docker.io/homeylabcharts
+
 ## Replace image in dev
 
 ## update dep
 update_dep:
-	helm dependency update ${CHART_DIR}/$(app) 
+	helm dependency update ${CHART_DIR}/$(app)
 
 bookstack_update_dep:
 	helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -34,7 +36,7 @@ pkg_with_dep:
 	helm package ${CHART_DIR}/$(app) -u
 
 oci_push:
-	helm push $(file) oci://registry-1.docker.io/homeylab
+	helm push $(file) ${OCI_REGISTRY}
 
 ## lint
 ## replace with `ct lint` once we have json schema file

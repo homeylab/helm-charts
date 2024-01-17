@@ -1,12 +1,21 @@
 # Homeylab Helm Charts
 Table of Contents
 - [Homeylab Helm Charts](#homeylab-helm-charts)
+  - [Notice For OCI Changes](#notice-for-oci-changes)
   - [Add Chart Repo to Use these charts](#add-chart-repo-to-use-these-charts)
   - [Search For Apps and Versions](#search-for-apps-and-versions)
   - [OCI Support](#oci-support)
   - [Chart Collection](#chart-collection)
   - [Recommendations](#recommendations)
   - [Tested On](#tested-on)
+
+
+## Notice For OCI Changes
+**Due to container registries not supporting OCI artifacts and images having the same tag, [reference](https://forums.docker.com/t/tag-overlap-in-oci-artifacts/131453), OCI registry is being moved to `registry-1.docker.io/homeylabcharts`.** 
+
+**Moving forward, as of 1/17/2024, OCI artifacts will no longer be pushed to the old OCI registry, `registry-1.docker.io/homeylab`. On March 2024, the OCI artifacts in `registry-1.docker.io/homeylab` will be removed and should no longer be referenced.** Users should not see any issue if they switch since chart names can remain the same and only the OCI registry url changes. If there is an issue, please feel free to open a Github Issue.
+
+If you do not use OCI artifacts and instead use traditional `helm repo add`, there is no action required.
 
 
 ## Add Chart Repo to Use these charts
@@ -29,22 +38,22 @@ An OCI supported registry is available for all charts, example using [unpoller](
 
 ```bash
 # pulls chart files locally for you to inspect
-helm pull oci://registry-1.docker.io/homeylab/unpoller --version 2.X.X
+helm pull oci://registry-1.docker.io/homeylabcharts/unpoller --version 2.X.X
 
 # outputs all the chart files as stdout
-helm show all oci://registry-1.docker.io/homeylab/unpoller --version 2.X.X
+helm show all oci://registry-1.docker.io/homeylabcharts/unpoller --version 2.X.X
 
 # outputs manifests as if an install was being made
 # - optionally can use your own values file:  `-f custom-values.yaml`
-helm template unpoller oci://registry-1.docker.io/homeylab/unpoller --version 2.X.X
+helm template unpoller oci://registry-1.docker.io/homeylabcharts/unpoller --version 2.X.X
 
 # install chart into your namespace
 # - optionally can use your own values file:  `-f custom-values.yaml`
-helm install unpoller -n <namespace> oci://registry-1.docker.io/homeylab/unpoller --version 2.X.X
+helm install unpoller -n <namespace> oci://registry-1.docker.io/homeylabcharts/unpoller --version 2.X.X
 
 # upgrade existing chart in your namespace
 # - optionally can use your own values file:  `-f custom-values.yaml`
-helm upgrade unpoller -n <namespace> oci://registry-1.docker.io/homeylab/unpoller --version 3.X.X
+helm upgrade unpoller -n <namespace> oci://registry-1.docker.io/homeylabcharts/unpoller --version 3.X.X
 ```
 </details>
 <br>
@@ -62,7 +71,7 @@ Apps available
 | [nut_exporter](https://github.com/homeylab/helm-charts/tree/main/charts/nut-exporter) | [nut_exporter](https://github.com/DRuggeri/nut_exporter) is a Prometheus exporter that connects to a NUT server(s) and scrapes UPS backup metrics. |
 | [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) | [exportarr](https://github.com/onedr0p/exportarr) is a Prometheus exporter that connects to `Arr` applications and scrapes metrics. This chart has an option to additionally deploy [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) chart.|
 | [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) | [qbittorrent-exporter](https://github.com/caseyscarborough/qbittorrent-exporter) is a Prometheus exporter that connects to a qbittorrent instance and scrapes metrics.  |
-| [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) | [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) is a Prometheus exporter that connects to a `Tdarr` instance and scrapes general statistics and for nodes and their running worker processes including transcode and health check jobs. |
+| [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) | [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) is a Prometheus exporter that connects to a [Tdarr](https://github.com/HaveAGitGat/Tdarr) instance and scrapes general statistics and for nodes and their running worker processes including transcode and health check jobs. |
 
 ## Recommendations
 ### Create A Values File

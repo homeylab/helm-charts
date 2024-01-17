@@ -2,6 +2,7 @@
 # tdarr-exporter
 Table of Contents
 - [tdarr-exporter](#tdarr-exporter)
+  - [Notice For OCI Changes](#notice-for-oci-changes)
   - [Add Chart Repo](#add-chart-repo)
   - [Install](#install)
   - [Upgrade](#upgrade)
@@ -9,6 +10,13 @@ Table of Contents
   - [Grafana Dashboards](#grafana-dashboards)
 
 This chart deploys [tdarr-exporter](https://github.com/homeylab/tdarr-exporter), an app that gathers Prometheus metrics from `Tdarr` instances.
+
+## Notice For OCI Changes
+**Due to container registries not supporting OCI artifacts and images having the same tag, [reference](https://forums.docker.com/t/tag-overlap-in-oci-artifacts/131453), OCI registry is being moved to `registry-1.docker.io/homeylabcharts`.** 
+
+**Moving forward, as of 1/17/2024, OCI artifacts will no longer be pushed to the old OCI registry, `registry-1.docker.io/homeylab`. On March 2024, the OCI artifacts in `registry-1.docker.io/homeylab` will be removed and should no longer be referenced.** Users should not see any issue if they switch registries, since chart names can remain the same and only the OCI registry url changes. If there is an issue, please feel free to open a Github Issue.
+
+If you do not use OCI artifacts and instead use traditional `helm repo add`, there is no action required.
 
 ## Add Chart Repo
 ```bash
@@ -27,10 +35,10 @@ helm install -f my-values.yaml tdarr-exporter homeylab/tdarr-exporter -n tdarr-e
 
 #### OCI Registry Support
 ```bash
-helm install tdarr-exporter -n tdarr-exporter oci://registry-1.docker.io/homeylab/tdarr-exporter --version X.Y.Z --create-namespace
+helm install tdarr-exporter -n tdarr-exporter oci://registry-1.docker.io/homeylabcharts/tdarr-exporter --version X.Y.Z --create-namespace
 
 # with own values file - recommended
-helm install -f my-values.yaml tdarr-exporter -n tdarr-exporter oci://registry-1.docker.io/homeylab/tdarr-exporter --version X.Y.Z --create-namespace
+helm install -f my-values.yaml tdarr-exporter -n tdarr-exporter oci://registry-1.docker.io/homeylabcharts/tdarr-exporter --version X.Y.Z --create-namespace
 ```
 
 ### Install Example
@@ -85,10 +93,10 @@ helm upgrade -f my-values.yaml tdarr-exporter homeylab/tdarr-exporter -n tdarr-e
 
 #### OCI Registry Support
 ```bash
-helm upgrade tdarr-exporter -n tdarr-exporter oci://registry-1.docker.io/homeylab/tdarr-exporter --version X.Y.Z
+helm upgrade tdarr-exporter -n tdarr-exporter oci://registry-1.docker.io/homeylabcharts/tdarr-exporter --version X.Y.Z
 
 # with own values file - recommended
-helm upgrade -f my-values.yaml tdarr-exporter -n tdarr-exporter oci://registry-1.docker.io/homeylab/tdarr-exporter --version X.Y.Z
+helm upgrade -f my-values.yaml tdarr-exporter -n tdarr-exporter oci://registry-1.docker.io/homeylabcharts/tdarr-exporter --version X.Y.Z
 ```
 
 ### Upgrade Matrix For Releases

@@ -1,6 +1,7 @@
 # Bookstack
 Table of Contents
 - [Bookstack](#bookstack)
+  - [Notice For OCI Changes](#notice-for-oci-changes)
   - [Add Chart Repo](#add-chart-repo)
   - [Prerequisites](#prerequisites)
   - [Install](#install)
@@ -9,10 +10,16 @@ Table of Contents
   - [File Exporter (Backup Your Pages)](#file-exporter-backup-your-pages)
   - [Backup And Restore Of MariaDB](#backup-and-restore-of-mariadb)
 
-
 This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it, enabled by default.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
+
+## Notice For OCI Changes
+**Due to container registries not supporting OCI artifacts and images having the same tag, [reference](https://forums.docker.com/t/tag-overlap-in-oci-artifacts/131453), OCI registry is being moved to `registry-1.docker.io/homeylabcharts`.** 
+
+**Moving forward, as of 1/17/2024, OCI artifacts will no longer be pushed to the old OCI registry, `registry-1.docker.io/homeylab`. On March 2024, the OCI artifacts in `registry-1.docker.io/homeylab` will be removed and should no longer be referenced.** Users should not see any issue if they switch registries, since chart names can remain the same and only the OCI registry url changes. If there is an issue, please feel free to open a Github Issue.
+
+If you do not use OCI artifacts and instead use traditional `helm repo add`, there is no action required.
 
 ## Add Chart Repo
 ```bash
@@ -36,10 +43,10 @@ helm install -f my-values.yaml bookstack homeylab/bookstack -n bookstack --creat
 
 #### OCI Registry Support
 ```bash
-helm install bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z --create-namespace
+helm install bookstack -n bookstack oci://registry-1.docker.io/homeylabcharts/bookstack --version X.Y.Z --create-namespace
 
 # with own values file - recommended
-helm install -f my-values.yaml bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z --create-namespace
+helm install -f my-values.yaml bookstack -n bookstack oci://registry-1.docker.io/homeylabcharts/bookstack --version X.Y.Z --create-namespace
 ```
 
 ### Install Example
@@ -140,10 +147,10 @@ helm upgrade -f my-values.yaml bookstack homeylab/bookstack -n bookstack
 
 #### OCI Registry Support
 ```bash
-helm upgrade bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z
+helm upgrade bookstack -n bookstack oci://registry-1.docker.io/homeylabcharts/bookstack --version X.Y.Z
 
 # with own values file - recommended
-helm upgrade -f my-values.yaml bookstack -n bookstack oci://registry-1.docker.io/homeylab/bookstack --version X.Y.Z
+helm upgrade -f my-values.yaml bookstack -n bookstack oci://registry-1.docker.io/homeylabcharts/bookstack --version X.Y.Z
 ```
 
 #### Upgrade Matrix For Releases
