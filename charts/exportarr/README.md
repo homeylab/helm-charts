@@ -13,9 +13,11 @@ This chart deploys [exportarr](https://github.com/onedr0p/exportarr), an app tha
 This chart can optionally install a Prometheus exporter for `qbittorrent` using a separate helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter), allowing users to consolidate different exporters into a single helm chart. See [Additional Exporters](#additional-exporters) section for more information.
 
 ## Notice For OCI Changes
-**Due to container registries not supporting OCI artifacts and images having the same tag, [reference](https://forums.docker.com/t/tag-overlap-in-oci-artifacts/131453), OCI registry is being moved to `registry-1.docker.io/homeylabcharts`.** 
+**Due to container registries not supporting OCI artifacts and images having the same tag, [reference](https://forums.docker.com/t/tag-overlap-in-oci-artifacts/131453), OCI registry is being moved to `registry-1.docker.io/homeylabcharts`.** This new registry should be used today and moving forward.
 
-**Moving forward, as of 1/17/2024, OCI artifacts will no longer be pushed to the old OCI registry, `registry-1.docker.io/homeylab`. On March 2024, the OCI artifacts in `registry-1.docker.io/homeylab` will be removed and should no longer be referenced.** Users should not see any issue if they switch registries, since chart names can remain the same and only the OCI registry url changes. If there is an issue, please feel free to open a Github Issue.
+**As of `1/17/2024`, OCI artifacts will no longer be pushed to the old OCI registry, `registry-1.docker.io/homeylab`. On `March 2024`, the OCI artifacts in `registry-1.docker.io/homeylab` will be removed and should no longer be referenced.**
+
+Users should not see any issue if they switch, since chart names can remain the same and only the OCI registry url changes. If there is an issue, please feel free to open a Github Issue.
 
 If you do not use OCI artifacts and instead use traditional `helm repo add`, there is no action required.
 

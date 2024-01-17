@@ -9,7 +9,6 @@ Table of Contents
   - [Recommendations](#recommendations)
   - [Tested On](#tested-on)
 
-
 ## Notice For OCI Changes
 **Due to container registries not supporting OCI artifacts and images having the same tag, [reference](https://forums.docker.com/t/tag-overlap-in-oci-artifacts/131453), OCI registry is being moved to `registry-1.docker.io/homeylabcharts`.** This new registry should be used today and moving forward.
 
