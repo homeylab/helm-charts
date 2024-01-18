@@ -9,4 +9,4 @@ USER vscode
 
 RUN mkdir -p /home/vscode/.kube
 
-COPY --chmod=600 kube_config /home/vscode/.kube/config
+COPY --chmod=600 --chown=vscode:vscode kube_config /home/vscode/.kube/config
