@@ -272,4 +272,26 @@ qbittorrent-exporter:
       existingSecret: ""
       username: ""
       password: ""
+  # extra env applied to exporter
+  extraEnv: {}
+
+### Optional included tdarr exporter ###
+## some sample values below but look at upstream chart for more options
+## set `enabled: true` to install tdarr prometheus exporter from separate chart
+## Ref: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
+tdarr-exporter:
+  enabled: false
+  metrics:
+    serviceMonitor:
+      enabled: false
+  settings:
+    # more options available than shown
+    config:
+      # If no protocol is provided (http/https), defaults to using https. 
+      # Examples: `tdarr.example.com`, `http://tdarr.example.com`
+      url: ""
+      # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
+      verify_ssl: true
+      log_level: "info"
+  # extra env applied to exporter
   extraEnv: {}

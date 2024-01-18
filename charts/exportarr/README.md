@@ -10,7 +10,12 @@ Table of Contents
 
 This chart deploys [exportarr](https://github.com/onedr0p/exportarr), an app that gathers Prometheus metrics from `Arr` instances. See upstream repository for supported applications.
 
-This chart can optionally install a Prometheus exporter for `qbittorrent` using a separate helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter), allowing users to consolidate different exporters into a single helm chart. See [Additional Exporters](#additional-exporters) section for more information.
+This chart can optionally install a Prometheus exporter for the following:
+
+1. `qbittorrent` using a separate helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter)
+2. `Tdarr` using a separate helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter)
+ 
+This allows users to consolidate different `Arr` related exporters into a single helm chart. See [Additional Exporters](#additional-exporters) section for more information.
 
 ## Notice For OCI Changes
 **Due to container registries not supporting OCI artifacts and images having the same tag, [reference](https://forums.docker.com/t/tag-overlap-in-oci-artifacts/131453), OCI registry is being moved to `registry-1.docker.io/homeylabcharts`.** This new registry should be used today and moving forward.
@@ -83,6 +88,9 @@ exportarr:
 ## additional exporters ##
 qbittorrent-exporter:
   enabled: false
+
+tdarr-exporter:
+  enabled: false
 ```
 </details>
 <br>
@@ -134,8 +142,8 @@ Below are some key options explained for this helm chart. For an exhaustive list
 
 ## Additional Exporters
 #### qbittorrent
-Enable additional exporter for `qbittorrent-exporter` by setting `qbittorrent-exporter.enabled` to `true.`
-```
+Enable additional exporter for `qbittorrent-exporter` by setting `qbittorrent-exporter.enabled` to `true`.
+```yaml
 qbittorrent-exporter:
   # enable/disable
   enabled: true
@@ -150,7 +158,32 @@ qbittorrent-exporter:
       existingSecret: ""
       username: ""
       password: ""
-    extraEnv: {}
+  # extra env applied to exporter
+  extraEnv: {}
 ```
 
 More options and details are available from upstream helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter).
+
+#### Tdarr
+Enable additional exporter for `tdarr-exporter` by setting `tdarr-exporter.enabled` to `true`.
+
+```yaml
+tdarr-exporter:
+  enabled: false
+  metrics:
+    serviceMonitor:
+      enabled: false
+  settings:
+    # more options available than shown
+    config:
+      # If no protocol is provided (http/https), defaults to using https. 
+      # Examples: `tdarr.example.com`, `http://tdarr.example.com`
+      url: ""
+      # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
+      verify_ssl: true
+      log_level: "info"
+  # extra env applied to exporter
+  extraEnv: {}
+```
+
+More options and details are available from upstream helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter).

@@ -10,6 +10,8 @@ Table of Contents
 
 This chart deploys [qbittorrent-exporter](https://github.com/caseyscarborough/qbittorrent-exporter), an app that gathers Prometheus metrics from `qbittorrent` instances.
 
+This chart is also included as an optional deployment in the [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) helm chart. You can use the `exportarr` chart and set `qbittorrent-exporter.enabled` if you prefer having all your `Arr` related exporters in one chart.
+
 ## Notice For OCI Changes
 **Due to container registries not supporting OCI artifacts and images having the same tag, [reference](https://forums.docker.com/t/tag-overlap-in-oci-artifacts/131453), OCI registry is being moved to `registry-1.docker.io/homeylabcharts`.** This new registry should be used today and moving forward.
 
