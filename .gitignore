@@ -7,5 +7,4 @@ kube_config
 /charts/*/Chart.lock
 /charts/*/charts
 .idea
-.vscode
 .DS_Store
