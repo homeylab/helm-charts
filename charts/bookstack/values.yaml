@@ -6,6 +6,9 @@ image:
   repository: docker.io
   name: linuxserver/bookstack
   pullPolicy: IfNotPresent
+  # You can optionally specify your preferred image tag here.
+  # For OS updates but consistent Bookstack version, use `version-X.X.X` tag
+  # for other variants refer: https://www.linuxserver.io/blog/docker-tags-so-many-tags-so-little-time#manifests
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
@@ -80,6 +83,7 @@ config:
 ## Ref: https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete
 ## All keys will be upper cased and values will be quoted
 ## Some default values below for reference
+## linuxserver.io specific env variables can also be set below
 extraEnv: {}
   # TZ: Etc/UTC
   # APP_DEFAULT_DARK_MODE: true
@@ -183,7 +187,7 @@ fileBackups:
     name: homeylab/bookstack-file-exporter
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.0.2"
+    tag: "1.1.0"
   ## default once per day
   cronSchedule: "@daily"
   ## existing secret for credentials loaded as env vars
@@ -221,6 +225,7 @@ fileBackups:
       keep_last: 5
     assets:
       export_images: true
+      export_attachments: true
       modify_markdown: false
       export_meta: false
       verify_ssl: true
