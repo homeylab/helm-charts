@@ -96,7 +96,10 @@ exportarr:
       enabled: false
       url: ""
       existingSecret:
+        # name of secret
         name: ""
+        # name of key within secret to use
+        # example: "sonarr_api_key"
         secretKey: ""
       # ignored if `existingSecret` is used
       apiKey: ""
@@ -108,7 +111,10 @@ exportarr:
       enabled: false
       url: ""
       existingSecret:
+        # name of secret
         name: ""
+        # name of key within secret to use
+        # example: "prowlarr_api_key"
         secretKey: ""
       # ignored if `existingSecret` is used
       apiKey: ""
@@ -119,7 +125,10 @@ exportarr:
       enabled: false
       url: ""
       existingSecret:
+        # name of secret
         name: ""
+        # name of key within secret to use
+        # example: "bazarr_api_key"
         secretKey: ""
       # ignored if `existingSecret` is used
       apiKey: ""
@@ -130,7 +139,10 @@ exportarr:
       enabled: false
       url: ""
       existingSecret:
+        # name of secret
         name: ""
+        # name of key within secret to use
+        # example: "lidarr_api_key"
         secretKey: ""
       # ignored if `existingSecret` is used
       apiKey: ""
@@ -141,7 +153,10 @@ exportarr:
       enabled: false
       url: ""
       existingSecret:
+        # name of secret
         name: ""
+        # name of key within secret to use
+        # example: "sabnzbd_api_key"
         secretKey: ""
       # ignored if `existingSecret` is used
       apiKey: ""
@@ -152,7 +167,10 @@ exportarr:
       enabled: false
       url: ""
       existingSecret:
+        # name of secret
         name: ""
+        # name of key within secret to use
+        # example: "readarr_api_key"
         secretKey: ""
       # ignored if `existingSecret` is used
       apiKey: ""
