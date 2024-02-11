@@ -120,4 +120,4 @@ Additional environment variables can be specified in `extraEnv` section.
 
 ## Grafana Dashboards
 - From Provider
-  - [https://github.com/homeylab/tdarr-exporter/tree/main/examples](https://github.com/homeylab/tdarr-exporter/tree/main/examples)
+  - [https://grafana.com/grafana/dashboards/20388-tdarr/](https://grafana.com/grafana/dashboards/20388-tdarr/)
