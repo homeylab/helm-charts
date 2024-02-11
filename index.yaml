@@ -534,6 +534,16 @@ entries:
     version: 0.0.1
   tdarr-exporter:
   - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-02-11T11:02:10.126515703Z"
+    description: A Helm chart for Kubernetes
+    digest: c6a81f9b4c1b31470cf463904f68615d69cdc644f50c7e02ec631b729e71ba33
+    name: tdarr-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/tdarr-exporter-1.0.0/tdarr-exporter-1.0.0.tgz
+    version: 1.0.0
+  - apiVersion: v2
     appVersion: 0.0.1
     created: "2024-01-16T10:40:45.878925444Z"
     description: A Helm chart for Kubernetes
@@ -632,4 +642,4 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2024-02-02T10:47:21.702439852Z"
+generated: "2024-02-11T11:02:10.126592105Z"
