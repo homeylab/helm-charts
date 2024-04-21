@@ -91,8 +91,8 @@ helm install -f my-values.yaml unpoller homeylab/unpoller -n unpoller --create-n
 
 ## Tested On
 All charts are currently tested on:
-- k8s `v1.28.5+k3s1`
-- Helm `v3.13.1`
+- k8s `v1.29.3+k3s1`
+- Helm `v3.14.2`
 
 ### Chart Testing
 **WIP Section**
