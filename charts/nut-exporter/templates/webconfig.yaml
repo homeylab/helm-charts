@@ -4,5 +4,5 @@ kind: ConfigMap
 metadata:
   name: {{ include "nut-exporter.fullname" . }}-webconfig
 data:
-  webconfig_file.yml: {{- .Values.webconfig_file | toYaml | indent 1 }}
+  webconfig.yml: {{- .Values.webconfig_file | toYaml | indent 1 }}
 {{- end }}

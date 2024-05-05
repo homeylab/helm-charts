@@ -41,11 +41,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if or .Values.extraRunFlags .Values.webconfig_file }}
           args:
-          {{- range $key, $value := .Values.extraRunFlags }}
-            {{- if $value }}
-              - --{{ $key }}={{ $value }}
+          {{- range $key, $val := .Values.extraRunFlags }}
+            {{- if $val }}
+            - --{{ $key }}={{ $val }}
             {{- else }}
-              - --{{ $key }}
+            - --{{ $key }}
             {{- end }}
           {{- end }}
           {{- if .Values.webconfig_file}}
