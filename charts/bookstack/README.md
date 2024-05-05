@@ -150,6 +150,7 @@ _The matrix below displays certain versions of this helm chart that could result
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `2.8.X` | `3.0.0` | Optional embedded mariadb chart version is updated to `18.0.2` from `14.1.4`. Check upstream upgrade [notes](https://github.com/bitnami/charts/tree/main/bitnami/mariadb#upgrading) for any potential issues before upgrading. If additional options are used for the embedded Mariadb section in the `values.yaml` file, configuration may need to be adjusted based on chart changes. Mariadb version itself stays on a `11.3.X` release. |
 | `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
 | `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |
 
