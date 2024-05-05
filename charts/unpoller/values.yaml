@@ -85,8 +85,9 @@ settings:
       save_anomalies: false
       save_dpi: false
       verify_ssl: false
+      # role: ""
     ## if existing secrets is supplied, below section is ignored
-    ## to use in a secret, use `UP_UNIFI_CONTROLLER_0_{USER/PASS}` in secret key
+    ## to use in an env variable, use `UP_UNIFI_CONTROLLER_0_{USER/PASS}` in secret key
     auth:
       ## For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller):
       ## Email field will be the `username`
@@ -102,6 +103,7 @@ settings:
       db: ""
       interval: ""
     ## if existing secrets is supplied, below section is ignored
+    ## to use in an env variable, use `UP_INFLUXDB_{USER/PASS}` in secret key
     auth:
       user: ""
       pass: ""
