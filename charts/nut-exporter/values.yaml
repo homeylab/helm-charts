@@ -88,6 +88,7 @@ settings:
 ## Provide extra flags as args to the exporter
 ## ref: https://github.com/DRuggeri/nut_exporter#usage
 ## for flags with no value, only provide key, example: `version: `
+## note: `--web.config.file` has its own section below and should not be included here
 extraRunFlags: {}
   # log.level: debug
   # log.format: json
