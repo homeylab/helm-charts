@@ -1,0 +1,44 @@
+{{- if .Values.service.rcon.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "v-rising.fullname" . }}
+  labels:
+    {{- include "v-rising.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.rcon.type }}
+{{- if eq .Values.service.rcon.type "LoadBalancer" }}
+  {{- if .Values.service.rcon.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.rcon.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.service.rcon.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+  {{ toYaml .Values.service.rcon.loadBalancerSourceRanges | indent 4 }}
+  {{- end }}
+{{- end }}
+{{- if .Values.service.rcon.clusterIP }}
+  clusterIP: {{ .Values.service.rcon.clusterIP }}
+{{- end }}
+{{- if .Values.service.rcon.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.rcon.externalTrafficPolicy }}
+{{- end }}
+  ports:
+    - port: {{ .Values.service.rcon.port }}
+    {{- if .Values.service.rcon.nodePort }}
+      nodePort: {{ .Values.service.rcon.nodePort }}
+    {{- end }}
+      targetPort: {{ .Values.service.rcon.port }}
+      protocol: TCP
+      name: rconport
+  {{- if .Values.service.rcon.externalIPs }}
+  externalIPs:
+    {{- with .Values.service.rcon.externalIPs }}
+      {{- range . }}
+        - {{ . | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  selector:
+    {{- include "v-rising.selectorLabels" . | nindent 4 }}
+{{- end }}

@@ -50,7 +50,10 @@ test_custom:
 	ct install --chart-dirs ${CHART_DIR} --charts ${CHART_DIR}/$(app)
 
 template:
-	helm template $(app) ${CHART_DIR}/$(app) -f ${LOCAL_VARS_DIR}/$(app).yaml --debug
+	helm template $(app) ${CHART_DIR}/$(app) --debug
+
+local_template:
+	helm template $(app) ${CHART_DIR}/$(app) -f ${LOCAL_VARS_DIR}/$(app).yaml  --debug
 
 dryrun_install_local:
 	helm install -f ${LOCAL_VARS_DIR}/$(app).yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace --dry-run

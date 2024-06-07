@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "v-rising.fullname" . }}
+  labels:
+    {{- include "v-rising.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "v-rising.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "v-rising.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "v-rising.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: gameport
+              containerPort: {{ .Values.service.server.gamePort.port }}
+              protocol: UDP
+            - name: queryport
+              containerPort: {{ .Values.service.server.queryPort.port }}
+              protocol: UDP
+          {{- if .Values.service.rcon.enabled }}
+            - name: rconport
+              containerPort: {{ .Values.service.rcon.port }}
+              protocol: TCP
+          {{- end }}
+          env:
+          {{- range $key, $value := .Values.config }}
+            - name: {{ $key | upper }}
+              value: {{ $value | quote }}
+          {{ end }}
+        {{- if .Values.extraEnv }}
+          {{- range $key, $value := .Values.extraEnv }}
+            - name: {{ $key | upper }}
+              value: {{ $value | quote }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.livenessProbe}}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+        {{- end }}
+        {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+        {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.persistence.steamServer.enabled }}
+            - name: steam-server-files
+              mountPath: {{ .Values.persistence.steamServer.mountPath }}
+          {{- end }}
+          {{- if .Values.persistence.world.enabled }}
+            - name: world-files
+              mountPath: {{ .Values.persistence.world.mountPath }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+    {{- if .Values.persistence.steamServer.enabled }}
+      {{- if .Values.persistence.steamServer.existingClaim }}
+        - name: steam-server-files
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.steamServer.existingClaim  }}
+      {{- else }}
+        - name: steam-server-files
+          persistentVolumeClaim:
+            claimName: {{ include "v-rising.fullname" . }}-steam-server-files
+      {{- end }} 
+    {{- else }}
+        - name: steam-server-files
+          emptyDir: {}
+    {{- end }}
+    {{- if .Values.persistence.world.enabled }}
+      {{- if .Values.persistence.world.existingClaim }}
+        - name: world-files
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.world.existingClaim  }}
+      {{- else }}
+        - name: world-files
+          persistentVolumeClaim:
+            claimName: {{ include "v-rising.fullname" . }}-world-files
+      {{- end }}
+    {{- else }}
+        - name: world-files
+          emptyDir: {}
+    {{- end }}
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,31 @@
+{{- if and (.Values.persistence.steamServer.enabled) (not .Values.persistence.steamServer.existingClaim) }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "v-rising.fullname" . }}-steam-server-files
+  namespace: {{ .Release.Namespace }}
+  annotations:
+  {{- if .Values.persistence.steamServer.annotations }}
+    {{ toYaml .Values.persistence.steamServer.annotations | indent 2 }}  
+  {{ end }}
+  labels:
+    {{- include "v-rising.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  {{- range .Values.persistence.steamServer.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.steamServer.size | quote }}
+{{- if (eq "-" .Values.persistence.steamServer.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.persistence.steamServer.storageClass }}"
+{{- end }}
+  {{- if .Values.persistence.steamServer.selector }}
+  selector:
+    {{ toYaml .Values.persistence.steamServer.selector | indent 4 }}
+  {{- end }}
+{{- end }}
