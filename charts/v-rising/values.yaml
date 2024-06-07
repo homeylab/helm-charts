@@ -171,7 +171,7 @@ resources:
   #   memory: 128Mi
   requests:
     cpu: 500m
-    memory: 8G
+    memory: 6G
 
 ## Not yet implemented
 livenessProbe: {}
