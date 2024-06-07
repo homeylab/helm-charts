@@ -808,4 +808,16 @@ entries:
     urls:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
-generated: "2024-05-05T09:29:43.411174731Z"
+  v-rising:
+  - apiVersion: v2
+    appVersion: "2.1"
+    created: "2024-06-07T02:13:39.487686521Z"
+    description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
+      server
+    digest: c6d6956aa3a747f74ab6554c48bfd2d7226d79edae3748ab8e76c8f699f08882
+    name: v-rising
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-06-07T02:13:39.487808038Z"
