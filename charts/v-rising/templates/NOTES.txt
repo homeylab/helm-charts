@@ -1,0 +1,7 @@
+~~Thanks for using homeylab charts!~~
+
+Get the {{ .Chart.Name }} instances by running this command:
+    - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "v-rising.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+For more information and options on the image used in this chart:
+    - https://github.com/TrueOsiris/docker-vrising

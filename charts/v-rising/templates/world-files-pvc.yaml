@@ -1,0 +1,31 @@
+{{- if and (.Values.persistence.world.enabled) (not .Values.persistence.world.existingClaim) }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "v-rising.fullname" . }}-world-files
+  namespace: {{ .Release.Namespace }}
+  annotations:
+  {{- if .Values.persistence.world.annotations }}
+    {{ toYaml .Values.persistence.world.annotations | indent 2 }}  
+  {{ end }}
+  labels:
+    {{- include "v-rising.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  {{- range .Values.persistence.world.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.world.size | quote }}
+{{- if (eq "-" .Values.persistence.world.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.persistence.world.storageClass }}"
+{{- end }}
+  {{- if .Values.persistence.world.selector }}
+  selector:
+    {{ toYaml .Values.persistence.world.selector | indent 4 }}
+  {{- end }}
+{{- end }}

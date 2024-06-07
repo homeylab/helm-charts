@@ -1,0 +1,203 @@
+# Default values for v-rising.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: trueosiris/vrising
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  ## Set service properties for the v-rising server
+  server:
+    annotations: {}
+    # -- set type of service, example: `ClusterIP`, `NodePort`, `LoadBalancer` for v-rising server
+    type: ClusterIP
+    gamePort:
+      # -- set game port for v rising
+      port: 9876
+      # Set the port used if the serviceType is NodePort
+      nodePort:
+    queryPort:
+      # -- set query port for v rising
+      port: 9877
+      # Set the port used if the serviceType is NodePort
+      nodePort:
+    # Set the external port of the service, useful when using the LoadBalancer service type
+    clusterIP:
+    # Set the loadBalancerIP if the serviceType is LoadBalancer
+    loadBalancerIP:
+    # Set the externalTrafficPolicy in the Service to either `Cluster` or `Local`
+    externalTrafficPolicy: ""
+    # Manually set the external IPs for the service
+    externalIPs: []
+    # - XX.XX.XX.XX
+  ## Add additional service for RCON
+  rcon:
+    annotations: {}
+     # -- optional enable rcon service port - note: also needs modification of settings file
+    enabled: false
+    # -- set type of service, example: `ClusterIP`, `NodePort`, `LoadBalancer` for rcon service
+    type: ClusterIP
+    # -- rcon port for v rising
+    port: 25575
+    # Set the port used if the serviceType is NodePort
+    nodePort:
+    # Set the external port of the service, useful when using the LoadBalancer service type
+    clusterIP:
+    # Set the loadBalancerIP if the serviceType is LoadBalancer
+    loadBalancerIP:
+    # Set the externalTrafficPolicy in the Service to either `Cluster` or `Local`
+    externalTrafficPolicy: ""
+    # Manually set the external IPs for the service
+    externalIPs: []
+    # - XX.XX.XX.XX
+  
+config:
+  # -- timezone for server
+  tz: America/New_York
+  # -- name of server
+  serverName: "v-rising"
+  # -- name of world
+  worldName: "v-rising-world"
+  # -- optional lifetime of logfiles
+  logDays: 30
+
+# -- additional environment variables as key value pairs
+extraEnv: {}
+
+persistence:
+  steamServer:
+    # -- enable persistence using PVC for dedicated server files
+    enabled: true
+    # -- set additional annotations for the PVC
+    annotations: {}
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # -- set the storage class to use
+    storageClass: ""
+    # -- set the size of the volume
+    size: 10Gi
+    # -- set an existingClaim for volume, if set the rest of persistence parameters are ignored
+    existingClaim: ""
+    accessModes:
+      - ReadWriteOnce
+    # -- set the mount path for the volume inside the container
+    mountPath: "/mnt/vrising/server"
+    # Selector to match an existing Persistent Volume
+    selector: {}
+  world:
+    # -- enable persistence using PVC for world files
+    enabled: true
+    # -- set additional annotations for the PVC
+    annotations: {}
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # -- set the storage class to use
+    storageClass: ""
+    # -- set the size of the volume
+    size: 5Gi
+    # -- set an existingClaim for volume, if set the rest of persistence parameters are ignored
+    existingClaim: ""
+    accessModes:
+      - ReadWriteOnce
+    # -- set the mount path for the volume inside the container
+    mountPath: "/mnt/vrising/persistentdata"
+    # Selector to match an existing Persistent Volume
+    selector: {}
+
+## NOT USED
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  requests:
+    cpu: 500m
+    memory: 8G
+
+## Not yet implemented
+livenessProbe: {}
+  # httpGet:
+  #   path: /
+  #   port: http
+readinessProbe: {}
+  # httpGet:
+  #   path: /
+  #   port: http
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
