@@ -2,6 +2,15 @@
 
 ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.4.0](https://img.shields.io/badge/AppVersion-v0.4.0-informational?style=flat-square)
 
+Table of Contents
+- [pihole-exporter](#pihole-exporter)
+  - [Add Chart Repo](#add-chart-repo)
+  - [Install](#install)
+  - [Upgrade](#upgrade)
+  - [Configuration Options](#configuration-options)
+  - [Grafana Dashboards](#grafana-dashboards)
+  - [References](#references)
+
 A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exporter) for Pi-hole. Based on `ekofr/pihole-exporter` image.
 
 ## Add Chart Repo
