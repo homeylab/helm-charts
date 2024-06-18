@@ -1,0 +1,202 @@
+# Default values for pihole-exporter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  repository: ekofr/pihole-exporter
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+## set image for post install helm tests
+testConnImage:
+  repository: docker.io
+  name: busybox
+  tag: "1.36.1"
+  pullPolicy: IfNotPresent
+  ## the path for post install check test
+  path: /metrics
+
+updateStrategy:
+  # -- set the update strategy for the deployment
+  type: Recreate
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+## each variable can be a list of values as documented by the upstream image
+## "A single instance of pihole-exporter can monitor multiple pi-holes instances. To do so, you can specify a list of hostnames, protocols, passwords/API tokens and ports by separating them with commas in their respective environment variable"
+## Example: hostname: "pihole1.example.com,pihole2.example.com"
+## Ref: https://github.com/eko/pihole-exporter
+settings:
+  # -- Add Configuration as Environment Variables
+  config:
+    # -- Set the pihole host protocol: `http` or `https`, default `http` set by container image
+    protocol: ""
+    # -- Set the pihole host or IP address
+    hostname: pi-hole.localdomain
+    # -- Set the pihole port on the pihole host to use, default `80` set by container image
+    port: 
+    # -- Set the port for metrics scraping
+    containerPort: 9617
+  # -- Set auth configuration for pihole
+  auth:
+    # -- Set the pihole password for auth
+    password: ""
+    # -- Set the pihole token for auth, if token is specified, password will be ignored
+    token: ""
+    # -- use existing secret instead of `auth.password` or `auth.token`. Use variables `PIHOLE_PASSWORD` or `PIHOLE_API_TOKEN`
+    existingSecret: ""
+
+# -- Add extra environment variables
+extraEnv: {}
+
+service:
+  type: ClusterIP
+  # -- set port for pihole-exporter scraping, should match the pihole-exporter container port in `settings.config.containerPort`
+  port: 9617
+  # -- set name for the service
+  name: metrics
+  # -- set protocol for the service
+  protocol: TCP
+
+## set metrics export properties
+metrics:
+  # -- enable/disable prometheus podAnnotations and serviceMonitors.
+  enabled: true
+  # -- Add podAnnotations for prometheus scraping
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    # -- set the path for prometheus scraping
+    prometheus.io/path: /metrics
+    # -- set the port for prometheus scraping, should match the service port
+    prometheus.io/port: "9617"
+  ## if serviceMonitor enabled, pod annotations above will be ignored
+  ## ServiceMonitor for each exportarr instance will be deployed instead
+  serviceMonitor:
+    # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
+    enabled: false
+    # -- set the path for prometheus scraping for serviceMonitor
+    path: /metrics
+    # -- how often to scrape for serviceMonitor
+    interval: 1m
+    # -- scrapeTimeout for serviceMonitor
+    scrapeTimeout: 15s
+    # -- set additional labels for serviceMonitor
+    additionalLabels: {}
+    targetLabels: []
+    # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+    relabelings: []
+    metricRelabelings: []
+  ## Enable and configure Prometheus Rules for the chart under this key.
+  ## not yet implemented
+  prometheusRule:
+    ### -- enable/disable prometheusRule
+    enabled: false
+    ### -- set labels for prometheusRule
+    labels: {}
+    ### -- Configure prometheusRule rules for the chart
+    rules: []
+      # - alert: UpsStatusUnknown
+      #   annotations:
+      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
+      #     summary: UPS status unknown.
+      #   expr: |
+      #     nut_status == 0
+      #   for: 10s
+      #   labels:
+      #     severity: critical
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+## Liveness probe
+livenessProbe:
+  httpGet:
+    path: /liveness
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 5
+  successThreshold: 1
+
+## Readiness probe
+readinessProbe:
+  httpGet:
+    path: /readiness
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 5
+  successThreshold: 1
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

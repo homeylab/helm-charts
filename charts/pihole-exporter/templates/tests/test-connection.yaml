@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "pihole-exporter.fullname" . }}-test-connection"
+  labels:
+    {{- include "pihole-exporter.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: "{{ .Values.testConnImage.repository}}/{{ .Values.testConnImage.name }}:{{ .Values.testConnImage.tag }}"
+      command: ['wget']
+      args: ['{{ include "pihole-exporter.fullname" . }}:{{ .Values.service.port }}{{ .Values.testConnImage.path }}']
+  restartPolicy: Never
