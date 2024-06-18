@@ -71,7 +71,7 @@ Apps available
 Use a values file to make changes and save your custom configuration. When using upstream helm charts and specifying your own values file, variables are handled like so:
 
 - First the base default values.yaml in the project/bundle is evaluated and all variables and values loaded.
-- When you specify your own file, your configuration is applied on top and overrides existing configuration in the base values.yaml.
+- When you specify your own file, your configuration is applied on top and overrides (or merges depending on value type) existing configuration loaded from the base values.yaml.
 
 General recommendation is only specify in your own values file what you are customizing or overriding. You may also include variables that are defaulted to a specific value that you need to stay constant, just in case the upstream helm chart changes. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
 
