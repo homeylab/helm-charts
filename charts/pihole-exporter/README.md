@@ -100,7 +100,6 @@ For a full list of values, see [values.yaml](values.yaml). Some of the most impo
 | service.type | string | `"ClusterIP"` |  |
 | extraEnv | object | `{}` | Add extra environment variables |
 | metrics.enabled | bool | `true` | enable/disable prometheus podAnnotations and serviceMonitors. |
-| metrics.podAnnotations | object | `{"prometheus.io/path":"/metrics","prometheus.io/port":"9617","prometheus.io/scrape":"true"}` | Add podAnnotations for prometheus scraping |
 | metrics.podAnnotations."prometheus.io/path" | string | `"/metrics"` | set the path for prometheus scraping |
 | metrics.podAnnotations."prometheus.io/port" | string | `"9617"` | set the port for prometheus scraping, should match the service port |
 | metrics.serviceMonitor.enabled | bool | `false` | enable/disable serviceMonitor, if enabled podAnnotations will be ignored |
