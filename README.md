@@ -61,9 +61,9 @@ Apps available
 | [nut_exporter](https://github.com/homeylab/helm-charts/tree/main/charts/nut-exporter) | [nut_exporter](https://github.com/DRuggeri/nut_exporter) is a Prometheus exporter that connects to a NUT server(s) and scrapes UPS backup metrics. |
 | [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) | [exportarr](https://github.com/onedr0p/exportarr) is a Prometheus exporter that connects to `Arr` applications and scrapes metrics. This chart has an option to additionally deploy [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) and [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) charts.|
 | [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) | [qbittorrent-exporter](https://github.com/caseyscarborough/qbittorrent-exporter) is a Prometheus exporter that connects to a qbittorrent instance and scrapes metrics.  |
-| [tdarr-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter) | [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) is a Prometheus exporter that connects to a [Tdarr](https://github.com/HaveAGitGat/Tdarr) instance and scrapes general statistics and for nodes and their running worker processes including transcode and health check jobs. |
+| [tdarr-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter) | [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) is a Prometheus exporter that connects to a [Tdarr](https://github.com/HaveAGitGat/Tdarr) instance and scrapes general statistics for nodes and their running worker processes including transcode and health check jobs. |
 | [pihole-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter) | [pihole-exporter](https://github.com/eko/pihole-exporter) is a Prometheus exporter that connects to one or more Pi-hole instances and scrapes metrics. |
-| [v-rising](https://github.com/homeylab/helm-charts/tree/main/charts/v-rising) | A v-rising dedicated server allows a user host their own server for the game v-rising. This chart uses the [TrueOsiris/docker-vrising](https://github.com/TrueOsiris/docker-vrising) image for the dedicated server. |
+| [v-rising](https://github.com/homeylab/helm-charts/tree/main/charts/v-rising) | A v-rising dedicated [server](https://github.com/TrueOsiris/docker-vrising) that allows a user host their own server for the game v-rising. |
 
 
 ## Recommendations
@@ -73,7 +73,7 @@ Use a values file to make changes and save your custom configuration. When using
 - First the base default values.yaml in the project/bundle is evaluated and all variables and values loaded.
 - When you specify your own file, your configuration is applied on top and overrides existing configuration in the base values.yaml.
 
-General recommendation is only specify in your own values file what you are customizing or overriding. You can also include variables that are defaulted to a specific value that you need to stay constant, just in case the upstream helm chart changes. For example, maybe you are using a port like `9090` and that is default now, it may change to `909X` in the future, so you might want to keep that in your own values file. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
+General recommendation is only specify in your own values file what you are customizing or overriding. You may also include variables that are defaulted to a specific value that you need to stay constant, just in case the upstream helm chart changes. This allows you to keep your files minimal and easy to upgrade when values change since your scope is smaller.
 
 Use the `-f` flag like so, example
 ```
@@ -94,8 +94,8 @@ helm install -f my-values.yaml unpoller homeylab/unpoller -n unpoller --create-n
 
 ## Tested On
 All charts are currently tested on:
-- k8s `v1.29.3+k3s1`
-- Helm `v3.14.2`
+- k8s `v1.29.4+k3s1`
+- Helm `v3.15.1`
 
 ### Chart Testing
 **WIP Section**
