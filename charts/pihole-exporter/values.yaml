@@ -79,7 +79,7 @@ metrics:
     # -- set the path for prometheus scraping for serviceMonitor
     path: /metrics
     # -- how often to scrape for serviceMonitor
-    interval: 1m
+    interval: 2m
     # -- scrapeTimeout for serviceMonitor
     scrapeTimeout: 15s
     # -- set additional labels for serviceMonitor
