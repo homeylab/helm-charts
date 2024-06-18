@@ -646,6 +646,17 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-0.0.1/nut-exporter-0.0.1.tgz
     version: 0.0.1
+  pihole-exporter:
+  - apiVersion: v2
+    appVersion: v0.4.0
+    created: "2024-06-18T04:30:50.802301935Z"
+    description: A Helm Chart to deploy a Prometheus exporter for Pi-hole
+    digest: 56772dc0b2302cf4cf6d24f52aeaef93a7c0aaf5f33a55c3c60d2c21d2024fdf
+    name: pihole-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/pihole-exporter-0.0.1/pihole-exporter-0.0.1.tgz
+    version: 0.0.1
   qbittorrent-exporter:
   - apiVersion: v2
     appVersion: v1.3.5
@@ -820,4 +831,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2024-06-07T02:13:39.487808038Z"
+generated: "2024-06-18T04:30:50.802441605Z"
