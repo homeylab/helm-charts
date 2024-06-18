@@ -649,6 +649,16 @@ entries:
   pihole-exporter:
   - apiVersion: v2
     appVersion: v0.4.0
+    created: "2024-06-18T07:38:42.793301827Z"
+    description: A Helm Chart to deploy a Prometheus exporter for Pi-hole
+    digest: 626fb7f8eebe9a59333f389573e92a015cda9a402dba57e327c7c73f242b6d2b
+    name: pihole-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/pihole-exporter-0.0.2/pihole-exporter-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: v0.4.0
     created: "2024-06-18T04:30:50.802301935Z"
     description: A Helm Chart to deploy a Prometheus exporter for Pi-hole
     digest: 56772dc0b2302cf4cf6d24f52aeaef93a7c0aaf5f33a55c3c60d2c21d2024fdf
@@ -831,4 +841,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2024-06-18T04:30:50.802441605Z"
+generated: "2024-06-18T07:38:42.793402134Z"
