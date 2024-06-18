@@ -1,0 +1,10 @@
+~~Thanks for using homeylab charts!~~
+
+Get the {{ .Chart.Name }} instances by running this command:
+    - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "pihole-exporter.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+A sample Grafana dashboard is available from upstream:
+    - https://grafana.com/grafana/dashboards/10176-pi-hole-exporter/
+
+The upstream provider can be found here:
+    - https://github.com/eko/pihole-exporter

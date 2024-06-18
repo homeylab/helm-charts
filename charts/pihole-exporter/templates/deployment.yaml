@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pihole-exporter.fullname" . }}
+  labels:
+    {{- include "pihole-exporter.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  {{- with .Values.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "pihole-exporter.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- if and (.Values.metrics.enabled) (not .Values.metrics.serviceMonitor.enabled) }}
+      {{- with .Values.metrics.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- end }}
+      labels:
+        {{- include "pihole-exporter.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "pihole-exporter.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: {{ .Values.service.name}}
+              containerPort: {{ .Values.service.port }}
+              protocol: {{ .Values.service.protocol }}
+          env:
+          {{- if .Values.settings.config.protocol }}
+            - name: PIHOLE_PROTOCOL
+              value: {{ .Values.settings.config.protocol | quote }}
+          {{- end }}
+            - name: PIHOLE_HOSTNAME
+              value: {{ .Values.settings.config.hostname | quote }}
+          {{- if .Values.settings.config.port }}
+            - name: PIHOLE_PORT
+              value: {{ .Values.settings.config.port | quote }}
+          {{- end }}
+            - name: PORT
+              value: {{ .Values.settings.config.containerPort | quote }}
+          {{- range $key, $val := .Values.extraEnv }}
+            - name: {{ $key | upper }}
+              value: {{ $val | quote }}
+          {{- end }}
+        {{- if not .Values.settings.auth.existingSecret }}
+          {{- if .Values.settings.auth.token }}
+            - name: PIHOLE_API_TOKEN
+              value: {{ .Values.settings.auth.token | quote }}
+          {{- else if .Values.settings.auth.password }}
+            - name: PIHOLE_PASSWORD
+              value: {{ .Values.settings.auth.password | quote }}
+          {{- end }}
+        {{- end }}
+          envFrom:
+          {{- if .Values.settings.auth.existingSecret }}
+            - secretRef:
+                name: {{ .Values.settings.auth.existingSecret }}
+          {{- end }}
+        {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+        {{- end }}
+        {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+        {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -62,7 +62,9 @@ Apps available
 | [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) | [exportarr](https://github.com/onedr0p/exportarr) is a Prometheus exporter that connects to `Arr` applications and scrapes metrics. This chart has an option to additionally deploy [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) and [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) charts.|
 | [qbittorrent-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) | [qbittorrent-exporter](https://github.com/caseyscarborough/qbittorrent-exporter) is a Prometheus exporter that connects to a qbittorrent instance and scrapes metrics.  |
 | [tdarr-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter) | [tdarr-exporter](https://github.com/homeylab/tdarr-exporter) is a Prometheus exporter that connects to a [Tdarr](https://github.com/HaveAGitGat/Tdarr) instance and scrapes general statistics and for nodes and their running worker processes including transcode and health check jobs. |
+| [pihole-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter) | [pihole-exporter](https://github.com/eko/pihole-exporter) is a Prometheus exporter that connects to one or more Pi-hole instances and scrapes metrics. |
 | [v-rising](https://github.com/homeylab/helm-charts/tree/main/charts/v-rising) | A v-rising dedicated server allows a user host their own server for the game v-rising. This chart uses the [TrueOsiris/docker-vrising](https://github.com/TrueOsiris/docker-vrising) image for the dedicated server. |
+
 
 ## Recommendations
 ### Create A Values File
