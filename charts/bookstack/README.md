@@ -1,4 +1,7 @@
+
 # Bookstack
+![Version: 3.1.0](https://img.shields.io/badge/Version-3.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: version-v24.05.2](https://img.shields.io/badge/AppVersion-version--v24.05.2-informational?style=flat-square)
+
 Table of Contents
 - [Bookstack](#bookstack)
   - [Add Chart Repo](#add-chart-repo)
@@ -221,7 +224,7 @@ formats:
   - pdf
   - plaintext
 # if existingSecret is supplied, can omit/comment out the `minio_config._key` sections below
-minio_config:
+minio:
   # a host/ip + port combination is also allowed
   # example: "minio.yourdomain.com:8443"
   host: "minio.yourdomain.com"
