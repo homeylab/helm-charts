@@ -187,7 +187,7 @@ fileBackups:
     name: homeylab/bookstack-file-exporter
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.1.0"
+    tag: "1.2.0"
   ## default once per day
   cronSchedule: "@daily"
   ## existing secret for credentials loaded as env vars
@@ -213,7 +213,7 @@ fileBackups:
       - pdf
       - plaintext
     # if existingSecret is supplied, can omit or leave blank the `minio_config.*_key` sections below
-    minio_config:
+    minio:
       host: "minio.yourdomain.com"
       # set here or as env variable, MINIO_ACCESS_KEY
       access_key: ""
