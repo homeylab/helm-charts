@@ -103,6 +103,8 @@ For a full list of options, see `values.yaml` file.
 | --------------------- | ----------------------------------------------------------------------------------------------------- | ------------------- |
 | `metrics` | By default `podAnnotations` are enabled. Set `serviceMonitor.enabled` to `true` to instead use `serviceMonitors`. | This section allows users to set configuration for Prometheus `podAnnotations`, `serviceMonitors`, etc. See `values.yaml` section for more details on what can be customized. |
 | `settings.config.url` | `NONE`                                                                                                | This is a required property and must be provided. If no protocol is provided (`http/https`), defaults to using `https`. Examples: `tdarr.example.com`, `http://tdarr.example.com`. |
+| `settings.config.apiKey`         | If `settings.config.existingSecret` is not supplied, provide `apiKey` for the Tdarr instance directly. If no auth required, leave blank.              | `""`    |
+| `settings.config.existingSecret` | Provide an existing secret and the `key` within the secret data to use for the `apiKey` of the Tdarr instance.                    | `{}`    |
 | `settings.config.verify_ssl` | `true`                                                                                         | If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance. |
 | `settings.config.log_level` | `info`                                                                                          | Log level to use: `debug`, `info`, `warn`, `error`. |
 

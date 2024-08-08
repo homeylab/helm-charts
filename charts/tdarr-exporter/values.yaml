@@ -79,6 +79,15 @@ settings:
     # If no protocol is provided (http/https), defaults to using https. 
     # Examples: `tdarr.example.com`, `http://tdarr.example.com`
     url: ""
+    # if auth is not required, do not provide any `secretKey` or `apiKey`
+    existingSecret:
+      # name of secret
+      name: ""
+      # name of key within secret to use
+      # example: "tdarr_api_key"
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
     # `verify_ssl` - This is an optional property and defaults to `true`.
     # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
     verify_ssl: true
