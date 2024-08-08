@@ -50,15 +50,15 @@ spec:
           env:
           - name: TDARR_URL
             value: {{ .Values.settings.config.url | quote }}
-          {{- if $val.existingSecret.name }}
+          {{- if .Values.settings.config.existingSecret.name }}
           - name: TDARR_API_KEY
             valueFrom:
               secretKeyRef:
-                name: {{ $val.existingSecret.name  }}
-                key: {{ $val.existingSecret.secretKey }}
-          {{- else if $val.apiKey }}
+                name: {{ .Values.settings.config.existingSecret.name  }}
+                key: {{ .Values.settings.config.existingSecret.secretKey }}
+          {{- else if .Values.settings.config.apiKey }}
           - name: TDARR_API_KEY
-            value: {{ $val.apiKey | quote }}
+            value: {{ .Values.settings.config.apiKey | quote }}
           {{- end }}
           - name: VERIFY_SSL
             value: {{ .Values.settings.config.verify_ssl | quote }}
