@@ -50,6 +50,16 @@ spec:
           env:
           - name: TDARR_URL
             value: {{ .Values.settings.config.url | quote }}
+          {{- if $val.existingSecret.name }}
+          - name: TDARR_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ $val.existingSecret.name  }}
+                key: {{ $val.existingSecret.secretKey }}
+          {{- else if $val.apiKey }}
+          - name: TDARR_API_KEY
+            value: {{ $val.apiKey | quote }}
+          {{- end }}
           - name: VERIFY_SSL
             value: {{ .Values.settings.config.verify_ssl | quote }}
           - name: LOG_LEVEL
