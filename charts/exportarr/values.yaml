@@ -305,11 +305,19 @@ tdarr-exporter:
   settings:
     # more options available than shown
     config:
-      # If no protocol is provided (http/https), defaults to using https. 
-      # Examples: `tdarr.example.com`, `http://tdarr.example.com`
-      url: ""
-      # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
-      verify_ssl: true
-      log_level: "info"
+    # If no protocol is provided (http/https), defaults to using https. 
+    # Examples: `tdarr.example.com`, `http://tdarr.example.com`
+    url: ""
+    # if auth is not required, do not provide any `secretKey` or `apiKey`
+    existingSecret:
+      # name of secret
+      name: ""
+      # name of key within secret to use
+      secretKey: ""
+    # ignored if `existingSecret` is used
+    apiKey: ""
+    # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
+    verify_ssl: true
+    log_level: "info"
   # extra env applied to exporter
   extraEnv: {}
