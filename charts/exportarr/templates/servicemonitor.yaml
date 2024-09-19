@@ -1,11 +1,11 @@
-{{- $appMetrics := .Values.exportarr.metrics -}}
-
 {{- if (.Values.exportarr.metrics.enabled) }}
 {{- range $instance_key, $instance_val := .Values.exportarr.apps }}
 {{- range $app := $instance_val }}
 
-{{- if (hasKey $app "metrics") }}
-{{- $appMetrics := $app.metrics -}}
+{{- $appMetrics := $.Values.exportarr.metrics -}}
+
+{{- if $app.metrics }}
+{{- $appMetrics = $app.metrics -}}
 {{- end }}
 
 {{- if and ($app.enabled) ($appMetrics.serviceMonitor.enabled) }}

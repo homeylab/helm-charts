@@ -1,11 +1,11 @@
-{{- $appMetrics := .Values.exportarr.metrics -}}
-
 {{- range $instance_key, $instance_val := .Values.exportarr.apps }}
 {{- range $app := $instance_val }}
 {{- if $app.enabled }}
 
-{{- if (hasKey $app "metrics") }}
-{{- $appMetrics := $app.metrics -}}
+{{- $appMetrics := $.Values.exportarr.metrics -}}
+
+{{- if $app.metrics }}
+{{- $appMetrics = $app.metrics -}}
 {{- end }}
 
 {{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}

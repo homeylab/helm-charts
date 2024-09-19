@@ -76,7 +76,7 @@ exportarr:
     radarr:
       # `exportarr-radarr-` prefix will be added to the pod name
     - name: main
-      enabled: true
+      enabled: false
       url: ""
       # optional, use instead of `apiKey`
       # this secret should provide the `apiKey` used for auth
@@ -116,7 +116,7 @@ exportarr:
     sonarr:
       # `exportarr-sonarr-` prefix will be added to the pod name
     - name: main
-      enabled: true
+      enabled: false
       url: ""
       existingSecret:
         # name of secret
