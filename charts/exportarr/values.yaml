@@ -11,15 +11,16 @@ exportarr:
     tag: ""
 
   ## set image for post install helm tests
-  testCurlImage:
+  testImage:
     repository: docker.io
     name: busybox
     tag: "1.36.1"
     pullPolicy: IfNotPresent
+    path: /healthz
 
   ## update strategy for newer versions
   updateStrategy:
-      type: Recreate
+    type: Recreate
 
   imagePullSecrets: []
   nameOverride: ""
@@ -32,7 +33,7 @@ exportarr:
     name: metrics
     protocol: TCP
 
-  ## set metrics export properties
+  ## set default metrics export properties
   metrics:
     ## enable/disable metrics for all exportarr instances.
     enabled: true
@@ -47,7 +48,7 @@ exportarr:
       path: /metrics
       # how often to scrape
       interval: 4m
-      scrapeTimeout: 90s
+      scrapeTimeout: 60s
       additionalLabels: {}
       targetLabels: []
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
@@ -73,7 +74,9 @@ exportarr:
   ### exportarr configuration per instance/app ###
   apps:
     radarr:
-      enabled: false
+      # `exportarr-radarr-` prefix will be added to the pod name
+    - name: main
+      enabled: true
       url: ""
       # optional, use instead of `apiKey`
       # this secret should provide the `apiKey` used for auth
@@ -92,8 +95,28 @@ exportarr:
       volumes: []
       ## Additional volumeMounts on the output Deployment definition.
       volumeMounts: []
+      # override default metrics settings for this instance - should specify all `key: value` pairs
+      metrics: {}
+        # podAnnotations:
+        #   prometheus.io/scrape: "true"
+        #   prometheus.io/path: /metrics
+        #   prometheus.io/port: "9707"
+        # serviceMonitor:
+        #   # -- overrides podAnnotations if enabled
+        #   enabled: false
+        #   path: /metrics
+        #   # how often to scrape
+        #   interval: 4m
+        #   scrapeTimeout: 60s
+        #   additionalLabels: {}
+        #   targetLabels: []
+        #   # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+        #   relabelings: []
+        #   metricRelabelings: []
     sonarr:
-      enabled: false
+      # `exportarr-sonarr-` prefix will be added to the pod name
+    - name: main
+      enabled: true
       url: ""
       existingSecret:
         # name of secret
@@ -107,7 +130,10 @@ exportarr:
         # ENABLE_ADDITIONAL_METRICS: true
       volumes: []
       volumeMounts: []
+      metrics: {}
     prowlarr:
+      # `exportarr-prowlarr-` prefix will be added to the pod name
+    - name: main
       enabled: false
       url: ""
       existingSecret:
@@ -121,7 +147,10 @@ exportarr:
       extraEnv: {}
       volumes: []
       volumeMounts: []
+      metrics: {}
     bazarr:
+      # `exportarr-bazarr-` prefix will be added to the pod name
+    - name: main
       enabled: false
       url: ""
       existingSecret:
@@ -135,7 +164,10 @@ exportarr:
       extraEnv: {}
       volumes: []
       volumeMounts: []
+      metrics: {}
     lidarr:
+      # `exportarr-lidarr-` prefix will be added to the pod name
+    - name: main
       enabled: false
       url: ""
       existingSecret:
@@ -149,7 +181,10 @@ exportarr:
       extraEnv: {}
       volumes: []
       volumeMounts: []
+      metrics: {}
     sabnzbd:
+      # `exportarr-sabnzbd-` prefix will be added to the pod name
+    - name: main
       enabled: false
       url: ""
       existingSecret:
@@ -163,7 +198,10 @@ exportarr:
       extraEnv: {}
       volumes: []
       volumeMounts: []
+      metrics: {}
     readarr:
+      # `exportarr-readarr-` prefix will be added to the pod name
+    - name: main
       enabled: false
       url: ""
       existingSecret:
@@ -177,6 +215,7 @@ exportarr:
       extraEnv: {}
       volumes: []
       volumeMounts: []
+      metrics: {}
 
   ### below section will be applied to all exportarr instances ###
   ## env applied to all exportarr exporters

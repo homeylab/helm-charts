@@ -1,6 +1,14 @@
-{{- range $key, $val := .Values.exportarr.apps }}
-{{- if $val.enabled }}
-{{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
+{{- $appMetrics := .Values.exportarr.metrics -}}
+
+{{- range $instance_key, $instance_val := .Values.exportarr.apps }}
+{{- range $app := $instance_val }}
+{{- if $app.enabled }}
+
+{{- if (hasKey $app "metrics") }}
+{{- $appMetrics := $app.metrics -}}
+{{- end }}
+
+{{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,7 +33,7 @@ spec:
       {{- with $.Values.exportarr.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- if and ($.Values.exportarr.metrics.enabled) (not $.Values.exportarr.metrics.serviceMonitor.enabled) }}
+    {{- if and ($.Values.exportarr.metrics.enabled) (not $appMetrics.serviceMonitor.enabled) }}
       {{- with $.Values.exportarr.metrics.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -52,21 +60,21 @@ spec:
               containerPort: {{ $.Values.exportarr.service.port }}
               protocol: {{ $.Values.exportarr.service.protocol }}
           args:
-            - {{ $key }}
+            - {{ $instance_key }}
           env:
             - name: URL
-              value: {{ $val.url | quote }}
-            {{- if $val.existingSecret.name }}
+              value: {{ $app.url | quote }}
+            {{- if $app.existingSecret.name }}
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ $val.existingSecret.name  }}
-                  key: {{ $val.existingSecret.secretKey }}
-            {{- else if $val.apiKey }}
+                  name: {{ $app.existingSecret.name  }}
+                  key: {{ $app.existingSecret.secretKey }}
+            {{- else if $app.apiKey }}
             - name: API_KEY
-              value: {{ $val.apiKey | quote }}
+              value: {{ $app.apiKey | quote }}
             {{- end }}
-          {{- range $key_extra, $val_extra := $val.extraEnv }}
+          {{- range $key_extra, $val_extra := $app.extraEnv }}
             - name: {{ $key_extra | upper }}
               value: {{ $val_extra | quote }}
           {{- end }}
@@ -92,14 +100,14 @@ spec:
           {{- with $.Values.exportarr.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $val.volumeMounts }}
+          {{- with $app.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
       {{- with $.Values.exportarr.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $val.volumes }}
+      {{- with $app.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with $.Values.exportarr.nodeSelector }}
@@ -115,5 +123,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 ---
+{{- end }}
 {{- end }}
 {{- end }}
