@@ -8,7 +8,7 @@
 {{- $appMetrics := $app.metrics -}}
 {{- end }}
 
-{{- if $app.enabled }}
+{{- if and ($app.enabled) ($appMetrics.serviceMonitor.enabled) }}
 {{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
