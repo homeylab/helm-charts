@@ -3,6 +3,21 @@ entries:
   bookstack:
   - apiVersion: v2
     appVersion: version-v24.10
+    created: "2024-10-31T04:42:38.946723636Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 18.0.2
+    description: bookstack documentation platform
+    digest: 1f307abc39d2d7257801a379dc2216d3c0e9ed6165c7f48be0679b95f37e15a1
+    name: bookstack
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-4.0.1/bookstack-4.0.1.tgz
+    version: 4.0.1
+  - apiVersion: v2
+    appVersion: version-v24.10
     created: "2024-10-31T03:56:52.780040709Z"
     dependencies:
     - condition: mariadb.enabled
@@ -1035,4 +1050,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2024-10-31T03:56:52.780278657Z"
+generated: "2024-10-31T04:42:38.946927085Z"
