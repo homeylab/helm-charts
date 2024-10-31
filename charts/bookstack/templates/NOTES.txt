@@ -1,6 +1,6 @@
 ~~Thanks for using homeylab charts!~~
 
-Get the {{ .Chart.Name }} URL by running these commands:
+Get the {{ .Chart.Name }} URL below:
 {{- if .Values.ingress.enabled }}
 {{- range $host := .Values.ingress.hosts }}
   {{- range .paths }}

@@ -159,6 +159,30 @@ _The matrix below displays certain versions of this helm chart that could result
 | `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
 | `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |
 
+#### Nginx Configuration Warnings
+After certain upgrades, you may see warnings in the logs about nginx configuration mismatches. 
+```
+**** The following active confs have different version dates than the samples that are shipped. ****
+**** This may be due to user customization or an update to the samples. ****
+**** You should compare the following files to the samples in the same folder and update them. ****
+**** Use the link at the top of the file to view the changelog. ****
+┌────────────┬────────────┬────────────────────────────────────────────────────────────────────────┐
+│  old date  │  new date  │ path                                                                   │
+├────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+│ 2024-05-27 │ 2024-07-16 │ /config/nginx/site-confs/default.conf                                  │
+└────────────┴────────────┴────────────────────────────────────────────────────────────────────────┘
+```
+
+Linuxserver.io changes their base Nginx configuration at times and it may have drifted. You can either find the new versions being referenced [here](https://github.com/linuxserver/docker-baseimage-alpine-nginx) or if your environment has access, it can be pulled. You can then copy the new version using `kubectl cp` to the pod and replace the old version. To re-pull it on start up, you can delete the file. Either option will require a restart of the pod to take effect.
+
+```bash
+# example of deleting for a re-pull
+kubectl exec -it -n bookstack {{ pod_name }} -- bash -c "rm /config/nginx/site-confs/default.conf"
+
+# example of copying a new version
+kubectl cp default.conf bookstack/{{ pod_name }}:/config/nginx/site-confs/default.conf
+```
+
 ## Configuration Options
 For a full list of options, see `values.yaml` file.
 
