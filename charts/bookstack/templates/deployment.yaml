@@ -37,10 +37,12 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
         {{- if not .Values.existingSecret }}
-          - name: DB_USER
+          - name: DB_USERNAME
             value: {{ .Values.config.dbUser | quote}}
-          - name: DB_PASS
+          - name: DB_PASSWORD
             value: {{ .Values.config.dbPass | quote}}
+          - name: APP_KEY
+            value: {{ .Values.config.appKey | quote }}
         {{- end }}
         {{- if .Values.config.dbHost }}
           - name: DB_HOST
