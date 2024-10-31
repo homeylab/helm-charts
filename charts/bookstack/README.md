@@ -166,7 +166,7 @@ For a full list of options, see `values.yaml` file.
 | -------- | ----------- | ------- |
 | `existingSecret` | Specify the name of an existing secret that contains the following keys: `DB_USERNAME`, `DB_PASSWORD`, and `APP_KEY`. If specified, the options `config.dbUser`, `config.dbPassword`, and `config.appKey` will be ignored. | `my-existing-secret` |
 | `config.appUrl` | Specify the url (with http/https) used to access Bookstack instance | `https://bookstack.domain.org`|
-| `config.appKey` | Required as of chart version `3.2.X` or higher. Specify the app key for the bookstack instance, required for newer versions of the `linuxserver/bookstack` image. Generate one with: `docker run -it --rm --entrypoint /bin/bash lscr.io/linuxserver/bookstack:latest appkey`. This is ignored if `existingSecret` is specified. | `base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4=` |
+| `config.appKey` | Required as of chart version `4.X.X` or higher. Specify the app key for the bookstack instance, required for newer versions of the `linuxserver/bookstack` image. Generate one with: `docker run -it --rm --entrypoint /bin/bash lscr.io/linuxserver/bookstack:latest appkey`. This is ignored if `existingSecret` is specified. | `base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4=` |
 | `config.dbHost` | Which backend db to use, if empty string, will attempt to use embedded mariaDB service | `bookstack-mariadb.bookstack.svc.cluster.local` |
 | `config.dbPort` | Specify the port for the backend db. | `3306` |
 | `config.dbDatabase` | Which database to use when connected to the backend db. | `bookstack` | 
