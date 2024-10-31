@@ -53,6 +53,10 @@ securityContext: {}
 ## existing secret for credentials
 ## if supplied, dbUser and dbPass will be ignored in config section
 ## You can also optionally set more credentials/secret env vars in this secret like APP_KEY
+## The following should be used in existingSecret if specified:
+## - DB_USERNAME (replaces dbUser below if specified)
+## - DB_PASSWORD (replaces dbPass below if specified)
+## - APP_KEY (replaces appKey below if specified)
 existingSecret: ""
 
 ## Default values below will work with included mariadb chart in bookstack namespace
@@ -61,6 +65,10 @@ config:
   ## If using ingress, set it to same url
   ## example: "https://bookstack.yourdomain.org"
   appUrl: ""
+  ## Used for session encryption key. Users should generate a new one with: `docker run -it --rm --entrypoint /bin/bash lscr.io/linuxserver/bookstack:latest appkey`
+  ## - below is one generated for test purposes only
+  ## - if existingSecret is specified, below will be ignored
+  appKey: "base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4="
   ## dbHost should be specified and consistent!
   ## If not included though, it will be dynamically generated and attempt to use included/embedded Bitnami mariadb instance
   ## This to help with chart-testing dynamic namespaces

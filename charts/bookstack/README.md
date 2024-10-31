@@ -56,6 +56,7 @@ Click below to expand for an example of a valid `custom-values.yaml` file.
 # custom-values.yaml
 config:
   appUrl: "https://bookstack.somedomain"
+  appKey: "base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4="
   ## Default values below will work with included mariadb chart in bookstack namespace
   dbHost: bookstack-mariadb.bookstack.svc.cluster.local
   dbPort: 3306
@@ -153,6 +154,7 @@ _The matrix below displays certain versions of this helm chart that could result
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `3.X.X` | `4.0.0` | Bookstack version is updated to `v24.10` from `v24.05.2`. The docker image from `linuxserver/bookstack` introduces the requirement for an appKey to be set in the `config` section. This will required to be set by the user, see [here](https://github.com/linuxserver/docker-bookstack?tab=readme-ov-file#parameters) for more information or Configuration section below. `DB_USER` and `DB_PASS` env variables have been changed to `DB_USERNAME` and `DB_PASSWORD` for those that use the `existingSecret` option. |
 | `2.8.X` | `3.0.0` | Optional embedded mariadb chart version is updated to `18.0.2` from `14.1.4`. Check upstream upgrade [notes](https://github.com/bitnami/charts/tree/main/bitnami/mariadb#upgrading) for any potential issues before upgrading. If additional options are used for the embedded Mariadb section in the `values.yaml` file, configuration may need to be adjusted based on chart changes. Mariadb version itself stays on a `11.3.X` release. |
 | `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
 | `2.2.X` | `2.3.X` | A new configuration option for application url, has been implemented in `config.appUrl` and should be used instead of placing it in the `extraEnv` section (`APP_URL`) for consistency purposes. |
@@ -162,7 +164,9 @@ For a full list of options, see `values.yaml` file.
 
 | property | description | example |
 | -------- | ----------- | ------- |
+| `existingSecret` | Specify the name of an existing secret that contains the following keys: `DB_USERNAME`, `DB_PASSWORD`, and `APP_KEY`. If specified, the options `config.dbUser`, `config.dbPassword`, and `config.appKey` will be ignored. | `my-existing-secret` |
 | `config.appUrl` | Specify the url (with http/https) used to access Bookstack instance | `https://bookstack.domain.org`|
+| `config.appKey` | Required as of chart version `3.2.X` or higher. Specify the app key for the bookstack instance, required for newer versions of the `linuxserver/bookstack` image. Generate one with: `docker run -it --rm --entrypoint /bin/bash lscr.io/linuxserver/bookstack:latest appkey`. This is ignored if `existingSecret` is specified. | `base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4=` |
 | `config.dbHost` | Which backend db to use, if empty string, will attempt to use embedded mariaDB service | `bookstack-mariadb.bookstack.svc.cluster.local` |
 | `config.dbPort` | Specify the port for the backend db. | `3306` |
 | `config.dbDatabase` | Which database to use when connected to the backend db. | `bookstack` | 
@@ -275,14 +279,14 @@ keep_last: -1
 To use this feature, set `fileBackups.enabled` to `true`. For more information on how to set configuration options, see exporter [docs](https://github.com/homeylab/bookstack-file-exporter#configuration).
 
 ## Backup And Restore Of MariaDB
-When upgrading to different versions, you can do a back up of your mariadb data and bookstack files to have available just in case. This can be used for other situations like PVC resizing as well. Below is just an example but there any other ways to do this as well like PV backups via [Longhorn](https://longhorn.io/docs/latest/) as an example.
+When upgrading to different versions, you can do a back up of your mariadb data and bookstack files to have available just in case. This can be used for other situations like PVC resizing as well. Below is just an example for a small set up but there any other ways to do this as well like PV backups via [Longhorn](https://longhorn.io/docs/latest/) as an example.
 
 For more information on backup/restore steps, you should follow the documentation for upstream providers: 
 
 1. [bookstack](https://www.bookstackapp.com/docs/admin/backup-restore/)
 2. [mariadb](https://mariadb.com/kb/en/full-backup-and-restore-with-mariabackup/)
 
-Example for mariadb:
+Example for a small mariadb set up:
 - Stop bookstack pod
 ```
 kubectl scale deploy -n bookstack bookstack --replicas=0
