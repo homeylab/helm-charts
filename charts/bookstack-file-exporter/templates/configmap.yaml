@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bookstack-file-exporter.fullname" . }}
+  labels:
+    {{- include "bookstack-file-exporter.labels" . | nindent 4 }}
+data:
+  config.yml: |
+    host: "{{ .Values.config.host }}"
+    credentials:
+      token_id: "{{ .Values.config.credentials.tokenId }}"
+      token_secret: "{{ .Values.config.credentials.tokenSecret }}"
+  {{- if .Values.config.additionalHeaders }}
+    additional_headers:
+    {{- with .Values.config.additionalHeaders }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- end }}
+    formats:
+    {{- with .Values.config.formats }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- if .Values.config.minio.enabled }}
+    minio:
+      host: "{{ .Values.config.minio.host }}"
+    {{- if not .Values.existingSecret }}
+      access_key: "{{ .Values.config.minio.accessKey }}"
+      secret_key: "{{ .Values.config.minio.secretKey }}"
+    {{- end }}
+      region: "{{ .Values.config.minio.region }}"
+      bucket: "{{ .Values.config.minio.bucket }}"
+      path: "{{ .Values.config.minio.path }}"
+      keep_last: {{ .Values.config.minio.keepLast }}
+  {{- end }}
+    assets:
+      export_images: {{ .Values.config.assets.exportImages }}
+      export_attachments: {{ .Values.config.assets.exportAttachments }}
+      modify_markdown: {{ .Values.config.assets.modifyMarkdown }}
+      export_meta: {{ .Values.config.assets.exportMeta }}
+      verify_ssl: {{ .Values.config.assets.verifySSL }}
+    keep_last: {{ .Values.config.keepLast }}
+    run_interval: {{ .Values.config.runInterval}}
