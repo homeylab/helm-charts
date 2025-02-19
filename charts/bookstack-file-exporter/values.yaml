@@ -49,8 +49,6 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-
-
 # -- use an existing secret for credentials
 existingSecret: ""
 # -- set extra environment variables
@@ -102,7 +100,6 @@ config:
     verifySSL: true
   # -- how many backups to keep on filesystem
   keepLast: 1
-  # -- run in application mode if specified. 
   # -- If `runInterval` is > `0`, the exporter will run as a deployment and wait specified seconds between runs.
   # -- setting to `0` uses CronJob resource instead of a deployment
   runInterval: 0
