@@ -50,6 +50,11 @@ spec:
             - name: {{ $key | upper }}
               value: {{ $val | quote }}
           {{- end }}
+        {{- if .Values.existingSecret }}
+          envFrom:
+          - secretRef:
+              name: {{ .Values.existingSecret }}
+        {{- end }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
