@@ -28,3 +28,7 @@ dependencies:
   version: "18.0.2"
   condition: mariadb.enabled
   repository: "oci://registry-1.docker.io/bitnamicharts"
+- name: bookstack-file-exporter
+  version: "0.0.2"
+  condition: bookstack-file-exporter.enabled
+  repository: "oci://registry-1.docker.io/homeylabcharts"
