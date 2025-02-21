@@ -58,9 +58,9 @@ config:
   # -- set the bookstack instance URL
   host: "http://bookstack.bookstack.svc.cluster.local"
   credentials:
-    # -- set token id, ignored if `BOOKSTACK_TOKEN_ID` is defined via secret or env variable
+    # -- set token id, ignored if `BOOKSTACK_TOKEN_ID` is defined in `existingSecret` or env variable
     tokenId: ""
-    # -- set token secret, ignored if `BOOKSTACK_TOKEN_SECRET` is defined via secret or env variable
+    # -- set token secret, ignored if `BOOKSTACK_TOKEN_SECRET` is defined in `existingSecret` or env variable
     tokenSecret: ""
   # -- set any additional headers for http client
   additionalHeaders:
@@ -75,9 +75,9 @@ config:
     enabled: false
     # set minio 
     host: "minio.yourdomain.com"
-    # -- set minio access key, ignored if `MINIO_ACCESS_KEY` is defined via secret or env variable
+    # -- set minio access key, ignored if `MINIO_ACCESS_KEY` is defined in `existingSecret` or env variable
     accessKey: ""
-    # -- set minio secret key, ignored if `MINIO_SECRET_KEY` is defined via secret or env variable
+    # -- set minio secret key, ignored if `MINIO_SECRET_KEY` is defined in `existingSecret` or env variable
     secretKey: ""
     # -- set region
     region: "us-east-1"
@@ -145,7 +145,7 @@ persistence:
 updateStrategy: 
   type: Recreate
 
-resources:
+resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -153,9 +153,9 @@ resources:
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
 
 # -- set additional volumes
 volumes: []
