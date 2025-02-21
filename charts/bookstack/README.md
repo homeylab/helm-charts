@@ -1,6 +1,6 @@
 
 # Bookstack
-![Version: 3.1.0](https://img.shields.io/badge/Version-3.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: version-v24.05.2](https://img.shields.io/badge/AppVersion-version--v24.05.2-informational?style=flat-square)
+![Version: 4.1.0](https://img.shields.io/badge/Version-3.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: version-v24.12](https://img.shields.io/badge/AppVersion-version--v24.05.2-informational?style=flat-square)
 
 Table of Contents
 - [Bookstack](#bookstack)
@@ -9,10 +9,10 @@ Table of Contents
   - [Install](#install)
   - [Upgrades](#upgrades)
   - [Configuration Options](#configuration-options)
-  - [File Exporter (Backup Your Pages)](#file-exporter-backup-your-pages)
+  - [Bookstack File Exporter (Backup Your Pages)](#bookstack-file-exporter-backup-your-pages)
   - [Backup And Restore Of MariaDB](#backup-and-restore-of-mariadb)
 
-This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it, enabled by default.
+This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it (default: enabled) and [bookstack-file-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter) for file backups.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
@@ -154,6 +154,7 @@ _The matrix below displays certain versions of this helm chart that could result
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `4.0.X` | `4.1.0` | `fileBackups` has been moved to its own chart and can be enabled by setting `bookstack-file-exporter.enabled` to `true` |
 | `3.X.X` | `4.0.0` | Bookstack version is updated to `v24.10` from `v24.05.2`. The docker image from `linuxserver/bookstack` introduces the requirement for an appKey to be set in the `config` section. This will required to be set by the user, see [here](https://github.com/linuxserver/docker-bookstack?tab=readme-ov-file#parameters) for more information or Configuration section below. `DB_USER` and `DB_PASS` env variables have been changed to `DB_USERNAME` and `DB_PASSWORD` for those that use the `existingSecret` option. |
 | `2.8.X` | `3.0.0` | Optional embedded mariadb chart version is updated to `18.0.2` from `14.1.4`. Check upstream upgrade [notes](https://github.com/bitnami/charts/tree/main/bitnami/mariadb#upgrading) for any potential issues before upgrading. If additional options are used for the embedded Mariadb section in the `values.yaml` file, configuration may need to be adjusted based on chart changes. Mariadb version itself stays on a `11.3.X` release. |
 | `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
@@ -186,18 +187,18 @@ kubectl cp default.conf bookstack/{{ pod_name }}:/config/nginx/site-confs/defaul
 ## Configuration Options
 For a full list of options, see `values.yaml` file.
 
-| property | description | example |
+| property | description | default |
 | -------- | ----------- | ------- |
-| `existingSecret` | Specify the name of an existing secret that contains the following keys: `DB_USERNAME`, `DB_PASSWORD`, and `APP_KEY`. If specified, the options `config.dbUser`, `config.dbPassword`, and `config.appKey` will be ignored. | `my-existing-secret` |
-| `config.appUrl` | Specify the url (with http/https) used to access Bookstack instance | `https://bookstack.domain.org`|
-| `config.appKey` | Required as of chart version `4.X.X` or higher. Specify the app key for the bookstack instance, required for newer versions of the `linuxserver/bookstack` image. Generate one with: `docker run -it --rm --entrypoint /bin/bash lscr.io/linuxserver/bookstack:latest appkey`. This is ignored if `existingSecret` is specified. | `base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4=` |
-| `config.dbHost` | Which backend db to use, if empty string, will attempt to use embedded mariaDB service | `bookstack-mariadb.bookstack.svc.cluster.local` |
+| `existingSecret` | Specify the name of an existing secret that contains the following keys: `DB_USERNAME`, `DB_PASSWORD`, and `APP_KEY`. If specified, the options `config.dbUser`, `config.dbPassword`, and `config.appKey` will be ignored. | `""` |
+| `config.appUrl` | Specify the url (with http/https) used to access Bookstack instance, example: `https://bookstack.domain.org` | `""` |
+| `config.appKey` | Required as of chart version `4.X.X` or higher. Specify the app key for the bookstack instance, required for newer versions of the `linuxserver/bookstack` image. Generate one with: `docker run -it --rm --entrypoint /bin/bash lscr.io/linuxserver/bookstack:latest appkey`. This is ignored if `existingSecret` is specified. *You should generate a new one for your instance* but an example is provided. | `base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4=` |
+| `config.dbHost` | Which backend db to use, if empty string, will attempt to use embedded chart mariaDB service. | `bookstack-mariadb.bookstack.svc.cluster.local`|
 | `config.dbPort` | Specify the port for the backend db. | `3306` |
 | `config.dbDatabase` | Which database to use when connected to the backend db. | `bookstack` | 
 | `config.dbUser` | Username for db connection, will be ignored if `existingSecret` is given | `bookstack` |
 | `config.dbPassword` | Password for db connection, will be ignored if `existingSecret` is given | `bookstack` |
-| `config.cacheDriver` | Which driver to use for cache. | `'file', 'database', 'memcached' or 'redis` |
-| `config.sessionDriver` | Which driver to use for sessions. | `'file', 'database', 'memcached' or 'redis` |
+| `config.cacheDriver` | Which driver to use for cache. Valid values: `'file', 'database', 'memcached' or 'redis` | `database` |
+| `config.sessionDriver` | Which driver to use for sessions. Valid values: `'file', 'database', 'memcached' or 'redis` | `database` |
 
 For more configuration option, refer to the documented env variables available for bookstack [here](https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete).
 
@@ -209,98 +210,14 @@ extraEnv:
   APP_VIEWS_BOOKS: list
 ```
 
-## File Exporter (Backup Your Pages)
+## Bookstack File Exporter (Backup Your Pages)
 This chart includes an optional [exporter](https://github.com/homeylab/bookstack-file-exporter) that will archive all your pages and their contents to a supported object storage provider(s) like minio, s3, etc.
 
-This exporter creates a `.tgz` archive in a folder-tree layout to maintain the hierarchy of shelves, books, and pages.
+This exporter creates a `.tgz` archive in a folder-tree layout to maintain the hierarchy of shelves, books, and pages. Including the option to export media such as images and attachments.
 
-Supported backup formats are shown [here](https://demo.bookstackapp.com/api/docs#pages-exportHtml) and below:
+The exporter is included as an optional dependency from a different helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter) and is enabled by setting `bookstack-file-exporter.enabled`.
 
-1. html
-2. pdf
-3. markdown
-4. plaintext
-
-A valid configuration should be provided and a valid object storage provider configuration(s) for remote archiving. Credentials can be specified directly in the config section or via `fileBackups.existingSecret`, see [here](https://github.com/homeylab/bookstack-file-exporter#authentication) for more information on getting/setting credentials for exporting. 
-
-Example configuration below using minio, place inside `fileBackups.config` string block.
-```yaml
-# The target bookstack instance
-# example value shown below
-# if http/https not specified, defaults to https
-# if you put http here, it will try verify=false, not to check certs
-host: "https://bookstack.example.com"
-# You could optionally set the bookstack token_id and token_secret here instead of env
-# if existingSecret is supplied, can omit/comment out the `credentials` section below
-credentials:
-    # set here or as env variable, BOOKSTACK_TOKEN_ID
-    # env var takes precedence over below
-    token_id: ""
-    # set here or as env variable, BOOKSTACK_TOKEN_SECRET
-    # env var takes precedence over below
-    token_secret: ""
-# additional headers to add, examples below
-# if not required, you can omit/comment out section
-additional_headers:
-  User-Agent: "helm-bookstack-exporter"
-# supported formats from bookstack below
-# specify one or more
-# comment/remove the ones you do not need
-formats:
-  - markdown
-  - html
-  - pdf
-  - plaintext
-# if existingSecret is supplied, can omit/comment out the `minio_config._key` sections below
-minio:
-  # a host/ip + port combination is also allowed
-  # example: "minio.yourdomain.com:8443"
-  host: "minio.yourdomain.com"
-  # set here or as env variable, MINIO_ACCESS_KEY
-  # env var takes precedence over below
-  access_key: ""
-  # set here or as env variable, MINIO_SECRET_KEY
-  # env var takes precedence over below
-  secret_key: ""
-  # required by minio
-  # if unsure, try "us-east-1"
-  region: "us-east-1"
-  # bucket to use
-  bucket: "bookstack-bkps"
-  # path to upload to
-  # optional, will use root bucket path if not set
-  # the exported archive will appear in: `<bucket_name>:<path>/bookstack_export_<timestamp>.tgz`
-  path: "bookstack/file_backups/"
-  # optional if specified exporter can delete older archives
-  # valid values are:
-  # set to 1+ if you want to retain a certain number of archives
-  # set to 0 or comment out section if you want no action done
-  keep_last: 5
-# optional how to handle additional content for pages
-assets:
-  # optional export of all the images used in a page(s).
-  # omit this or set to false if not needed
-  export_images: false
-  # optional modify markdown files to replace image url links
-  # with local exported image paths
-  modify_markdown: false
-  ## optional export of metadata about the page in a json file
-  # this metadata contains general information about the page
-  # like: last update, owner, revision count, etc.
-  # omit this or set to false if not needed
-  export_meta: false
-  # optional whether or not to check ssl certificates when requesting content from Bookstack host
-  verify_ssl: true
-# optional if specified exporter can delete older archives
-# valid values are:
-# set to -1 if you want to delete all archives after each run
-# - this is useful if you only want to upload to object storage
-# set to 1+ if you want to retain a certain number of archives
-# set to 0 or comment out section if you want no action done
-keep_last: -1
-```
-
-To use this feature, set `fileBackups.enabled` to `true`. For more information on how to set configuration options, see exporter [docs](https://github.com/homeylab/bookstack-file-exporter#configuration).
+See the source helm chart for more information on configuration.
 
 ## Backup And Restore Of MariaDB
 When upgrading to different versions, you can do a back up of your mariadb data and bookstack files to have available just in case. This can be used for other situations like PVC resizing as well. Below is just an example for a small set up but there any other ways to do this as well like PV backups via [Longhorn](https://longhorn.io/docs/latest/) as an example.

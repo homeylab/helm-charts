@@ -185,65 +185,6 @@ tolerations: []
 
 affinity: {}
 
-## file exporter for backups of pages
-## https://github.com/homeylab/bookstack-file-exporter
-## enable if you want to export all your pages to object storage like minio
-fileBackups:
-  enabled: false
-  image:
-    repository: docker.io
-    name: homeylab/bookstack-file-exporter
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.2.0"
-  ## default once per day
-  cronSchedule: "@daily"
-  ## existing secret for credentials loaded as env vars
-  ## can use this secret for Bookstack credentials
-  ## <BOOKSTACK_TOKEN_ID>, <BOOKSTACK_TOKEN_SECRET>
-  ## also use for object storage credentials
-  ## See ref for more details on how to get credentials: https://demo.bookstackapp.com/api/docs#authentication
-  existingSecret: ""
-  ## configuration options here: https://github.com/homeylab/bookstack-file-exporter#configuration
-  config: |
-    # The target bookstack instance
-    host: "http://bookstack.bookstack.svc.cluster.local"
-    credentials:
-      # set here or as env variable, BOOKSTACK_TOKEN_ID
-      token_id: ""
-      # set here or as env variable, BOOKSTACK_TOKEN_SECRET
-      token_secret: ""
-    additional_headers:
-      User-Agent: "bookstack-file-exporter"
-    formats:
-      - markdown
-      - html
-      - pdf
-      - plaintext
-    # if existingSecret is supplied, can omit or leave blank the `minio_config.*_key` sections below
-    minio:
-      host: "minio.yourdomain.com"
-      # set here or as env variable, MINIO_ACCESS_KEY
-      access_key: ""
-      # set here or as env variable, MINIO_SECRET_KEY
-      secret_key: ""
-      region: "us-east-1"
-      bucket: "bookstack-bkps"
-      path: "bookstack/file_backups/"
-      keep_last: 5
-    assets:
-      export_images: true
-      export_attachments: true
-      modify_markdown: false
-      export_meta: false
-      verify_ssl: true
-    keep_last: -1
-  
-  ## All keys will be upper cased and values will be quoted
-  extraEnv: {}
-    # LOG_LEVEL: debug
-
-
 ## mariadb backend
 ## https://github.com/bitnami/charts/tree/main/bitnami/mariadb
 ## some basic options below look at upstream chart for more
@@ -356,3 +297,91 @@ mariadb:
       ##      summary: MariaDB instance is down
       ##
       rules: []
+
+bookstack-file-exporter:
+  enabled: false
+  config:
+    # -- set the bookstack instance URL
+    host: "http://bookstack.bookstack.svc.cluster.local"
+    credentials:
+      # -- set token id, ignored if `BOOKSTACK_TOKEN_ID` is defined in `existingSecret` or env variable
+      tokenId: ""
+      # -- set token secret, ignored if `BOOKSTACK_TOKEN_SECRET` is defined in `existingSecret` or env variable
+      tokenSecret: ""
+    # -- set any additional headers for http client
+    additionalHeaders:
+      User-Agent: "bookstack-file-exporter"
+    # -- set one or more export formats
+    formats:
+      - markdown
+      # - html
+      # - pdf
+      # - plaintext
+    minio:
+      enabled: false
+      # set minio 
+      host: "minio.yourdomain.com"
+      # -- set minio access key, ignored if `MINIO_ACCESS_KEY` is defined in `existingSecret` or env variable
+      accessKey: ""
+      # -- set minio secret key, ignored if `MINIO_SECRET_KEY` is defined in `existingSecret` or env variable
+      secretKey: ""
+      # -- set region
+      region: "us-east-1"
+      # -- set bucket
+      bucket: "bookstack-bkps"
+      # -- set minio path to use
+      path: "bookstack/file_backups/"
+      # -- how many backups to keep
+      keepLast: 5
+    assets:
+      # -- set to export images
+      exportImages: true
+      # -- set to export attachments
+      exportAttachments: true
+      # -- set to modify asset links for markdown files
+      modifyMarkdown: false
+      # -- set to export page metadata
+      exportMeta: false
+      # -- set to enable SSL verification for all asset requests
+      verifySSL: true
+    # -- how many backups to keep on filesystem
+    keepLast: 1
+    # -- If `runInterval` is > `0`, the exporter will run as a deployment and wait specified seconds between runs.
+    # -- setting to `0` uses CronJob resource instead of a deployment
+    runInterval: 0
+
+  cron:
+    # -- if `runInterval == 0` CronJob settings will be applied
+    # -- set a valid cron schedule
+    schedule: "@daily"
+    # -- set a valid timezone if preferred
+    timeZone: ""
+    # -- set the concurrency policy
+    concurrencyPolicy: Forbid
+    # -- set restart policy
+    restartPolicy: OnFailure
+  
+  persistence:
+    # -- enable persistence using PVC for backup files if using `runMode: application`
+    enabled: false
+    # -- set additional annotations for the PVC
+    annotations: {}
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # -- set the storage class to use, example: `nfs-provisioner`
+    storageClass: ""
+    # -- set the size of the volume
+    size: 5Gi
+    # -- set an existingClaim for volume, if set the rest of persistence parameters are ignored
+    existingClaim: ""
+    accessModes:
+      - ReadWriteOnce
+    # probably will not have to change below
+    # -- set the mount path for the volume inside the container
+    mountPath: "/export/dump"
+    # Selector to match an existing Persistent Volume
+    selector: {}
