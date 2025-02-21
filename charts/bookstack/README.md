@@ -9,10 +9,10 @@ Table of Contents
   - [Install](#install)
   - [Upgrades](#upgrades)
   - [Configuration Options](#configuration-options)
-  - [File Exporter (Backup Your Pages)](#file-exporter-backup-your-pages)
+  - [Bookstack File Exporter (Backup Your Pages)](#bookstack-file-exporter-backup-your-pages)
   - [Backup And Restore Of MariaDB](#backup-and-restore-of-mariadb)
 
-This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it, enabled by default.
+This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it (default: enabled) and an exporter for file backups.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
@@ -209,98 +209,14 @@ extraEnv:
   APP_VIEWS_BOOKS: list
 ```
 
-## File Exporter (Backup Your Pages)
+## Bookstack File Exporter (Backup Your Pages)
 This chart includes an optional [exporter](https://github.com/homeylab/bookstack-file-exporter) that will archive all your pages and their contents to a supported object storage provider(s) like minio, s3, etc.
 
-This exporter creates a `.tgz` archive in a folder-tree layout to maintain the hierarchy of shelves, books, and pages.
+This exporter creates a `.tgz` archive in a folder-tree layout to maintain the hierarchy of shelves, books, and pages. Including the option to export media such as images and attachments.
 
-Supported backup formats are shown [here](https://demo.bookstackapp.com/api/docs#pages-exportHtml) and below:
+The exporter is included as an optional dependency from a different helm [chart](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter) and is enabled by setting `bookstack-file-exporter.enabled`.
 
-1. html
-2. pdf
-3. markdown
-4. plaintext
-
-A valid configuration should be provided and a valid object storage provider configuration(s) for remote archiving. Credentials can be specified directly in the config section or via `fileBackups.existingSecret`, see [here](https://github.com/homeylab/bookstack-file-exporter#authentication) for more information on getting/setting credentials for exporting. 
-
-Example configuration below using minio, place inside `fileBackups.config` string block.
-```yaml
-# The target bookstack instance
-# example value shown below
-# if http/https not specified, defaults to https
-# if you put http here, it will try verify=false, not to check certs
-host: "https://bookstack.example.com"
-# You could optionally set the bookstack token_id and token_secret here instead of env
-# if existingSecret is supplied, can omit/comment out the `credentials` section below
-credentials:
-    # set here or as env variable, BOOKSTACK_TOKEN_ID
-    # env var takes precedence over below
-    token_id: ""
-    # set here or as env variable, BOOKSTACK_TOKEN_SECRET
-    # env var takes precedence over below
-    token_secret: ""
-# additional headers to add, examples below
-# if not required, you can omit/comment out section
-additional_headers:
-  User-Agent: "helm-bookstack-exporter"
-# supported formats from bookstack below
-# specify one or more
-# comment/remove the ones you do not need
-formats:
-  - markdown
-  - html
-  - pdf
-  - plaintext
-# if existingSecret is supplied, can omit/comment out the `minio_config._key` sections below
-minio:
-  # a host/ip + port combination is also allowed
-  # example: "minio.yourdomain.com:8443"
-  host: "minio.yourdomain.com"
-  # set here or as env variable, MINIO_ACCESS_KEY
-  # env var takes precedence over below
-  access_key: ""
-  # set here or as env variable, MINIO_SECRET_KEY
-  # env var takes precedence over below
-  secret_key: ""
-  # required by minio
-  # if unsure, try "us-east-1"
-  region: "us-east-1"
-  # bucket to use
-  bucket: "bookstack-bkps"
-  # path to upload to
-  # optional, will use root bucket path if not set
-  # the exported archive will appear in: `<bucket_name>:<path>/bookstack_export_<timestamp>.tgz`
-  path: "bookstack/file_backups/"
-  # optional if specified exporter can delete older archives
-  # valid values are:
-  # set to 1+ if you want to retain a certain number of archives
-  # set to 0 or comment out section if you want no action done
-  keep_last: 5
-# optional how to handle additional content for pages
-assets:
-  # optional export of all the images used in a page(s).
-  # omit this or set to false if not needed
-  export_images: false
-  # optional modify markdown files to replace image url links
-  # with local exported image paths
-  modify_markdown: false
-  ## optional export of metadata about the page in a json file
-  # this metadata contains general information about the page
-  # like: last update, owner, revision count, etc.
-  # omit this or set to false if not needed
-  export_meta: false
-  # optional whether or not to check ssl certificates when requesting content from Bookstack host
-  verify_ssl: true
-# optional if specified exporter can delete older archives
-# valid values are:
-# set to -1 if you want to delete all archives after each run
-# - this is useful if you only want to upload to object storage
-# set to 1+ if you want to retain a certain number of archives
-# set to 0 or comment out section if you want no action done
-keep_last: -1
-```
-
-To use this feature, set `fileBackups.enabled` to `true`. For more information on how to set configuration options, see exporter [docs](https://github.com/homeylab/bookstack-file-exporter#configuration).
+See the source helm chart for more information on configuration.
 
 ## Backup And Restore Of MariaDB
 When upgrading to different versions, you can do a back up of your mariadb data and bookstack files to have available just in case. This can be used for other situations like PVC resizing as well. Below is just an example for a small set up but there any other ways to do this as well like PV backups via [Longhorn](https://longhorn.io/docs/latest/) as an example.
