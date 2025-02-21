@@ -12,7 +12,7 @@ Table of Contents
   - [Bookstack File Exporter (Backup Your Pages)](#bookstack-file-exporter-backup-your-pages)
   - [Backup And Restore Of MariaDB](#backup-and-restore-of-mariadb)
 
-This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it (default: enabled) and an exporter for file backups.
+This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it (default: enabled) and [bookstack-file-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter) for file backups.
 
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
@@ -154,6 +154,7 @@ _The matrix below displays certain versions of this helm chart that could result
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `4.0.X` | `4.1.0` | `fileBackups` has been moved to its own chart and can be enabled by setting `bookstack-file-exporter.enabled` to `true` |
 | `3.X.X` | `4.0.0` | Bookstack version is updated to `v24.10` from `v24.05.2`. The docker image from `linuxserver/bookstack` introduces the requirement for an appKey to be set in the `config` section. This will required to be set by the user, see [here](https://github.com/linuxserver/docker-bookstack?tab=readme-ov-file#parameters) for more information or Configuration section below. `DB_USER` and `DB_PASS` env variables have been changed to `DB_USERNAME` and `DB_PASSWORD` for those that use the `existingSecret` option. |
 | `2.8.X` | `3.0.0` | Optional embedded mariadb chart version is updated to `18.0.2` from `14.1.4`. Check upstream upgrade [notes](https://github.com/bitnami/charts/tree/main/bitnami/mariadb#upgrading) for any potential issues before upgrading. If additional options are used for the embedded Mariadb section in the `values.yaml` file, configuration may need to be adjusted based on chart changes. Mariadb version itself stays on a `11.3.X` release. |
 | `2.4.X` | `2.5.0` | File exporter has been upgraded to `1.0.0` which has some breaking configuration changes. |
