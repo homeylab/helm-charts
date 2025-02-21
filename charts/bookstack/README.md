@@ -1,6 +1,6 @@
 
 # Bookstack
-![Version: 4.1.0](https://img.shields.io/badge/Version-3.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: version-v24.12](https://img.shields.io/badge/AppVersion-version--v24.05.2-informational?style=flat-square)
+![Version: 4.1.0](https://img.shields.io/badge/Version-4.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: version-v24.12](https://img.shields.io/badge/AppVersion-version--v24.12-informational?style=flat-square)
 
 Table of Contents
 - [Bookstack](#bookstack)
