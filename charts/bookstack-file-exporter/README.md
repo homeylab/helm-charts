@@ -148,7 +148,7 @@ For more information on all `config.*` properties and environment variables, see
 | cron.restartPolicy | string | `"OnFailure"` | set restart policy |
 | persistence.enabled | bool | `false` | enable persistence using PVC for backup files |
 | persistence.existingClaim | string | `""` | set an existingClaim for volume, if set the rest of persistence parameters are ignored |
-| persistence.size | string | `"10Gi"` | set the size of the volume |
+| persistence.size | string | `"5Gi"` | set the size of the volume |
 | persistence.storageClass | string | `""` | set the storage class to use, example: `nfs-provisioner` |
 | persistence.mountPath | string | `"/export/dump"` | set the mount path for the volume inside the container |
 | persistence.annotations | object | `{}` | set additional annotations for the PVC |
