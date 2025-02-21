@@ -1,6 +1,12 @@
 # bookstack-file-exporter
 ![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.1](https://img.shields.io/badge/AppVersion-1.4.0-informational?style=flat-square)
 
+- [bookstack-file-exporter](#bookstack-file-exporter)
+  - [Add Chart Repo](#add-chart-repo)
+  - [Install](#install)
+  - [Upgrades](#upgrades)
+  - [Configuration Options](#configuration-options)
+
 This chart deploys [bookstack-file-exporter](https://github.com/homeylab/bookstack-file-exporter), an exporter that provides a way to export [Bookstack](https://github.com/BookStackApp/BookStack) pages and their content (_text, images, attachments, metadata, etc._) into a relational parent-child layout onto persistent volumes with an option to push to remote object storage locations. See source repository for more information on features and behavior of the exporter.
 
 This chart is also included as an optional CronJob or Deployment in the [bookstack](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack) helm chart.
