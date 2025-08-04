@@ -57,20 +57,24 @@ exportarr:
         app: exportarr
   apps:
     radarr:
+    - name: main
       enabled: true
       url: "https://radarr.somedomain/"
       apiKey: "someApiKey" # provide here or `existingSecret` section
     sonarr:
+    - name: main
       enabled: true
       url: "https://sonarr.somedomain/"
       apiKey: "someApiKey"
       extraEnv:
         ENABLE_ADDITIONAL_METRICS: true # example specifying extraEnv
     prowlarr:
+    - name: main
       enabled: true
       url: "https://prowlarr.somedomain/"
       apiKey: "someApiKey"
     bazarr:
+    - name: main
       enabled: true
       url: "https://bazarr.somedomain/"
       apiKey: "someApiKey"
@@ -106,6 +110,12 @@ helm upgrade exportarr -n exportarr oci://registry-1.docker.io/homeylabcharts/ex
 helm upgrade -f my-values.yaml exportarr -n exportarr oci://registry-1.docker.io/homeylabcharts/exportarr --version X.Y.Z
 ```
 
+#### Upgrade Matrix For Releases
+_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+
+| Start Chart Version | Target Chart Version | Upgrade Steps |
+| ------------------- | -------------------- | ------------- |
+| `1.X.X` | `2.0.0` | This version is a breaking change.<br><br>The data structure under `exportarr.apps.{{ radarr/sonarr/etc }}` have been changed to an array instead of object type. This flexibility allows you to list numerous instances of each *arr application (i.e. `radarr1`, `radarr2`, `sonarr1`, and so on), allowing you to consolidate multiple chart installations and configurations into one.<br><br>In addition, `exportarr.testCurlImage` has been renamed to `exportarr.testImage` |
 
 ## Configuration Options
 Below are some key options explained for this helm chart. For an exhaustive list, look at `values.yaml` file.
@@ -116,19 +126,21 @@ Below are some key options explained for this helm chart. For an exhaustive list
 | `exportarr.metrics.enabled`                    | Toggle metric scraping for Prometheus. If set to `false`, pods are still deployed but without `podAnnotations` or `serviceMonitors`.         | `true`  |
 | `exportarr.metrics.podAnnotations`             | Set/override `podAnnotations` for Prometheus.                                                                                                | `{}`    |
 | `exportarr.metrics.serviceMonitor`             | Set/override `serviceMonitor` configuration for Prometheus                                                                                   | `{}`    |
-| `exportarr.apps`                               | For each supported `Arr` app, provide configuration and properties. Each `key` in `apps` is iterated over, allowing you to define more apps. | `{}`    |
-| `exportarr.apps.{{ app_name }}.enabled`        | For each supported `Arr` app, choose which are enabled/disabled.                                                                             | `false` |
-| `exportarr.apps.{{ app_name }}.url`            | Required field from exportarr. Provide an `url` to reach the `{{ app_name }}` instance.                                                      | `""`    |
-| `exportarr.apps.{{ app_name }}.existingSecret` | Provide an existing secret and the `key` within the secret data to use for the `apiKey` of the `{{ app_name }}` instance.                    | `{}`    |
-| `exportarr.apps.{{ app_name }}.apiKey`         | If `existingSecret` is not supplied, provide `apiKey` for `{{ app_name }}` instance directly. If no auth required, leave blank.              | `""`    |
-| `exportarr.apps.{{ app_name }}.extraEnv`       | Set any additional env variables here for only the `{{ app_name }}` exportarr instance.                                                      | `{}`    | 
-| `exportarr.apps.{{ app_name }}.volumes`        | Set `volumes` to use for `{{ app_name }}` exportarr instance like `configMaps` or `secrets`.                                                 | `{}`    |
-| `exportarr.apps.{{ app_name }}.volumeMounts`   | Set `volumeMounts` for your `volumes for `{{ app_name }}` exportarr instance.                                                                | `{}`    |
+| `exportarr.apps`                               | For each supported `Arr` app, provide configuration and properties. Each `key` in `apps` is iterated over, allowing you to define more apps as needed even if the chart is not updated. | `{}`    |
+| `exportarr.apps.{{ app_name }}[0].enabled`        | For each `Arr` app instance, choose which are enabled/disabled.                                                                              | `false` |
+| `exportarr.apps.{{ app_name }}[0].name   `        | Select the name of the `Arr` app instance. This name will be used in container naming.                                                       | `false` |
+| `exportarr.apps.{{ app_name }}[0].url`            | Required field from exportarr. Provide an `url` to reach the `{{ app_name }}` instance.                                                      | `""`    |
+| `exportarr.apps.{{ app_name }}[0].existingSecret` | Provide an existing secret and the `key` within the secret data to use for the `apiKey` of the `{{ app_name }}` instance.                    | `{}`    |
+| `exportarr.apps.{{ app_name }}[0].apiKey`         | If `existingSecret` is not supplied, provide `apiKey` for `{{ app_name }}` instance directly. If no auth required, leave blank.              | `""`    |
+| `exportarr.apps.{{ app_name }}[0].extraEnv`       | Set any additional env variables here for only the `{{ app_name }}` exportarr instance.                                                      | `{}`    | 
+| `exportarr.apps.{{ app_name }}[0].volumes`        | Set `volumes` to use for `{{ app_name }}` exportarr instance like `configMaps` or `secrets`.                                                 | `{}`    |
+| `exportarr.apps.{{ app_name }}[0].volumeMounts`   | Set `volumeMounts` for your `volumes for `{{ app_name }}` exportarr instance.                                                                | `{}`    |
+| `exportarr.apps.{{ app_name }}[0].metrics     `   | Override `exportarr.metrics` properties for an `{{ app_name }}` exportarr instance.                                                          | `{}`    |
 | `exportarr.extraEnv`                           | Set any additional env variables here for all exportarr instances. All keys will be upper cased and values quoted.                           | `{}`    |
 | `exportarr.volumes`                            | Set `volumes` to use for all exportarr instance like `configMaps` or `secrets`.                                                              | `{}`    |
 | `exportarr.volumeMounts`                       | Set `volumeMounts` for your `volumes` for all exportarr instance.                                                                            | `{}`    |
 | `qbittorrent-exporter.enabled`                 | Setting this value to `true` deploys an additional exporter for `qbittorrent`. See [Additional Exporter](#qbittorrent) for more details.     | `false` |
-
+| `tdarr-exporter.enabled`                       | Setting this value to `true` deploys an additional exporter for `tdarr-exporter`. See [Additional Exporter](#Tdarr) for more details.        | `false` |
 
 ## Additional Exporters
 #### qbittorrent

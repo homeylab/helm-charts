@@ -222,7 +222,7 @@ exportarr:
 
   ### below section will be applied to all exportarr instances ###
   ## env applied to all exportarr exporters
-  ## example: `ENABLE_ADDITIONAL_METRICS` to get additional metrics that take longer to scrape
+  ## example: `ENABLE_ADDITIONAL_METRICS` to get additional metrics that may take longer to scrape
   extraEnv: {}
     # ENABLE_ADDITIONAL_METRICS: true
 
