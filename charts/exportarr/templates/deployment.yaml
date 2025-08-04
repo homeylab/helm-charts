@@ -2,10 +2,24 @@
 {{- range $app := $instance_val }}
 {{- if $app.enabled }}
 
-{{- $appMetrics := $.Values.exportarr.metrics -}}
+{{- $metricsEnabled := $.Values.exportarr.metrics.enabled -}}
+{{- $pdMetrics := $.Values.exportarr.metrics -}}
+{{- $smEnabled := $.Values.exportarr.metrics.serviceMonitor.enabled -}}
 
 {{- if $app.metrics }}
-{{- $appMetrics = $app.metrics -}}
+{{- if hasKey $app.metrics "enabled" }}
+{{- $metricsEnabled = $app.metrics.enabled -}}
+{{- end }}
+
+{{- if and ($metricsEnabled) ($app.metrics.serviceMonitor) }}
+{{- if hasKey $app.metrics.serviceMonitor "enabled" }}
+{{- $smEnabled = $app.metrics.serviceMonitor.enabled -}}
+{{- end }}
+{{- end }}
+
+{{- if $app.metrics.podAnnotations }}
+{{- $pdMetrics = $app.metrics.podAnnotations -}}
+{{- end }}
 {{- end }}
 
 {{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}
@@ -33,8 +47,8 @@ spec:
       {{- with $.Values.exportarr.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- if and ($appMetrics.enabled) (not $appMetrics.serviceMonitor.enabled) }}
-      {{- with $appMetrics.podAnnotations }}
+    {{- if and ($metricsEnabled) (not $smEnabled) }}
+      {{- with $pdMetrics.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- end }}
@@ -64,16 +78,18 @@ spec:
           env:
             - name: URL
               value: {{ $app.url | quote }}
-            {{- if $app.existingSecret.name }}
+          {{- if $app.existingSecret }}
+          {{- if $app.existingSecret.name }}
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ $app.existingSecret.name  }}
                   key: {{ $app.existingSecret.secretKey }}
-            {{- else if $app.apiKey }}
+          {{- else if $app.apiKey }}
             - name: API_KEY
               value: {{ $app.apiKey | quote }}
-            {{- end }}
+          {{- end }}
+          {{- end }}
           {{- range $key_extra, $val_extra := $app.extraEnv }}
             - name: {{ $key_extra | upper }}
               value: {{ $val_extra | quote }}

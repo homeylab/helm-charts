@@ -72,6 +72,7 @@ exportarr:
         #     severity: critical
 
   ### exportarr configuration per instance/app ###
+  # Use list format within keys for instances of each type, keep keys static for runtime args
   apps:
     radarr:
       # `exportarr-radarr-` prefix will be added to the pod name
@@ -95,8 +96,10 @@ exportarr:
       volumes: []
       ## Additional volumeMounts on the output Deployment definition.
       volumeMounts: []
-      # override default metrics settings for this instance - should specify all `key: value` pairs
+      # override default metrics settings for this instance
+      # set to empty "{}" if you want to use global .Values.metrics settings
       metrics: {}
+        # enabled: false
         # podAnnotations:
         #   prometheus.io/scrape: "true"
         #   prometheus.io/path: /metrics
