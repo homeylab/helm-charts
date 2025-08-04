@@ -1,0 +1,90 @@
+{{- if not .Values.config.runInterval }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "bookstack-file-exporter.fullname" . }}
+  labels:
+    {{- include "bookstack-file-exporter.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.cron.schedule }}"
+  {{- if .Values.timeZone }}
+  timeZone: "{{ .Values.cron.timeZone }}"
+  {{- end }}
+  concurrencyPolicy: "{{ .Values.cron.concurrencyPolicy }}"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            {{- include "bookstack-file-exporter.labels" . | nindent 12 }}
+            {{- with .Values.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        spec:
+          {{- with .Values.podSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: {{ .Chart.Name }}
+            {{- with .Values.securityContext }}
+            securityContext:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            env:
+          {{- range $key, $val := .Values.extraEnv }}
+            - name: {{ $key | upper }}
+              value: {{ $val | quote }}
+          {{- end }}
+            volumeMounts:
+            - mountPath: /export/config/config.yml
+              name: config
+              subPath: config.yml
+          {{- if .Values.persistence.enabled }}
+            - name: export-dump
+              mountPath: {{ .Values.persistence.mountPath }}
+          {{- end }}
+          {{- if .Values.existingSecret }}
+            envFrom:
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          {{- end }}
+            {{- with .Values.resources }}
+            resources:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+          volumes:
+          - name: config
+            configMap:
+              name: {{ include "bookstack-file-exporter.fullname" . }}
+          {{- if .Values.persistence.enabled }}
+            {{- if .Values.persistence.existingClaim }}
+          - name: export-dump
+            persistentVolumeClaim:
+              claimName: {{ .Values.persistence.existingClaim  }}
+            {{- else }}
+          - name: export-dump
+            persistentVolumeClaim:
+              claimName: {{ include "bookstack-file-exporter.fullname" . }}
+            {{- end }}
+          {{- end }}
+          restartPolicy: {{ .Values.cron.restartPolicy }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
