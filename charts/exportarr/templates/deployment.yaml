@@ -3,7 +3,7 @@
 {{- if $app.enabled }}
 
 {{- $metricsEnabled := $.Values.exportarr.metrics.enabled -}}
-{{- $pdMetrics := $.Values.exportarr.metrics -}}
+{{- $pdMetrics := $.Values.exportarr.metrics.podAnnotations -}}
 {{- $smEnabled := $.Values.exportarr.metrics.serviceMonitor.enabled -}}
 
 {{- if $app.metrics }}
@@ -48,7 +48,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- if and ($metricsEnabled) (not $smEnabled) }}
-      {{- with $pdMetrics.podAnnotations }}
+      {{- with $pdMetrics }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- end }}
@@ -78,8 +78,7 @@ spec:
           env:
             - name: URL
               value: {{ $app.url | quote }}
-          {{- if $app.existingSecret }}
-          {{- if $app.existingSecret.name }}
+          {{- if and ($app.existingSecret) ($app.existingSecret.name) }}
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
@@ -88,7 +87,6 @@ spec:
           {{- else if $app.apiKey }}
             - name: API_KEY
               value: {{ $app.apiKey | quote }}
-          {{- end }}
           {{- end }}
           {{- range $key_extra, $val_extra := $app.extraEnv }}
             - name: {{ $key_extra | upper }}

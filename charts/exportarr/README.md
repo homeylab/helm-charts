@@ -3,7 +3,7 @@ Table of Contents
 - [exportarr](#exportarr)
   - [Add Chart Repo](#add-chart-repo)
   - [Install](#install)
-  - [Upgrade](#upgrade)
+  - [Upgrades](#upgrades)
   - [Configuration Options](#configuration-options)
   - [Additional Exporters](#additional-exporters)
 
@@ -94,7 +94,7 @@ Install with custom:
 helm install -f custom-values.yaml exportarr homeylab/exportarr -n exportarr --create-namespace
 ```
 
-## Upgrade
+## Upgrades
 ```bash
 helm upgrade exportarr homeylab/exportarr -n exportarr
 

@@ -1,18 +1,20 @@
 {{- range $instance_key, $instance_val := .Values.exportarr.apps }}
 {{- range $app := $instance_val }}
+{{- if $app.enabled }}
 
 {{- $metricsEnabled := $.Values.exportarr.metrics.enabled -}}
 {{- $smConfig := $.Values.exportarr.metrics.serviceMonitor -}}
 {{- $smEnabled := $.Values.exportarr.metrics.serviceMonitor.enabled -}}
 
-{{- if $app.enabled }}
-
 {{- if $app.metrics }}
+{{- if hasKey $app.metrics "enabled" }}
+{{- $metricsEnabled = $app.metrics.enabled -}}
+{{- end }}
 
 {{- if and ($metricsEnabled) ($app.metrics.serviceMonitor) }}
-{{- $smConfig = $app.serviceMonitor -}}
 {{- if hasKey $app.metrics.serviceMonitor "enabled" }}
 {{- $smEnabled = $app.metrics.serviceMonitor.enabled -}}
+{{- $smConfig = $app.metrics.serviceMonitor -}}
 {{- end }}
 {{- end }}
 
