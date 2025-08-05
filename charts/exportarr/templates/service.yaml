@@ -1,6 +1,7 @@
-{{- range $key, $val := .Values.exportarr.apps }}
-{{- if $val.enabled }}
-{{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
+{{- range $instance_key, $instance_val := .Values.exportarr.apps }}
+{{- range $app := $instance_val }}
+{{- if $app.enabled }}
+{{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -19,5 +20,6 @@ spec:
     {{- include "exportarr.selectorLabels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $appName }}
 ---
+{{- end }}
 {{- end }}
 {{- end }}

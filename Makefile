@@ -56,6 +56,7 @@ local_template:
 	helm template $(app) ${CHART_DIR}/$(app) -f ${LOCAL_VARS_DIR}/$(app).yaml  --debug
 
 dryrun_install_local:
+	#helm install  $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace --dry-run
 	helm install -f ${LOCAL_VARS_DIR}/$(app).yaml $(app) ${CHART_DIR}/$(app) -n local-$(app) --create-namespace --dry-run
 
 install_local:

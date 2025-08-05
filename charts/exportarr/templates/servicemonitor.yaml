@@ -1,29 +1,50 @@
-{{- range $key, $val := .Values.exportarr.apps }}
-{{- if $val.enabled }}
-{{- $appName := printf "%s-%s" (include "exportarr.fullname" $) $key }}
+{{- range $instance_key, $instance_val := .Values.exportarr.apps }}
+{{- range $app := $instance_val }}
+{{- if $app.enabled }}
+
+{{- $metricsEnabled := $.Values.exportarr.metrics.enabled -}}
+{{- $smConfig := $.Values.exportarr.metrics.serviceMonitor -}}
+{{- $smEnabled := $.Values.exportarr.metrics.serviceMonitor.enabled -}}
+
+{{- if $app.metrics }}
+{{- if hasKey $app.metrics "enabled" }}
+{{- $metricsEnabled = $app.metrics.enabled -}}
+{{- end }}
+
+{{- if and ($metricsEnabled) ($app.metrics.serviceMonitor) }}
+{{- if hasKey $app.metrics.serviceMonitor "enabled" }}
+{{- $smEnabled = $app.metrics.serviceMonitor.enabled -}}
+{{- $smConfig = $app.metrics.serviceMonitor -}}
+{{- end }}
+{{- end }}
+
+{{- end }}
+
+{{- if and ($metricsEnabled) ($smEnabled) }}
+{{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
     {{- include "exportarr.labels" $ | nindent 4 }}
-    {{- range $key_label, $value_label := $.Values.exportarr.metrics.serviceMonitor.additionalLabels }}
+    {{- range $key_label, $value_label := $smConfig.additionalLabels }}
     {{ $key_label }}: {{ $value_label | quote }}
     {{- end }}
     app.kubernetes.io/component: {{ $appName }}
   name: {{ $appName }}
 spec:
   endpoints:
-  - interval: {{ $.Values.exportarr.metrics.serviceMonitor.interval }}
-    path: {{ $.Values.exportarr.metrics.serviceMonitor.path }}
+  - interval: {{ $smConfig.interval }}
+    path: {{ $smConfig.path }}
     port: {{ $.Values.exportarr.service.name }}
-    scrapeTimeout: {{ $.Values.exportarr.metrics.serviceMonitor.scrapeTimeout }}
-{{- if $.Values.exportarr.metrics.serviceMonitor.relabelings }}
+    scrapeTimeout: {{ $smConfig.scrapeTimeout }}
+{{- if $smConfig.relabelings }}
     relabelings:
-      {{- toYaml $.Values.exportarr.metrics.serviceMonitor.relabelings | nindent 6 }}
+      {{- toYaml $smConfig.relabelings | nindent 6 }}
 {{- end }}
-{{- if $.Values.exportarr.metrics.serviceMonitor.metricRelabelings }}
+{{- if $smConfig.metricRelabelings }}
     metricRelabelings:
-      {{- toYaml $.Values.exportarr.metrics.serviceMonitor.metricRelabelings | nindent 6 }}
+      {{- toYaml $smConfig.metricRelabelings | nindent 6 }}
 {{- end }}
   namespaceSelector:
     matchNames:
@@ -32,12 +53,14 @@ spec:
     matchLabels:
       {{- include "exportarr.selectorLabels" $ | nindent 6 }}
       app.kubernetes.io/component: {{ $appName }}
-{{- if $.Values.exportarr.metrics.serviceMonitor.targetLabels }}
+{{- if $smConfig.targetLabels }}
   targetLabels:
-{{- range $.Values.exportarr.metrics.serviceMonitor.targetLabels }}
+{{- range $smConfig.targetLabels }}
     - {{ . }}
 {{- end }}
 {{- end }}
 ---
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
