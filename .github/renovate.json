@@ -1,0 +1,22 @@
+{
+  "extends": ["config:recommended"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 0,
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions-dependencies",
+      "groupSlug": "github-actions"
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "chore(deps): minor & patch updates",
+      "groupSlug": "minor-patch"
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "minimumReleaseAge": "3 days"
+    }
+  ],
+  "timezone": "UTC"
+}
