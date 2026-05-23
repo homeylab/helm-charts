@@ -4,6 +4,7 @@
   "prConcurrentLimit": 5,
   "prHourlyLimit": 0,
   "minimumReleaseAge": "3 days",
+  "semanticCommits": "enabled",
   "timezone": "UTC",
   "bumpVersions": [
     {
