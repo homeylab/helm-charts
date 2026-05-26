@@ -14,6 +14,18 @@
       "bumpType": "patch"
     }
   ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track container image version stored in Chart.yaml appVersion",
+      "managerFilePatterns": ["charts/*/Chart.yaml"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?(?: extractVersion=(?<extractVersion>\\S+))?\\s+appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}"
+    }
+  ],
   "packageRules": [
     {
       "matchManagers": ["github-actions"],
