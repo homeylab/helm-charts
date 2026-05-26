@@ -14,6 +14,8 @@ Table of Contents
 
 This chart deploys [bookstack](https://github.com/BookStackApp/BookStack), an app for self and/or collaborated documentation similar to confluence. This chart includes an option to install mariadb alongside it (default: enabled) and [bookstack-file-exporter](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter) for file backups.
 
+This chart is useful for demoing and light usage. Chart revisions may jump versions, it is recommended to use a dedicated mariadb instance instead and upgrade bookstack incrementally if using this chart for teams or production.
+
 *Note: You should set some chart values by creating your own values.yaml and save that locally*
 
 ## Add Chart Repo

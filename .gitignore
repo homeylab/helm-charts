@@ -8,3 +8,5 @@ kube_config
 /charts/*/charts
 .idea
 .DS_Store
+
+.claude/
