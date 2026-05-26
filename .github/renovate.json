@@ -28,6 +28,11 @@
   ],
   "packageRules": [
     {
+      "description": "Image versions are tracked via Chart.yaml appVersion (custom manager); values.yaml image fields use a registry/name split that helm-values cannot resolve, so disable it to avoid junk deps",
+      "matchManagers": ["helm-values"],
+      "enabled": false
+    },
+    {
       "matchManagers": ["github-actions"],
       "groupName": "github-actions-dependencies",
       "groupSlug": "github-actions"
