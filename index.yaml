@@ -825,6 +825,19 @@ entries:
   nut-exporter:
   - apiVersion: v2
     appVersion: 3.1.1
+    created: "2026-05-27T02:33:18.101261587Z"
+    deprecated: true
+    description: 'DEPRECATED - superseded by the first-party upstream chart maintained
+      by the nut_exporter author. See https://github.com/DRuggeri/nut_exporter (charts/nut-exporter).
+      This chart is no longer maintained and will receive no further updates. '
+    digest: e18b6f97b9da5450fee829e1eb7b8aaf66e2db254b2dfb55c5929bd04db16902
+    name: nut-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-1.1.0/nut-exporter-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v2
+    appVersion: 3.1.1
     created: "2024-05-05T08:32:35.029895567Z"
     description: A Helm chart for Kubernetes
     digest: b8a94d38c01413ded1526f03330f2a7214e675882deb4b454497430abcdfefa3
@@ -1138,4 +1151,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2025-08-05T07:55:50.797897935Z"
+generated: "2026-05-27T02:33:18.929345594Z"
