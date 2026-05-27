@@ -1,5 +1,5 @@
 # bookstack-file-exporter
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.1](https://img.shields.io/badge/AppVersion-1.4.1-informational?style=flat-square)
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.0.0](https://img.shields.io/badge/AppVersion-2.0.0-informational?style=flat-square)
 
 - [bookstack-file-exporter](#bookstack-file-exporter)
   - [Add Chart Repo](#add-chart-repo)
@@ -56,8 +56,6 @@ config:
   credentials:
     tokenId: "sample_tokenid"
     tokenSecret: "sample_tokensecret"
-  additionalHeaders:
-    User-Agent: "bookstack-file-exporter"
   formats:
     - markdown
     # - html
@@ -75,9 +73,12 @@ config:
   assets:
     exportImages: true
     exportAttachments: true
-    modifyMarkdown: true
+    modifyLinks: true
     exportMeta: false
+  httpConfig:
     verifySSL: true
+    additionalHeaders:
+      User-Agent: "bookstack-file-exporter"
   keepLast: 3
   runInterval: 0
 
@@ -119,6 +120,10 @@ helm upgrade -f my-values.yaml bookstack-file-exporter -n bookstack oci://regist
 ### Upgrade Matrix For Releases
 _The matrix below displays certain versions of this helm chart that could result in breaking changes._
 
+| Start Chart Version | Target Chart Version | Upgrade Steps |
+| ------------------- | -------------------- | ------------- |
+| `0.0.X` | `0.1.0` | Exporter upgraded to upstream `v2.x` (`appVersion` `1.4.1` -> `2.0.0`), which crosses two breaking upstream releases.<br><br>**Chart `values.yaml` restructured** to match the upstream `v1.5.0+` config schema:<br>• `config.additionalHeaders` -> `config.httpConfig.additionalHeaders`<br>• `config.assets.verifySSL` -> `config.httpConfig.verifySSL`<br>• `config.assets.modifyMarkdown` -> `config.assets.modifyLinks`<br><br>If you set any of these in your values file, rename them. The chart keeps `verifySSL` defaulting to `true` (upstream's own default changed to `false`). New optional `config.httpConfig` knobs (`timeout`, `backoffFactor`, `retryCount`, `retryCodes`) are also exposed.<br><br>Behavior change: `modifyLinks: true` now also rewrites links in `html` exports, and rewrites the outer click-to-zoom anchor URL in markdown to a local path. See the [upstream v2.0.0 release notes](https://github.com/homeylab/bookstack-file-exporter/releases/tag/v2.0.0). |
+
 ## Configuration Options
 For a full list of options, see `values.yaml` file.
 
@@ -131,15 +136,19 @@ For more information on all `config.*` properties and environment variables, see
 | config.host | string | `"http://bookstack.bookstack.svc.cluster.local"` | set the bookstack instance URL |
 | config.credentials.tokenId | string | `""` | set token id, ignored if `BOOKSTACK_TOKEN_ID` is defined in `existingSecret` or env variable |
 | config.credentials.tokenSecret | string | `""` | set token secret, ignored if `BOOKSTACK_TOKEN_SECRET` is defined in `existingSecret` or env variable |
-| config.additionalHeaders | object | `{"User-Agent":"bookstack-file-exporter"}` | set any additional headers for http client |
 | config.formats | list | `["markdown"]` | set one or more export formats |
 | config.keepLast | int | `1` | how many backups to keep on filesystem |
 | config.runInterval | int | `0` | setting to `0` uses CronJob resource instead of a deployment |
 | config.assets.exportAttachments | bool | `true` | set to export attachments |
 | config.assets.exportImages | bool | `true` | set to export images |
 | config.assets.exportMeta | bool | `false` | set to export page metadata |
-| config.assets.modifyMarkdown | bool | `false` | set to modify asset links for markdown files |
-| config.assets.verifySSL | bool | `true` | set to enable SSL verification for all asset requests |
+| config.assets.modifyLinks | bool | `false` | set to rewrite image and attachment links to local relative paths in markdown and html exports |
+| config.httpConfig.verifySSL | bool | `true` | enable SSL verification for https requests |
+| config.httpConfig.timeout | int | `30` | http request timeout in seconds |
+| config.httpConfig.backoffFactor | float | `2.5` | backoff factor in seconds between retries |
+| config.httpConfig.retryCount | int | `5` | number of retries before giving up |
+| config.httpConfig.retryCodes | list | `[413, 429, 500, 502, 503, 504]` | http status codes that trigger a retry |
+| config.httpConfig.additionalHeaders | object | `{"User-Agent":"bookstack-file-exporter"}` | additional headers for the http client |
 | config.minio.enabled | bool | `false` |  enable minio backup uploads |
 | config.minio.accessKey | string | `""` | set minio access key, ignored if `MINIO_ACCESS_KEY` is defined in `existingSecret` or env variable |
 | config.minio.secretKey | string | `""` | set minio secret key, ignored if `MINIO_SECRET_KEY` is defined in `existingSecret` or env variable |
