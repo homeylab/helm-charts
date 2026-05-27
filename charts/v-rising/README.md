@@ -99,6 +99,7 @@ For a full list of values, see [values.yaml](values.yaml). Some of the most impo
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| config.branch | string | `""` | (optional) pin the V Rising server version, e.g. `legacy-1.1.x-pc`; leave empty to auto-update to the latest build on boot |
 | config.logDays | int | `30` | optional lifetime of logfiles |
 | config.serverName | string | `"v-rising"` | name of server |
 | config.tz | string | `"America/New_York"` | timezone for server |
