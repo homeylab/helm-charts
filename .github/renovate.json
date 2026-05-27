@@ -10,7 +10,7 @@
     {
       "name": "bump chart version on dependency update",
       "filePatterns": ["charts/**/Chart.yaml"],
-      "matchStrings": ["^version:\\s(?<version>\\S+)"],
+      "matchStrings": ["\\nversion:\\s(?<version>\\S+)"],
       "bumpType": "patch"
     }
   ],
