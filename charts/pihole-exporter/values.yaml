@@ -39,13 +39,15 @@ settings:
     port: 
     # -- Set the port for metrics scraping
     containerPort: 9617
-  # -- Set auth configuration for pihole
+  # -- Set auth configuration for pihole.
+  # As of pihole-exporter v1.x (Pi-hole v6 API) the exporter reads only `PIHOLE_PASSWORD`.
+  # It accepts either the Pi-hole app password or the legacy WEBPASSWORD API token.
   auth:
-    # -- Set the pihole password for auth
+    # -- Set the pihole app password (or legacy WEBPASSWORD API token) for auth. Maps to `PIHOLE_PASSWORD`.
     password: ""
-    # -- Set the pihole token for auth, if token is specified, password will be ignored
+    # -- DEPRECATED alias for `auth.password`, kept for backwards compatibility. If set, takes precedence over `auth.password`. Also maps to `PIHOLE_PASSWORD` (the separate `PIHOLE_API_TOKEN` env var was removed in upstream v1.x).
     token: ""
-    # -- use existing secret instead of `auth.password` or `auth.token`. Use variables `PIHOLE_PASSWORD` or `PIHOLE_API_TOKEN`
+    # -- use existing secret instead of `auth.password`/`auth.token`. The secret must provide the `PIHOLE_PASSWORD` key (`PIHOLE_API_TOKEN` is no longer read by v1.x).
     existingSecret: ""
 
 # -- Add extra environment variables
