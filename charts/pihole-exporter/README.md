@@ -1,6 +1,6 @@
 # pihole-exporter
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.4.0](https://img.shields.io/badge/AppVersion-v0.4.0-informational?style=flat-square)
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.2.0](https://img.shields.io/badge/AppVersion-v1.2.0-informational?style=flat-square)
 
 Table of Contents
 - [pihole-exporter](#pihole-exporter)
@@ -12,6 +12,13 @@ Table of Contents
   - [References](#references)
 
 A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exporter) for Pi-hole. Based on `ekofr/pihole-exporter` image.
+
+> [!IMPORTANT]
+> **Chart `0.1.0` upgrades the exporter to v1.x (Pi-hole v6 API).** This is a breaking change:
+> - Requires a **Pi-hole v6+** server.
+> - The exporter now reads only `PIHOLE_PASSWORD`; the separate `PIHOLE_API_TOKEN` env var was removed upstream. The chart maps both `settings.auth.password` and the deprecated `settings.auth.token` to `PIHOLE_PASSWORD` (it accepts a Pi-hole app password or the legacy WEBPASSWORD API token).
+> - If you use `settings.auth.existingSecret`, the secret must provide the `PIHOLE_PASSWORD` key.
+> - Still on Pi-hole v5? Pin the chart to `0.0.2` (`--version 0.0.2`).
 
 ## Add Chart Repo
 ```bash
@@ -91,9 +98,9 @@ For a full list of values, see [values.yaml](values.yaml). Some of the most impo
 | settings.config.hostname | string | `"pi-hole.localdomain"` | Set the pihole host or IP address |
 | settings.config.port | string | `nil` | Set the pihole port on the pihole host to use, default `80` set by container image |
 | settings.config.protocol | string | `""` | Set the pihole host protocol: `http` or `https`, default `http` set by container image |
-| settings.auth.existingSecret | string | `""` | use existing secret instead of `auth.password` or `auth.token`. Use variables `PIHOLE_PASSWORD` or `PIHOLE_API_TOKEN` |
-| settings.auth.password | string | `""` | Set the pihole password for auth |
-| settings.auth.token | string | `""` | Set the pihole token for auth, if token is specified, password will be ignored |
+| settings.auth.existingSecret | string | `""` | use existing secret instead of `auth.password`/`auth.token`. The secret must provide the `PIHOLE_PASSWORD` key (`PIHOLE_API_TOKEN` is no longer read by v1.x) |
+| settings.auth.password | string | `""` | Set the pihole app password (or legacy WEBPASSWORD API token). Maps to `PIHOLE_PASSWORD` |
+| settings.auth.token | string | `""` | DEPRECATED alias for `auth.password`; if set, takes precedence. Also maps to `PIHOLE_PASSWORD` |
 | service.name | string | `"metrics"` | set name for the service |
 | service.port | int | `9617` | set port for pihole-exporter scraping, should match the pihole-exporter container port in `settings.config.containerPort` |
 | service.protocol | string | `"TCP"` | set protocol for the service |
