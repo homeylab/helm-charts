@@ -96,6 +96,10 @@ helm upgrade -f my-values.yaml tdarr-exporter -n tdarr-exporter oci://registry-1
 ### Upgrade Matrix For Releases
 _The matrix below displays certain versions of this helm chart that could result in breaking changes._
 
+| Start Chart Version | Target Chart Version | Upgrade Steps |
+| ------------------- | -------------------- | ------------- |
+| `1.1.X` | `1.2.0` | Exporter upgraded to upstream `v2.x` (`appVersion` `1.4.3` -> `2.1.0`).<br><br>**No chart configuration changes** - `values.yaml` is unchanged, no action needed on your values file.<br><br>This is a breaking _upstream_ release: it requires Tdarr `v2.24.01`+ and renames/removes many Prometheus metrics and labels, so existing dashboards and alerts will break. Review the [upstream v2.0.0 release notes](https://github.com/homeylab/tdarr-exporter/releases/tag/v2.0.0) and reimport the [Grafana dashboard](https://grafana.com/grafana/dashboards/20388-tdarr/) before upgrading. |
+
 ## Configuration Options
 For a full list of options, see `values.yaml` file.
 
