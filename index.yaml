@@ -442,6 +442,16 @@ entries:
     version: 0.1.2
   bookstack-file-exporter:
   - apiVersion: v2
+    appVersion: 2.0.0
+    created: "2026-05-27T05:31:51.092572576Z"
+    description: A Helm chart for Kubernetes
+    digest: 07b8474765a022957372ea1c9c2eec135a99e4dd08e904381c50d5776999df73
+    name: bookstack-file-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-0.1.0/bookstack-file-exporter-0.1.0.tgz
+    version: 0.1.0
+  - apiVersion: v2
     appVersion: 1.4.1
     created: "2025-02-21T09:52:36.506335834Z"
     description: A Helm chart for Kubernetes
@@ -1182,4 +1192,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-05-27T05:02:12.771730598Z"
+generated: "2026-05-27T05:31:51.092704511Z"
