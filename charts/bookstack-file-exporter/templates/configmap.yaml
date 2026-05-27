@@ -10,12 +10,6 @@ data:
     credentials:
       token_id: "{{ .Values.config.credentials.tokenId }}"
       token_secret: "{{ .Values.config.credentials.tokenSecret }}"
-  {{- if .Values.config.additionalHeaders }}
-    additional_headers:
-    {{- with .Values.config.additionalHeaders }}
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-  {{- end }}
     formats:
     {{- with .Values.config.formats }}
       {{- toYaml . | nindent 6 }}
@@ -35,8 +29,20 @@ data:
     assets:
       export_images: {{ .Values.config.assets.exportImages }}
       export_attachments: {{ .Values.config.assets.exportAttachments }}
-      modify_markdown: {{ .Values.config.assets.modifyMarkdown }}
+      modify_links: {{ .Values.config.assets.modifyLinks }}
       export_meta: {{ .Values.config.assets.exportMeta }}
-      verify_ssl: {{ .Values.config.assets.verifySSL }}
+    http_config:
+      verify_ssl: {{ .Values.config.httpConfig.verifySSL }}
+      timeout: {{ .Values.config.httpConfig.timeout }}
+      backoff_factor: {{ .Values.config.httpConfig.backoffFactor }}
+      retry_count: {{ .Values.config.httpConfig.retryCount }}
+    {{- with .Values.config.httpConfig.retryCodes }}
+      retry_codes:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.config.httpConfig.additionalHeaders }}
+      additional_headers:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     keep_last: {{ .Values.config.keepLast }}
     run_interval: {{ .Values.config.runInterval}}
