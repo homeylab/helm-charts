@@ -6,14 +6,6 @@
   "minimumReleaseAge": "3 days",
   "semanticCommits": "enabled",
   "timezone": "UTC",
-  "bumpVersions": [
-    {
-      "name": "bump chart version on dependency update",
-      "filePatterns": ["charts/**/Chart.yaml"],
-      "matchStrings": ["\\nversion:\\s(?<version>\\S+)"],
-      "bumpType": "patch"
-    }
-  ],
   "customManagers": [
     {
       "customType": "regex",
@@ -41,6 +33,18 @@
       "matchManagers": ["helmv3"],
       "groupName": "{{packageFileDir}} chart deps",
       "groupSlug": "{{packageFileDir}}"
+    },
+    {
+      "description": "Bump the chart's own version when its appVersion image is updated. Scoped via {{packageFileDir}} to the updated chart's dir so unrelated charts are not bumped. Patch upstream -> chart patch, minor/major upstream -> chart minor.",
+      "matchFileNames": ["charts/**"],
+      "bumpVersions": [
+        {
+          "name": "bump chart version on dependency update",
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["\\nversion:\\s(?<version>\\S+)"],
+          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+        }
+      ]
     }
   ]
 }
