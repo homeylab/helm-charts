@@ -1,4 +1,34 @@
 # nut-exporter
+
+> [!WARNING]
+> **DEPRECATED.** This chart is superseded by the first-party chart maintained by the
+> `nut_exporter` author and will receive no further updates. Please migrate to the
+> upstream chart: **https://github.com/DRuggeri/nut_exporter** (`charts/nut-exporter`).
+>
+> The upstream chart is a superset of this one — it tracks newer `appVersion`s and adds
+> Ingress and a Grafana dashboard ConfigMap. Existing installs keep working, but no new
+> versions will be released here.
+
+## Migration to the upstream chart
+
+Switching repos requires rewriting your values file — the value keys differ. Mapping:
+
+| This chart (homeylab) | Upstream (DRuggeri) | Notes |
+| --------------------- | ------------------- | ----- |
+| `image.repository: docker.io` + `image.name: druggeri/nut_exporter` | `image.repository: ghcr.io/druggeri/nut_exporter` | Same binary, different registry. |
+| `settings.config.*` | `settings.config.*` | Carried over; confirm key names against upstream `values.yaml`. |
+| `settings.auth.nut_exporter_username` / `_password` | `settings.auth.*` / `existingSecret` | Confirm against upstream `values.yaml`. |
+| `existingSecret` | `existingSecret` | Same intent. |
+| `webconfig_file` | `webconfig_file` | Same intent. |
+| `metrics.serviceMonitor.*` | `metrics.serviceMonitor.*` | Same intent. |
+| (not available) | `ingress.*` | New upstream feature. |
+| (not available) | dashboard ConfigMap | New upstream feature. |
+
+> [!NOTE]
+> This chart's post-install `helm test` connection check has no upstream equivalent.
+> Always diff your values against the upstream `values.yaml` before migrating — verify
+> every key rather than assuming a 1:1 match.
+
 Table of Contents
 - [nut-exporter](#nut-exporter)
   - [Add Chart Repo](#add-chart-repo)

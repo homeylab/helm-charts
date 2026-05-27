@@ -1,6 +1,14 @@
 apiVersion: v2
 name: nut-exporter
-description: A Helm chart for Kubernetes
+description: |
+  DEPRECATED - superseded by the first-party upstream chart maintained by the
+  nut_exporter author. See https://github.com/DRuggeri/nut_exporter (charts/nut-exporter).
+  This chart is no longer maintained and will receive no further updates.
+
+# This chart is deprecated. The nut_exporter author now publishes an official
+# chart that is a superset of this one (adds ingress + Grafana dashboard configmap,
+# tracks newer appVersions). No further releases will be cut here.
+deprecated: true
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -15,11 +23,12 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.0.0
+version: 1.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-# renovate: datasource=docker depName=druggeri/nut_exporter
+# Renovate annotation intentionally removed: this chart is deprecated and pinned.
+# Do not re-add it, or Renovate will resume opening appVersion/version bump PRs.
 appVersion: "3.1.1"
