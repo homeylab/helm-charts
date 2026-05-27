@@ -1161,6 +1161,17 @@ entries:
     version: 1.0.0
   v-rising:
   - apiVersion: v2
+    appVersion: "3.0"
+    created: "2026-05-27T05:02:12.771578002Z"
+    description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
+      server
+    digest: 0444f3be74d95b4c42cd04efa40a0200335d925365cec860bc72ee6e823d8fa0
+    name: v-rising
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.1.0/v-rising-0.1.0.tgz
+    version: 0.1.0
+  - apiVersion: v2
     appVersion: "2.1"
     created: "2024-06-07T02:13:39.487686521Z"
     description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
@@ -1171,4 +1182,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-05-27T04:15:26.156706973Z"
+generated: "2026-05-27T05:02:12.771730598Z"
