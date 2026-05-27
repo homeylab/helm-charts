@@ -92,6 +92,8 @@ config:
   worldName: "v-rising-world"
   # -- optional lifetime of logfiles
   logDays: 30
+  # -- (optional) pin the V Rising server version, e.g. `legacy-1.1.x-pc`; leave empty to auto-update to the latest build on boot
+  branch: ""
 
 # -- additional environment variables as key value pairs
 extraEnv: {}
