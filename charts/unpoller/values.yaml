@@ -86,11 +86,11 @@ settings:
       save_dpi: false
       verify_ssl: false
       # role: ""
+      # api_key: ""  # required for Integration/v1 metrics on Network 9.3.43+ (unpoller v3+)
     ## if existing secrets is supplied, below section is ignored
     ## to use in an env variable, use `UP_UNIFI_CONTROLLER_0_{USER/PASS}` in secret key
     auth:
-      ## For a Non UnifiOS Controller (like: https://hub.docker.com/r/linuxserver/unifi-controller):
-      ## Email field will be the `username`
+      ## For the self-hosted UniFi Network Application, email field will be the `username`
       ## change the below to your created user/pass
       user: ""
       pass: ""
@@ -121,7 +121,14 @@ settings:
     # UP_PROMETHEUS_NAMESPACE: "unpoller"
     namespace: "unpoller"
     http_listen: "0.0.0.0:9130"
-    
+
+    ## Background poll interval for Prometheus metric collection (added in unpoller v3.2.0).
+    ## unpoller pre-fetches UniFi data on this interval and serves /metrics from cache.
+    ## Default "60s". Minimum effective value is 15s (values below are clamped by unpoller).
+    ## The background cache cannot be disabled via this setting.
+    ## Align your Prometheus scrape interval with this value to avoid stale data gaps.
+    interval: "60s"
+
     ## additional settings
     # report_errors: false
     # buffer: "50"
@@ -149,6 +156,9 @@ extraEnv: {}
   # UP_UNIFI_CONTROLLER_1_SAVE_SITES: "true"
   ## change the below to your unifi instance
   # UP_UNIFI_CONTROLLER_1_URL: https://unifi.localdomain:8443
+  ## api_key for Integration/v1 metrics (Network 9.3.43+, unpoller v3+)
+  ## Prefer storing this in `existingSecret` as UP_UNIFI_CONTROLLER_0_API_KEY rather than plaintext here
+  # UP_UNIFI_CONTROLLER_0_API_KEY: ""
 
 ## Liveness probe
 ## port: "prom" = .Values.service.port in the deployment file
