@@ -21,7 +21,7 @@ version: 4.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-# renovate: datasource=docker depName=linuxserver/bookstack versioning=loose extractVersion=^version-(?<version>.+)$
+# renovate: datasource=docker depName=linuxserver/bookstack versioning=regex:^version-v(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$
 appVersion: "version-v24.12"
 
 dependencies:
