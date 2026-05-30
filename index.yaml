@@ -484,6 +484,25 @@ entries:
   exportarr:
   - apiVersion: v2
     appVersion: v2.2.0
+    created: "2026-05-30T19:12:09.602117051Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 0.1.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.2.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 7c813bfda465ec255327c4a8caa27315b0defac617375d9912376578c0755d7a
+    name: exportarr
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-2.1.0/exportarr-2.1.0.tgz
+    version: 2.1.0
+  - apiVersion: v2
+    appVersion: v2.2.0
     created: "2025-08-05T07:55:50.79761698Z"
     dependencies:
     - condition: qbittorrent-exporter.enabled
@@ -1202,4 +1221,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-05-27T06:14:48.25158717Z"
+generated: "2026-05-30T19:12:09.602298592Z"
