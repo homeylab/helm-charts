@@ -1100,6 +1100,17 @@ entries:
     version: 0.0.1
   unpoller:
   - apiVersion: v2
+    appVersion: v3.2.0
+    created: "2026-05-31T02:12:59.541743062Z"
+    description: unpoller for unifi controller metrics
+    digest: c71c5e5ba1630afdb872081bc7395ccf751f712eb3125420c78e34b070ce0a44
+    icon: https://unpoller.com/img/logo.png
+    name: unpoller
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-3.0.0/unpoller-3.0.0.tgz
+    version: 3.0.0
+  - apiVersion: v2
     appVersion: v2.11.2
     created: "2024-05-05T09:29:43.410997652Z"
     description: unpoller for unifi controller metrics
@@ -1221,4 +1232,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-05-30T19:12:09.602298592Z"
+generated: "2026-05-31T02:12:59.542007195Z"
