@@ -47,6 +47,8 @@ Click below to expand for an example of a valid `custom-values.yaml` file.
 
 ```yaml
 # custom-values.yaml
+# UniFi Network Application (self-hosted Linux/Docker): use port 8443
+# UniFi OS devices (UDM/UCG/UXG): use port 443, no path — e.g. "https://192.168.1.1"
 settings:
   unifi:
     config:
@@ -104,12 +106,13 @@ _The matrix below displays certain versions of this helm chart that could result
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
 | `1.X.X` | `2.0.0` | Configuration is no longer specified in `config` section as a single key/value object. There is now dedicated sections in the `config` section for each part of unpoller. This allows for easier usability. |
+| `2.X.X` | `3.0.0` | Upgrades unpoller `v2.11.2` -> `v3.2.0`. This is a breaking upstream release — review the [v3.0.0 release notes](https://github.com/unpoller/unpoller/releases/tag/v3.0.0) and [v3.2.0 release notes](https://github.com/unpoller/unpoller/releases/tag/v3.2.0) before upgrading.<br><br>**New chart value `settings.prometheus.interval`** (default `60s`): unpoller v3.2.0 introduced background metric caching. Align your Prometheus `scrapeInterval` with this value. |
 
 
 ## Prerequisites
 Ensure you have created a user in your unifi site as described here: https://unpoller.com/docs/install/controllerlogin
 
-For a Non UnifiOS Controller (like: [unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller)), email used for login will be the `user` used for authentication.
+For the self-hosted UniFi Network Application, email used for login will be the `user` used for authentication.
 
 ## Configuration Options
 ### Descriptions
@@ -122,13 +125,15 @@ Comments in the provided `values.yaml` provide helpful descriptions. Some of the
 | `metrics` | `*` | This section allows users to set configuration for Prometheus `podAnnotations`, `serviceMonitors`, etc. See `values.yaml` section for more details on what can be customized. |
 | `existingSecret` |  | Replaces auth sections of `settings.*.auth` with user supplied secret. Secrets should have key/value for env vars. |
 | `setttings.unifi.config` | `*` | Unifi connection configuration section.<br><br>If scraping multiple controllers, this section uses the `_0_` number, [reference]( https://unpoller.com/docs/install/configuration) - multiple controllers section. Use `extraEnv` section to specify more controllers. |
-|  |  `url` | `https://unifi-controller.localdomain:8443` |
+|  |  `url` | `https://unifi-network-application.localdomain:8443` for self-hosted; UniFi OS devices (UDM/UCG/UXG) use port `443` with no path suffix |
+| `setttings.unifi.config` | `api_key` | Optional. Enables additional metrics in unpoller v3+. Set via `existingSecret` (preferred) or `extraEnv` using key `UP_UNIFI_CONTROLLER_0_API_KEY`. |
 | `settings.unifi.auth` | `*` | This section will be ignored if `existingSecret` is supplied. Provide username/password here. |
-|  | `user` | For a Non UnifiOS Controller (like: [unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller)), email used for login, will be the `user` |
+|  | `user` | For the self-hosted UniFi Network Application, email used for login will be the `user` |
 |  | `pass` | Provide the password for the metrics user. |
 | `setttings.influxdb.config` | `*` | Send to influxdb, use `setttings.influxdb.enabled` to use this feature. Not enabled by default. |
 | `setttings.prometheus` | `*` | Prometheus settings, uncomment `disable` and set to `true` if you want Prometheus disabled. |
 | `setttings.prometheus` | `namespace` | By default unpoller is going to use the value of `UP_PROMETHEUS_NAMESPACE` value (this setting) and not your actual deployed namespace to prefix the metrics with a string. Since the grafana [charts](https://github.com/unpoller/dashboards) all have `unpoller_` prefix set in the prom queries, you should put this as `unpoller`. _Note: You can install this helm chart in any namespace you'd like, just set this variable to `unpoller` to work with the existing dashboards without changes._ |
+| `setttings.prometheus` | `interval` | Background poll interval for UniFi data collection (unpoller v3.2.0+). Default `60s`. Minimum effective value is `15s`. The background cache cannot be disabled. Align your Prometheus scrape interval with this value. |
 | `settings.unpoller` | `*` | Additional settings for unpoller. |
 
 For additional configuration use the `extraEnv` section.
