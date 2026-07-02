@@ -15,7 +15,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 4.1.0
+version: 4.2.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -26,7 +26,7 @@ appVersion: "version-v24.12"
 
 dependencies:
 - name: mariadb
-  version: "18.0.2"
+  version: "26.1.7"
   condition: mariadb.enabled
   repository: "oci://registry-1.docker.io/bitnamicharts"
 - name: bookstack-file-exporter
