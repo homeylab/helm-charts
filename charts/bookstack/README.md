@@ -211,6 +211,19 @@ kubectl exec -it -n bookstack {{ pod_name }} -- bash -c "rm /config/nginx/site-c
 kubectl cp default.conf bookstack/{{ pod_name }}:/config/nginx/site-confs/default.conf
 ```
 
+### Migrating data from 4.x
+
+BookStack has no built-in full export/import — a migration is done via a database dump, a copy of the uploaded files, and carrying over your `APP_KEY` (see the [BookStack backup/restore docs](https://www.bookstackapp.com/docs/admin/backup-restore/)). The 4.x → 5.0.0 change swaps the embedded database chart but does **not** migrate data for you; the steps below move it manually. A logical SQL dump is portable across both the Bitnami→CloudPirates swap and the MariaDB version change.
+
+1. **Dump the old database** — the `bookstack` database only, not the system tables: `mariadb-dump -u root -p bookstack > bookstack.sql`, then `kubectl cp` it out of the old mariadb pod. See _Backup And Restore Of MariaDB_ below for the exact pod commands.
+2. **Note your old `APP_KEY`** — in 4.x this was `config.appKey` (the chart's old fixed default if you never changed it). It encrypts MFA secrets and other data; losing it makes that data unrecoverable.
+3. **Copy the uploaded files** out of the old bookstack `/config` volume — user-uploaded images, page attachments, and any custom themes (BookStack's instance-specific data; see the backup/restore docs for the exact directories).
+4. **Install 5.0.0 fresh** with the embedded CloudPirates MariaDB, and set `config.appKey` to the value from step 2 — do this **before first boot**, or previously-encrypted data (MFA, etc.) becomes unrecoverable.
+5. **Restore** — import `bookstack.sql` into the new `bookstack` database, and copy the files from step 3 back into the new `/config` volume.
+6. On first boot, BookStack runs its database migrations automatically, upgrading the schema to the new version.
+
+> Do not point the new CloudPirates database at the old Bitnami PVC — credentials are baked in at first init and the physical data dir isn't portable across the swap. Use the logical dump/restore above.
+
 ## Requirements
 
 | Repository | Name | Version |
