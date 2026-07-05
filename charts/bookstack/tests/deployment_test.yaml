@@ -1,0 +1,33 @@
+suite: deployment wiring
+templates:
+  - templates/deployment.yaml
+release:
+  name: bookstack
+tests:
+  - it: uses the lscr.io image ref
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: "^lscr\\.io/linuxserver/bookstack:"
+  - it: envFrom targets the chart-managed Secret by default
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: bookstack
+  - it: envFrom targets existingSecret when set
+    set:
+      existingSecret: my-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: my-secret
+  - it: renders linuxserver PUID/PGID/UMASK/TZ env
+    asserts:
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: PUID, value: "1000" } }
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: TZ, value: "Etc/UTC" } }
+  - it: DB_DATABASE derives from mariadb.auth.database when embedded
+    set:
+      mariadb.enabled: true
+      mariadb.auth.database: bs_db
+    asserts:
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: DB_DATABASE, value: "bs_db" } }
