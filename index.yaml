@@ -1,6 +1,44 @@
 apiVersion: v1
 entries:
   bookstack:
+  - annotations:
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |-
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-07-05T07:07:37.91537067Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 0.0.2
+    description: bookstack documentation platform
+    digest: 900d92753cfdfbb4e70b405b445f9c0910b0ac81b95d6c112ddf1a63ea1afe4c
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.0.0/bookstack-5.0.0.tgz
+    version: 5.0.0
   - apiVersion: v2
     appVersion: version-v24.12
     created: "2025-02-21T10:12:52.006345112Z"
@@ -1232,4 +1270,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-05-31T02:12:59.542007195Z"
+generated: "2026-07-05T07:07:37.917376672Z"
