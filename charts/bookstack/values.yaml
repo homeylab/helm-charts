@@ -2,26 +2,39 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+## @section Image
 image:
-  repository: docker.io
-  name: linuxserver/bookstack
+  # -- image registry
+  registry: lscr.io
+  # -- image repository
+  repository: linuxserver/bookstack
+  # -- image pull policy
   pullPolicy: IfNotPresent
   # You can optionally specify your preferred image tag here.
   # For OS updates but consistent Bookstack version, use `version-X.X.X` tag
   # for other variants refer: https://www.linuxserver.io/blog/docker-tags-so-many-tags-so-little-time#manifests
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- overrides the image tag whose default is the chart appVersion
   tag: ""
 
-## set image for post install helm tests
-testCurlImage:
-  repository: docker.io
-  name: busybox
-  tag: "1.36.1"
-  pullPolicy: IfNotPresent
-  # the url for post install check test
+## @section Testing
+## post-install `helm test` connection check
+tests:
+  image:
+    # -- registry for the `helm test` connection-check image
+    registry: docker.io
+    # -- repository for the `helm test` connection-check image
+    repository: busybox
+    # -- tag for the `helm test` connection-check image
+    tag: "1.36.1"
+    # -- pull policy for the `helm test` connection-check image
+    pullPolicy: IfNotPresent
+  ## path the test requests and expects a 200 from
+  # -- path the `helm test` request calls and expects a 200 from
   path: /status
 
+## @section Resources & Deployment behavior
 updateStrategy:
+  # -- deployment update strategy, e.g. `Recreate` or `RollingUpdate`
   type: Recreate
 
 imagePullSecrets: []
@@ -39,17 +52,30 @@ serviceAccount:
 
 podAnnotations: {}
 
+## Pod-level security context.
+## NOTE: the default linuxserver.io image boots as root (s6-overlay init chowns
+## /config and drops to PUID:PGID), so runAsNonRoot / readOnlyRootFilesystem /
+## dropping capabilities will BREAK it. PUID/PGID (see linuxserver.*) is the
+## unprivileged UID the app actually runs as. A safe baseline that works with
+## linuxserver:
+##   seccompProfile:
+##     type: RuntimeDefault
 podSecurityContext: {}
-  # fsGroup: 2000
 
+## Container-level security context.
+## Real hardening (runAsNonRoot, runAsUser, readOnlyRootFilesystem, drop-all
+## capabilities) is only viable on a rootless image with linuxserver.enabled=false
+## — do NOT enable these while using the default linuxserver image. Example for a
+## rootless image:
+##   runAsNonRoot: true
+##   runAsUser: 1000
+##   readOnlyRootFilesystem: true
+##   allowPrivilegeEscalation: false
+##   capabilities:
+##     drop: [ALL]
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
+## @section Credentials & Secret
 ## existing secret for credentials
 ## if supplied, dbUser and dbPass will be ignored in config section
 ## You can also optionally set more credentials/secret env vars in this secret like APP_KEY
@@ -57,33 +83,60 @@ securityContext: {}
 ## - DB_USERNAME (replaces dbUser below if specified)
 ## - DB_PASSWORD (replaces dbPass below if specified)
 ## - APP_KEY (replaces appKey below if specified)
+# -- name of an existing Secret with `DB_USERNAME`/`DB_PASSWORD`/`APP_KEY` keys; if set, `config.dbUser`/`config.dbPass`/`config.appKey` are ignored
 existingSecret: ""
 
+## @section LinuxServer.io Runtime
+## linuxserver.io image runtime settings (PUID/PGID/UMASK/TZ)
+## https://docs.linuxserver.io/images/docker-bookstack/
+linuxserver:
+  # -- Render linuxserver.io/s6 runtime env (PUID/PGID/UMASK/TZ). Set false if you swap to a non-linuxserver BookStack image.
+  enabled: true
+  # -- user ID the container process runs as
+  PUID: 1000
+  # -- group ID the container process runs as
+  PGID: 1000
+  # -- file creation mask applied inside the container
+  UMASK: "022"
+  # -- timezone for the container
+  TZ: "Etc/UTC"
+
+## @section Application config
 ## Default values below will work with included mariadb chart in bookstack namespace
 config:
   ## (specify http/https) url used to access bookstack
   ## If using ingress, set it to same url
   ## example: "https://bookstack.yourdomain.org"
+  # -- public url (with http/https) used to access bookstack; should match your ingress/httproute host
   appUrl: ""
-  ## Used for session encryption key. Users should generate a new one with: `docker run -it --rm --entrypoint /bin/bash lscr.io/linuxserver/bookstack:latest appkey`
-  ## - below is one generated for test purposes only
-  ## - if existingSecret is specified, below will be ignored
-  appKey: "base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4="
-  ## dbHost should be specified and consistent!
-  ## If not included though, it will be dynamically generated and attempt to use included/embedded Bitnami mariadb instance
-  ## This to help with chart-testing dynamic namespaces
-  ## dbHost if not specified, value = "{{ bookstack.fullname/specified chart install name }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
-  ## Example value if installed in bookstack namespace: "bookstack-mariadb.bookstack.svc.cluster.local"
+  ## Session encryption key. Leave empty to auto-generate (stored in the chart Secret and
+  ## preserved across upgrades). To pin one: `docker run -it --rm --entrypoint /bin/bash \
+  ##   lscr.io/linuxserver/bookstack:latest appkey`
+  ## Ignored if existingSecret is specified.
+  # -- app encryption key; leave empty to auto-generate and persist in the chart Secret, or pin an existing key (required when upgrading with existing data, see "Migrating to 5.0.0")
+  appKey: ""
+  ## dbHost should be specified and consistent.
+  ## If left empty, it is derived as "{{ .Release.Name }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
+  ## to target the embedded CloudPirates mariadb. This matches the subchart Service for any release name
+  ## unless the release name contains "mariadb" or mariadb.fullnameOverride/nameOverride is set — set dbHost
+  ## explicitly in those cases. Example: "bookstack-mariadb.bookstack.svc.cluster.local"
+  # -- backend db host; if empty, derived to target the embedded CloudPirates mariadb (see comment above for caveats)
   dbHost: ""
+  # -- backend db port
   dbPort: 3306
+  # -- database name to connect to
   dbDatabase: bookstack
   ## Credentials below
   ## if existingSecret is specified, these will be ignored
+  # -- db username; ignored if `existingSecret` is set, or if `mariadb.enabled` is true (embedded mariadb is the source of truth then)
   dbUser: bookstack
+  # -- db password; ignored if `existingSecret` is set, or if `mariadb.enabled` is true (embedded mariadb is the source of truth then)
   dbPass: bookstack
   ## Cache & Session driver to use
   ## Can be 'file', 'database', 'memcached' or 'redis'
+  # -- cache driver: `file`, `database`, `memcached` or `redis`
   cacheDriver: database
+  # -- session driver: `file`, `database`, `memcached` or `redis`
   sessionDriver: database
 
 
@@ -97,37 +150,76 @@ extraEnv: {}
   # APP_DEFAULT_DARK_MODE: true
   # APP_VIEWS_BOOKS: list
 
+## @section Routing
 service:
+  # -- Kubernetes Service type
   type: ClusterIP
+  # -- Service port
   port: 80
-  name: http
+  # -- name of the Service port (NOT the Service name)
+  portName: http
 
 ingress:
+  # -- enable an Ingress (networking.k8s.io/v1) for the bookstack Service
   enabled: false
+  # -- ingress class name
   className: ""
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  ## Add controller-specific annotations here, e.g. for nginx:
+  ##   nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+  # -- annotations added to the Ingress; empty by default (previously shipped nginx timeout annotations — see "Migrating to 5.0.0")
+  annotations: {}
+  # -- ingress hosts and paths
   hosts:
     - host: bookstack.example.org
       paths:
         - path: /
           pathType: Prefix
+  # -- ingress TLS configuration
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
+## Gateway API HTTPRoute (alternative to ingress).
+## Requires the Gateway API CRDs installed and an existing Gateway to attach to
+## (this chart does NOT create the Gateway). For cross-namespace attachment,
+## the target Gateway listener must allow routes from this namespace (or add a
+## ReferenceGrant).
+httproute:
+  # -- enable a Gateway API (gateway.networking.k8s.io/v1) HTTPRoute as an alternative to ingress
+  enabled: false
+  # -- annotations added to the HTTPRoute
+  annotations: {}
+  ## Gateways to attach to (parentRefs). name is required; namespace/sectionName optional.
+  # -- parentRefs pointing at the Gateway(s) to attach to; `name` is required
+  parentRefs: []
+  #  - name: traefik-gateway
+  #    namespace: traefik
+  #    sectionName: websecure
+  # -- hostnames matched by the route
+  hostnames: []
+  #  - bookstack.example.org
+  ## Optional explicit rules. If empty, a single rule routing all paths to the
+  ## bookstack service is generated.
+  # -- explicit HTTPRoute rules; if empty, a single rule routing all paths to the bookstack Service is generated
+  rules: []
+
+## @section Persistence
 persistence:
+  # -- enable a PVC for bookstack application data
   enabled: true
+  # -- storage class for the PVC; empty uses the cluster default
   storageClass: ""
+  # -- size of the PVC
   size: 5Gi
   ## NOTE: When existingClaim is set the rest of persistence parameters are ignored
+  # -- use an existing PVC instead of creating one; if set, the rest of the persistence options are ignored
   existingClaim: ""
+  # -- PVC access modes
   accessModes:
     - ReadWriteOnce
 
+# -- container resource requests/limits; left empty by default, see comments below for an example
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -144,6 +236,7 @@ resources: {}
 ## Use `/status` path for checks
 
 ## Liveness probe
+# -- liveness probe config; set to `{}` to disable
 livenessProbe:
   httpGet:
     path: /status
@@ -155,6 +248,7 @@ livenessProbe:
   successThreshold: 1
 
 ## Readiness probe
+# -- readiness probe config; set to `{}` to disable
 readinessProbe:
   httpGet:
     path: /status
@@ -169,6 +263,7 @@ readinessProbe:
 ## Initial delay of 30 seconds to wait for mariadb
 ## long start up helps with chart-testing, change this as desired
 ## shorter periodSeconds helps with pod restarts for db timeout conditions
+# -- startup probe config; set to `{}` to disable
 startupProbe:
   httpGet:
     path: /status
@@ -185,118 +280,39 @@ tolerations: []
 
 affinity: {}
 
-## mariadb backend
-## https://github.com/bitnami/charts/tree/main/bitnami/mariadb
-## some basic options below look at upstream chart for more
+## @section Database (embedded MariaDB)
+## mariadb backend (embedded)
+## https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+## Set mariadb.enabled=false and config.dbHost to use an external database.
 mariadb:
+  # -- deploy the embedded CloudPirates mariadb subchart; set to `false` to use an external database via `config.dbHost`
   enabled: true
-  ## @param architecture MariaDB architecture (`standalone` or `replication`)
-  ##
-  architecture: standalone
-  ## Mariadb Authentication parameters
-  ##
   auth:
-    ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided.
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mariadb#setting-the-root-password-on-first-run
-    ##
+    ## Root password. Ignored if existingSecret is set.
+    # -- mariadb root password; ignored if `auth.existingSecret` is set
     rootPassword: ""
-    ## @param auth.existingSecret Use existing secret for password details (`auth.rootPassword`, `auth.password`, `auth.replicationPassword` will be ignored and picked up from this secret). The secret has to contain the keys `mariadb-root-password`, `mariadb-replication-password` and `mariadb-password`
-    ##
-    existingSecret: ""
-    ## @param auth.database Name for a custom database to create
-    ## ref: https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-on-first-run
-    ##
+    ## Application database + user created on first boot.
+    # -- application database created on first boot; single source of truth for bookstack's `config.dbDatabase` when `mariadb.enabled` is true
     database: "bookstack"
-    ## @param auth.username Name for a custom user to create
-    ## ref: https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-user-on-first-run
-    ##
+    # -- application db username created on first boot; single source of truth for bookstack's `config.dbUser` when `mariadb.enabled` is true
     username: "bookstack"
-    ## @param auth.password Password for the new user. Ignored if existing secret is provided
-    ##
+    # -- application db password created on first boot; single source of truth for bookstack's `config.dbPass` when `mariadb.enabled` is true
     password: "bookstack"
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-  ##
-  primary:
-    persistence:
-      ## @param primary.persistence.enabled Enable persistence on MariaDB primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
-      ##
-      enabled: true
-      ## @param primary.persistence.existingClaim Name of an existing `PersistentVolumeClaim` for MariaDB primary replicas
-      ## NOTE: When it's set the rest of persistence parameters are ignored
-      ##
-      existingClaim: ""
-      ## @param primary.persistence.subPath Subdirectory of the volume to mount at
-      ##
-      subPath: ""
-      ## @param primary.persistence.storageClass MariaDB primary persistent volume storage Class
-      ## If defined, storageClassName: <storageClass>
-      ## If set to "-", storageClassName: "", which disables dynamic provisioning
-      ## If undefined (the default) or set to null, no storageClassName spec is
-      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-      ##   GKE, AWS & OpenStack)
-      ##
-      storageClass: ""
-      ## @param primary.persistence.labels Labels for the PVC
-      ##
-      labels: {}
-      ## @param primary.persistence.annotations MariaDB primary persistent volume claim annotations
-      ##
-      annotations: {}
-      ## @param primary.persistence.accessModes MariaDB primary persistent volume access Modes
-      ##
-      accessModes:
-        - ReadWriteOnce
-      ## @param primary.persistence.size MariaDB primary persistent volume size
-      ##
-      size: 5Gi
-      ## @param primary.persistence.selector Selector to match an existing Persistent Volume
-      ## selector:
-      ##   matchLabels:
-      ##     app: my-app
-      ##
-      selector: {}
-    
-  metrics:
-    ## @param metrics.enabled Start a side-car prometheus exporter
-    ##
-    enabled: false
-    ## Prometheus Service Monitor
-    ## ref: https://github.com/coreos/prometheus-operator
-    ##
-    serviceMonitor:
-      ## @param metrics.serviceMonitor.enabled Create ServiceMonitor Resource for scraping metrics using PrometheusOperator
-      ##
-      enabled: false
-      ## @param metrics.serviceMonitor.labels Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
-      ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-      ##
-      labels:
-        app: mariadb
-    ## Prometheus Operator PrometheusRule configuration
-    ##
-    prometheusRule:
-      ## @param metrics.prometheusRule.enabled if `true`, creates a Prometheus Operator PrometheusRule (also requires `metrics.enabled` to be `true` and `metrics.prometheusRule.rules`)
-      ##
-      enabled: false
-      ## @param metrics.prometheusRule.namespace Namespace for the PrometheusRule Resource (defaults to the Release Namespace)
-      ##
-      namespace: ""
-      ## @param metrics.prometheusRule.additionalLabels Additional labels that can be used so PrometheusRule will be discovered by Prometheus
-      ##
-      additionalLabels: {}
-      ## @param metrics.prometheusRule.rules Prometheus Rule definitions
-      ##  - alert: MariaDB-Down
-      ##    expr: absent(up{job="mariadb"} == 1)
-      ##    for: 5m
-      ##    labels:
-      ##      severity: warning
-      ##      service: mariadb
-      ##    annotations:
-      ##      message: 'MariaDB instance {{ `{{` }} $labels.instance {{ `}}` }} is down'
-      ##      summary: MariaDB instance is down
-      ##
-      rules: []
+    ## Existing secret with keys: mariadb-root-password, mariadb-password
+    # -- existing Secret with `mariadb-root-password`/`mariadb-password` keys; if set, also set the bookstack-side `existingSecret` (see "Migrating to 5.0.0")
+    existingSecret: ""
+  persistence:
+    # -- enable a PVC for the embedded mariadb data volume
+    enabled: true
+    # -- use an existing PVC instead of creating one
+    existingClaim: ""
+    # -- storage class for the mariadb PVC; empty uses the cluster default
+    storageClass: ""
+    # -- mariadb PVC access modes
+    accessModes:
+      - ReadWriteOnce
+    # -- size of the mariadb PVC
+    size: 8Gi
 
 bookstack-file-exporter:
   enabled: false

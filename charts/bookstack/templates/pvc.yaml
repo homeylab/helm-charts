@@ -5,11 +5,10 @@ kind: "PersistentVolumeClaim"
 apiVersion: "v1"
 metadata:
   name: {{ include "bookstack.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  {{- with .Values.persistence.annotations }}
   annotations:
-  {{- if .Values.persistence.annotations }}
-  {{ toYaml .Values.persistence.annotations | indent 2 }}  
-  {{ end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "bookstack.labels" . | nindent 4 }}
 spec:

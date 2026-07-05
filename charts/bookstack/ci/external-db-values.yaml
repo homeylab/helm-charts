@@ -1,0 +1,11 @@
+# ct install permutation: external DB path (embedded MariaDB disabled).
+# Serves as a usage example for pointing BookStack at an existing database.
+# NOTE: this will not reach Ready without a real DB at config.dbHost; it is kept
+# for ct lint / template / schema coverage. Scope `ct install` to the embedded
+# default permutation to avoid a guaranteed install failure.
+mariadb:
+  enabled: false
+config:
+  dbHost: "mariadb.example.svc.cluster.local"
+  dbUser: ci_user
+  dbPass: ci_pass

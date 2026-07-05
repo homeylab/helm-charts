@@ -1,4 +1,4 @@
-~~Thanks for using homeylab charts!~~
+Thanks for using homeylab charts!
 
 Get the {{ .Chart.Name }} URL below:
 {{- if .Values.ingress.enabled }}
@@ -6,6 +6,10 @@ Get the {{ .Chart.Name }} URL below:
   {{- range .paths }}
   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
   {{- end }}
+{{- end }}
+{{- else if and .Values.httproute.enabled .Values.httproute.hostnames }}
+{{- range .Values.httproute.hostnames }}
+  http://{{ . }}
 {{- end }}
 {{- else if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "bookstack.fullname" . }})
@@ -21,4 +25,11 @@ Get the {{ .Chart.Name }} URL below:
   export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{- end }}
+{{- if .Values.httproute.enabled }}
+
+NOTE: HTTPRoute is enabled. This chart does not create a Gateway.
+Ensure the Gateway API CRDs are installed and the Gateway referenced in
+httproute.parentRefs exists and allows routes from namespace "{{ .Release.Namespace }}"
+(via the listener's allowedRoutes or a ReferenceGrant).
 {{- end }}
