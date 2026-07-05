@@ -127,6 +127,25 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+## Gateway API HTTPRoute (alternative to ingress).
+## Requires the Gateway API CRDs installed and an existing Gateway to attach to
+## (this chart does NOT create the Gateway). For cross-namespace attachment,
+## the target Gateway listener must allow routes from this namespace (or add a
+## ReferenceGrant).
+httproute:
+  enabled: false
+  annotations: {}
+  ## Gateways to attach to (parentRefs). name is required; namespace/sectionName optional.
+  parentRefs: []
+  #  - name: traefik-gateway
+  #    namespace: traefik
+  #    sectionName: websecure
+  hostnames: []
+  #  - bookstack.example.org
+  ## Optional explicit rules. If empty, a single rule routing all paths to the
+  ## bookstack service is generated.
+  rules: []
+
 persistence:
   enabled: true
   storageClass: ""
