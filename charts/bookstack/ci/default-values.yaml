@@ -1,0 +1,9 @@
+# ct install permutation: embedded CloudPirates MariaDB, minimal.
+# Also serves as a usage example for the default (embedded DB) path.
+mariadb:
+  enabled: true
+  auth:
+    rootPassword: "ci-root"
+    password: "ci-pass"
+config:
+  appUrl: "http://bookstack.ci.local"
