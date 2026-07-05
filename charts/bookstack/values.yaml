@@ -114,10 +114,9 @@ service:
 ingress:
   enabled: false
   className: ""
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  ## Add controller-specific annotations here, e.g. for nginx:
+  ##   nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+  annotations: {}
   hosts:
     - host: bookstack.example.org
       paths:
