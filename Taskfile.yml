@@ -80,33 +80,19 @@ tasks:
     cmds:
       - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml --debug
 
-  dryrun-install-local:
-    desc: Dry-run install a chart with local values (APP=<chart>)
+  deploy-local:
+    desc: Install or upgrade a chart with local values (APP=<chart>)
     requires:
       vars: [APP]
     cmds:
-      - helm install -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}} --create-namespace --dry-run
+      - helm upgrade --install -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}} --create-namespace
 
-  install-local:
-    desc: Install a chart with local values (APP=<chart>)
+  dryrun-local:
+    desc: Dry-run install/upgrade a chart with local values (APP=<chart>)
     requires:
       vars: [APP]
     cmds:
-      - helm install -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}} --create-namespace
-
-  dryrun-upgrade-local:
-    desc: Dry-run upgrade a chart with local values (APP=<chart>)
-    requires:
-      vars: [APP]
-    cmds:
-      - helm upgrade -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}} --dry-run
-
-  upgrade-local:
-    desc: Upgrade a chart with local values (APP=<chart>)
-    requires:
-      vars: [APP]
-    cmds:
-      - helm upgrade -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}}
+      - helm upgrade --install -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}} --create-namespace --dry-run=client
 
   clean-local:
     desc: Delete a local release and its namespace (APP=<chart>)
@@ -114,4 +100,4 @@ tasks:
       vars: [APP]
     cmds:
       - helm delete {{.APP}} -n local-{{.APP}}
-      - kubectl delete ns local-{{.APP}}
+      - kubectl delete ns local-{{.APP}} --ignore-not-found
