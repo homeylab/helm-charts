@@ -1,4 +1,4 @@
-~~Thanks for using homeylab charts!~~
+Thanks for using homeylab charts!
 
 Get the {{ .Chart.Name }} URL below:
 {{- if .Values.ingress.enabled }}

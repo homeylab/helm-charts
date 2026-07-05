@@ -104,4 +104,3 @@ the embedded DB from drifting when only one side is overridden.
 {{- define "bookstack.dbName" -}}
 {{- if .Values.mariadb.enabled -}}{{ .Values.mariadb.auth.database }}{{- else -}}{{ .Values.config.dbDatabase }}{{- end -}}
 {{- end }}
-*/}}
