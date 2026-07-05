@@ -22,7 +22,7 @@ version: 5.0.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 # renovate: datasource=docker depName=linuxserver/bookstack versioning=regex:^version-v(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$
-appVersion: "version-v24.12"
+appVersion: "version-v26.05.2"
 
 dependencies:
 - name: mariadb
