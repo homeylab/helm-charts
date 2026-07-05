@@ -51,6 +51,7 @@ image:
   tag: ""
 
 linuxserver:
+  enabled: true
   PUID: 1000
   PGID: 1000
   UMASK: "022"
@@ -180,6 +181,12 @@ Chart version `5.0.0` is a major, breaking revision. Read every item below that 
 - **APP_KEY warning — applies even if you're keeping an external database and its data.** 5.0.0 removes the old fixed default app key. On first upgrade, no chart Secret exists yet, so an empty `config.appKey` will auto-generate a **new** key, which makes previously-encrypted bookstack data (MFA secrets, etc.) undecryptable. **If you have existing data, set `config.appKey` to your current key before upgrading.**
 - **GitOps users (ArgoCD/Flux applying via `helm template`).** The lookup-based APP_KEY preservation does not work under template-only rendering — you must pin `config.appKey` explicitly, or the key will regenerate on every sync.
 
+### `linuxserver.enabled` toggle
+`linuxserver.PUID`/`PGID`/`UMASK`/`TZ` are s6-overlay/linuxserver.io-image-specific runtime env vars, not generic BookStack config. They're gated behind `linuxserver.enabled` (default `true`, matching the current `lscr.io/linuxserver/bookstack` image) so a future non-linuxserver image can drop them cleanly by setting `linuxserver.enabled: false`. linuxserver images boot as root and use s6 to drop privileges to `PUID`/`PGID` at runtime, so a hardened `securityContext` (`runAsNonRoot: true`, etc.) is only viable once you're on a rootless, non-linuxserver image with `linuxserver.enabled: false` — it is not achievable with the current image.
+
+### Empty embedded DB password is rejected
+When `mariadb.enabled: true` and no bookstack-side `existingSecret` is set, leaving `mariadb.auth.password` empty is rejected at render time (`helm template`/`install`/`upgrade` will fail with an explicit error) instead of silently breaking BookStack's DB connection. Leaving it empty would make the embedded MariaDB auto-generate a random password on first boot that BookStack has no way to read, causing a silent authentication failure. Set `mariadb.auth.password` to a real value, or use the `mariadb.auth.existingSecret` + bookstack-side `existingSecret` combo instead (see "Migrating to 5.0.0").
+
 #### Nginx Configuration Warnings
 After certain upgrades, you may see warnings in the logs about nginx configuration mismatches.
 ```
@@ -289,6 +296,7 @@ extraEnv:
 | linuxserver.PUID | int | `1000` | user ID the container process runs as |
 | linuxserver.TZ | string | `"Etc/UTC"` | timezone for the container |
 | linuxserver.UMASK | string | `"022"` | file creation mask applied inside the container |
+| linuxserver.enabled | bool | `true` | Render linuxserver.io/s6 runtime env (PUID/PGID/UMASK/TZ). Set false if you swap to a non-linuxserver BookStack image. |
 | livenessProbe | object | `{"failureThreshold":5,"httpGet":{"path":"/status","port":"http"},"initialDelaySeconds":5,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":3}` | liveness probe config; set to `{}` to disable |
 | mariadb.auth.database | string | `"bookstack"` | application database created on first boot; single source of truth for bookstack's `config.dbDatabase` when `mariadb.enabled` is true |
 | mariadb.auth.existingSecret | string | `""` | existing Secret with `mariadb-root-password`/`mariadb-password` keys; if set, also set the bookstack-side `existingSecret` (see "Migrating to 5.0.0") |

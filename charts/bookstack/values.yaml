@@ -78,6 +78,8 @@ existingSecret: ""
 ## linuxserver.io image runtime settings (PUID/PGID/UMASK/TZ)
 ## https://docs.linuxserver.io/images/docker-bookstack/
 linuxserver:
+  # -- Render linuxserver.io/s6 runtime env (PUID/PGID/UMASK/TZ). Set false if you swap to a non-linuxserver BookStack image.
+  enabled: true
   # -- user ID the container process runs as
   PUID: 1000
   # -- group ID the container process runs as

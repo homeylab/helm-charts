@@ -10,6 +10,7 @@ spec:
   containers:
     - name: wget
       image: "{{ .Values.tests.image.registry }}/{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+      imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
       command: ['wget']
       args: ["{{ include "bookstack.fullname" . }}:{{ .Values.service.port }}{{ .Values.tests.path }}"]
   restartPolicy: Never

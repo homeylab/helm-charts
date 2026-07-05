@@ -31,3 +31,9 @@ tests:
       mariadb.auth.database: bs_db
     asserts:
       - contains: { path: "spec.template.spec.containers[0].env", content: { name: DB_DATABASE, value: "bs_db" } }
+  - it: omits linuxserver env when linuxserver.enabled is false
+    set:
+      linuxserver.enabled: false
+    asserts:
+      - notContains: { path: "spec.template.spec.containers[0].env", content: { name: PUID, value: "1000" } }
+      - notContains: { path: "spec.template.spec.containers[0].env", content: { name: TZ, value: "Etc/UTC" } }
