@@ -26,9 +26,9 @@ appVersion: "version-v24.12"
 
 dependencies:
 - name: mariadb
-  version: "18.0.2"
+  version: "0.16.5"
   condition: mariadb.enabled
-  repository: "oci://registry-1.docker.io/bitnamicharts"
+  repository: "oci://registry-1.docker.io/cloudpirates"
 - name: bookstack-file-exporter
   version: "0.0.2"
   condition: bookstack-file-exporter.enabled

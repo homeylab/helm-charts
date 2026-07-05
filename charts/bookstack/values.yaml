@@ -69,11 +69,10 @@ config:
   ## - below is one generated for test purposes only
   ## - if existingSecret is specified, below will be ignored
   appKey: "base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4="
-  ## dbHost should be specified and consistent!
-  ## If not included though, it will be dynamically generated and attempt to use included/embedded Bitnami mariadb instance
-  ## This to help with chart-testing dynamic namespaces
-  ## dbHost if not specified, value = "{{ bookstack.fullname/specified chart install name }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
-  ## Example value if installed in bookstack namespace: "bookstack-mariadb.bookstack.svc.cluster.local"
+  ## dbHost should be specified and consistent.
+  ## If left empty, it is derived as "{{ .Release.Name }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
+  ## to target the embedded CloudPirates mariadb (works for the default release name; set explicitly
+  ## for non-default release names). Example if released as "bookstack": "bookstack-mariadb.bookstack.svc.cluster.local"
   dbHost: ""
   dbPort: 3306
   dbDatabase: bookstack
@@ -185,118 +184,27 @@ tolerations: []
 
 affinity: {}
 
-## mariadb backend
-## https://github.com/bitnami/charts/tree/main/bitnami/mariadb
-## some basic options below look at upstream chart for more
+## mariadb backend (embedded)
+## https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+## Set mariadb.enabled=false and config.dbHost to use an external database.
 mariadb:
   enabled: true
-  ## @param architecture MariaDB architecture (`standalone` or `replication`)
-  ##
-  architecture: standalone
-  ## Mariadb Authentication parameters
-  ##
   auth:
-    ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided.
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mariadb#setting-the-root-password-on-first-run
-    ##
+    ## Root password. Ignored if existingSecret is set.
     rootPassword: ""
-    ## @param auth.existingSecret Use existing secret for password details (`auth.rootPassword`, `auth.password`, `auth.replicationPassword` will be ignored and picked up from this secret). The secret has to contain the keys `mariadb-root-password`, `mariadb-replication-password` and `mariadb-password`
-    ##
-    existingSecret: ""
-    ## @param auth.database Name for a custom database to create
-    ## ref: https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-on-first-run
-    ##
+    ## Application database + user created on first boot.
     database: "bookstack"
-    ## @param auth.username Name for a custom user to create
-    ## ref: https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-user-on-first-run
-    ##
     username: "bookstack"
-    ## @param auth.password Password for the new user. Ignored if existing secret is provided
-    ##
     password: "bookstack"
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-  ##
-  primary:
-    persistence:
-      ## @param primary.persistence.enabled Enable persistence on MariaDB primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
-      ##
-      enabled: true
-      ## @param primary.persistence.existingClaim Name of an existing `PersistentVolumeClaim` for MariaDB primary replicas
-      ## NOTE: When it's set the rest of persistence parameters are ignored
-      ##
-      existingClaim: ""
-      ## @param primary.persistence.subPath Subdirectory of the volume to mount at
-      ##
-      subPath: ""
-      ## @param primary.persistence.storageClass MariaDB primary persistent volume storage Class
-      ## If defined, storageClassName: <storageClass>
-      ## If set to "-", storageClassName: "", which disables dynamic provisioning
-      ## If undefined (the default) or set to null, no storageClassName spec is
-      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-      ##   GKE, AWS & OpenStack)
-      ##
-      storageClass: ""
-      ## @param primary.persistence.labels Labels for the PVC
-      ##
-      labels: {}
-      ## @param primary.persistence.annotations MariaDB primary persistent volume claim annotations
-      ##
-      annotations: {}
-      ## @param primary.persistence.accessModes MariaDB primary persistent volume access Modes
-      ##
-      accessModes:
-        - ReadWriteOnce
-      ## @param primary.persistence.size MariaDB primary persistent volume size
-      ##
-      size: 5Gi
-      ## @param primary.persistence.selector Selector to match an existing Persistent Volume
-      ## selector:
-      ##   matchLabels:
-      ##     app: my-app
-      ##
-      selector: {}
-    
-  metrics:
-    ## @param metrics.enabled Start a side-car prometheus exporter
-    ##
-    enabled: false
-    ## Prometheus Service Monitor
-    ## ref: https://github.com/coreos/prometheus-operator
-    ##
-    serviceMonitor:
-      ## @param metrics.serviceMonitor.enabled Create ServiceMonitor Resource for scraping metrics using PrometheusOperator
-      ##
-      enabled: false
-      ## @param metrics.serviceMonitor.labels Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
-      ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-      ##
-      labels:
-        app: mariadb
-    ## Prometheus Operator PrometheusRule configuration
-    ##
-    prometheusRule:
-      ## @param metrics.prometheusRule.enabled if `true`, creates a Prometheus Operator PrometheusRule (also requires `metrics.enabled` to be `true` and `metrics.prometheusRule.rules`)
-      ##
-      enabled: false
-      ## @param metrics.prometheusRule.namespace Namespace for the PrometheusRule Resource (defaults to the Release Namespace)
-      ##
-      namespace: ""
-      ## @param metrics.prometheusRule.additionalLabels Additional labels that can be used so PrometheusRule will be discovered by Prometheus
-      ##
-      additionalLabels: {}
-      ## @param metrics.prometheusRule.rules Prometheus Rule definitions
-      ##  - alert: MariaDB-Down
-      ##    expr: absent(up{job="mariadb"} == 1)
-      ##    for: 5m
-      ##    labels:
-      ##      severity: warning
-      ##      service: mariadb
-      ##    annotations:
-      ##      message: 'MariaDB instance {{ `{{` }} $labels.instance {{ `}}` }} is down'
-      ##      summary: MariaDB instance is down
-      ##
-      rules: []
+    ## Existing secret with keys: mariadb-root-password, mariadb-password
+    existingSecret: ""
+  persistence:
+    enabled: true
+    existingClaim: ""
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
 
 bookstack-file-exporter:
   enabled: false
