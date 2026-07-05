@@ -33,7 +33,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - secretRef:
@@ -59,6 +59,14 @@ spec:
             value: {{ .Values.config.sessionDriver | quote }}
           - name: APP_URL
             value: {{ .Values.config.appUrl | quote }}
+          - name: PUID
+            value: {{ .Values.linuxserver.PUID | quote }}
+          - name: PGID
+            value: {{ .Values.linuxserver.PGID | quote }}
+          - name: UMASK
+            value: {{ .Values.linuxserver.UMASK | quote }}
+          - name: TZ
+            value: {{ .Values.linuxserver.TZ | quote }}
         {{- range $key, $val := .Values.extraEnv }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}

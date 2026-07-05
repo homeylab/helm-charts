@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: "{{ .Values.testCurlImage.repository}}/{{ .Values.testCurlImage.name }}:{{ .Values.testCurlImage.tag }}"
+      image: "{{ .Values.tests.image.registry }}/{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
       command: ['wget']
-      args: ["{{ include "bookstack.fullname" . }}:{{ .Values.service.port }}{{ .Values.testCurlImage.path }}"]
+      args: ["{{ include "bookstack.fullname" . }}:{{ .Values.service.port }}{{ .Values.tests.path }}"]
   restartPolicy: Never

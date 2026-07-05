@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 
 image:
-  repository: docker.io
-  name: linuxserver/bookstack
+  registry: lscr.io
+  repository: linuxserver/bookstack
   pullPolicy: IfNotPresent
   # You can optionally specify your preferred image tag here.
   # For OS updates but consistent Bookstack version, use `version-X.X.X` tag
@@ -12,13 +12,14 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
-## set image for post install helm tests
-testCurlImage:
-  repository: docker.io
-  name: busybox
-  tag: "1.36.1"
-  pullPolicy: IfNotPresent
-  # the url for post install check test
+## post-install `helm test` connection check
+tests:
+  image:
+    registry: docker.io
+    repository: busybox
+    tag: "1.36.1"
+    pullPolicy: IfNotPresent
+  ## path the test requests and expects a 200 from
   path: /status
 
 updateStrategy:
@@ -58,6 +59,14 @@ securityContext: {}
 ## - DB_PASSWORD (replaces dbPass below if specified)
 ## - APP_KEY (replaces appKey below if specified)
 existingSecret: ""
+
+## linuxserver.io image runtime settings (PUID/PGID/UMASK/TZ)
+## https://docs.linuxserver.io/images/docker-bookstack/
+linuxserver:
+  PUID: 1000
+  PGID: 1000
+  UMASK: "022"
+  TZ: "Etc/UTC"
 
 ## Default values below will work with included mariadb chart in bookstack namespace
 config:
