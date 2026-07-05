@@ -22,15 +22,6 @@ tasks:
     cmds:
       - helm dependency update {{.CHART_DIR}}/{{.APP}}
 
-  bookstack-update-dep:
-    desc: Update bookstack chart dependencies incl. bitnami repo (APP=<chart>)
-    requires:
-      vars: [APP]
-    cmds:
-      - helm repo add bitnami https://charts.bitnami.com/bitnami
-      - helm repo update bitnami
-      - helm dependency update {{.CHART_DIR}}/{{.APP}}
-
   pkg:
     desc: Package a chart (APP=<chart>)
     requires:
