@@ -1,6 +1,5 @@
 # For local testing or deploys
-local-values.yaml
-local_vars
+.local/
 kube_config
 
 # Chart dependencies

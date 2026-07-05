@@ -39,7 +39,11 @@ jobs:
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | helm registry login registry-1.docker.io --password-stdin -u ${{ secrets.DOCKERHUB_USERNAME }}
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Setup Task
+        uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Helm Package Charts
-        run: for x in $(ls charts); do make pkg_with_dep app=${x}; done
+        run: for x in $(ls charts); do task pkg-with-dep APP=${x}; done
       - name: Helm Push Charts
-        run: for x in $(ls *.tgz); do make oci_push file=${x}; done
+        run: for x in $(ls *.tgz); do task oci-push FILE=${x}; done

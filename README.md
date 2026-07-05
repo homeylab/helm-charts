@@ -105,11 +105,11 @@ To contribute, there are a many ways to do testing and many are valid. I am usin
 
 To use the same Dev Containers, ensure you have the extension enabled and add a copy of your kubectl config in `.devcontainer/`. Name it `kube_config` and it will be ignored by git (in .gitignore) and will be used during Dev Container build.
 
-The provided makefile can then be used for testing via helm and [chart-testing](https://github.com/helm/chart-testing).
+The provided [Taskfile](https://taskfile.dev) can then be used for testing via helm and [chart-testing](https://github.com/helm/chart-testing). Run `task` to list available tasks.
 
 Example:
 ```
-# Use `app=` for targeting a chart
+# Use `APP=` for targeting a chart
 # below runs chart-testing for the specified chart/app
-make test app=bookstack
+task test APP=bookstack
 ```

@@ -1,0 +1,117 @@
+version: '3'
+
+# Usage: pass the target chart via APP, e.g. `task lint APP=bookstack`.
+# List all tasks with `task` or `task --list`.
+
+vars:
+  CHART_DIR: charts
+  LOCAL_VALUES_DIR: .local/values
+  OCI_REGISTRY: oci://registry-1.docker.io/homeylabcharts
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  update-dep:
+    desc: Update chart dependencies (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm dependency update {{.CHART_DIR}}/{{.APP}}
+
+  bookstack-update-dep:
+    desc: Update bookstack chart dependencies incl. bitnami repo (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm repo add bitnami https://charts.bitnami.com/bitnami
+      - helm repo update bitnami
+      - helm dependency update {{.CHART_DIR}}/{{.APP}}
+
+  pkg:
+    desc: Package a chart (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm package {{.CHART_DIR}}/{{.APP}}
+
+  pkg-with-dep:
+    desc: Package a chart with dependencies bundled (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm package {{.CHART_DIR}}/{{.APP}} -u
+
+  oci-push:
+    desc: Push a packaged chart to the OCI registry (FILE=<chart>.tgz)
+    requires:
+      vars: [FILE]
+    cmds:
+      - helm push {{.FILE}} {{.OCI_REGISTRY}}
+
+  lint:
+    desc: Lint a chart (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm lint {{.CHART_DIR}}/{{.APP}}
+
+  test:
+    desc: Run chart-testing install for a chart (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - ct install --chart-dirs {{.CHART_DIR}} --charts {{.CHART_DIR}}/{{.APP}}
+
+  template:
+    desc: Render a chart's templates (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} --debug
+
+  local-template:
+    desc: Render a chart with local values (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml --debug
+
+  dryrun-install-local:
+    desc: Dry-run install a chart with local values (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm install -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}} --create-namespace --dry-run
+
+  install-local:
+    desc: Install a chart with local values (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm install -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}} --create-namespace
+
+  dryrun-upgrade-local:
+    desc: Dry-run upgrade a chart with local values (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm upgrade -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}} --dry-run
+
+  upgrade-local:
+    desc: Upgrade a chart with local values (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm upgrade -f {{.LOCAL_VALUES_DIR}}/{{.APP}}.yaml {{.APP}} {{.CHART_DIR}}/{{.APP}} -n local-{{.APP}}
+
+  clean-local:
+    desc: Delete a local release and its namespace (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm delete {{.APP}} -n local-{{.APP}}
+      - kubectl delete ns local-{{.APP}}

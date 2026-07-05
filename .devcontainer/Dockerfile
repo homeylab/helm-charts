@@ -1,7 +1,8 @@
 FROM quay.io/helmpack/chart-testing:v3.10.1
 
 RUN apk update && \
-    apk add make
+    apk add go-task && \
+    ln -s /usr/bin/go-task /usr/local/bin/task
 
 RUN adduser -D -s /bin/ash -u 1000 vscode
 
