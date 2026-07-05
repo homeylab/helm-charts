@@ -12,6 +12,21 @@ description: bookstack documentation platform
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
+icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+home: https://www.bookstackapp.com/
+sources:
+  - https://github.com/BookStackApp/BookStack
+  - https://github.com/linuxserver/docker-bookstack
+  - https://github.com/homeylab/helm-charts
+keywords:
+  - bookstack
+  - wiki
+  - documentation
+  - knowledge-base
+maintainers:
+  - name: homeylab
+    url: https://github.com/homeylab
+
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
@@ -33,3 +48,9 @@ dependencies:
   version: "0.0.2"
   condition: bookstack-file-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
+
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack

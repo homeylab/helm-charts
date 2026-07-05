@@ -52,16 +52,28 @@ serviceAccount:
 
 podAnnotations: {}
 
+## Pod-level security context.
+## NOTE: the default linuxserver.io image boots as root (s6-overlay init chowns
+## /config and drops to PUID:PGID), so runAsNonRoot / readOnlyRootFilesystem /
+## dropping capabilities will BREAK it. PUID/PGID (see linuxserver.*) is the
+## unprivileged UID the app actually runs as. A safe baseline that works with
+## linuxserver:
+##   seccompProfile:
+##     type: RuntimeDefault
 podSecurityContext: {}
-  # fsGroup: 2000
 
+## Container-level security context.
+## Real hardening (runAsNonRoot, runAsUser, readOnlyRootFilesystem, drop-all
+## capabilities) is only viable on a rootless image with linuxserver.enabled=false
+## — do NOT enable these while using the default linuxserver image. Example for a
+## rootless image:
+##   runAsNonRoot: true
+##   runAsUser: 1000
+##   readOnlyRootFilesystem: true
+##   allowPrivilegeEscalation: false
+##   capabilities:
+##     drop: [ALL]
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 ## @section Credentials & Secret
 ## existing secret for credentials
