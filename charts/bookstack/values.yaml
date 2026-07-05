@@ -65,10 +65,11 @@ config:
   ## If using ingress, set it to same url
   ## example: "https://bookstack.yourdomain.org"
   appUrl: ""
-  ## Used for session encryption key. Users should generate a new one with: `docker run -it --rm --entrypoint /bin/bash lscr.io/linuxserver/bookstack:latest appkey`
-  ## - below is one generated for test purposes only
-  ## - if existingSecret is specified, below will be ignored
-  appKey: "base64:MywekbncHHu+a3R/gGTT7wwnUQGc6o9PXWrVOyaHlp4="
+  ## Session encryption key. Leave empty to auto-generate (stored in the chart Secret and
+  ## preserved across upgrades). To pin one: `docker run -it --rm --entrypoint /bin/bash \
+  ##   lscr.io/linuxserver/bookstack:latest appkey`
+  ## Ignored if existingSecret is specified.
+  appKey: ""
   ## dbHost should be specified and consistent.
   ## If left empty, it is derived as "{{ .Release.Name }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
   ## to target the embedded CloudPirates mariadb (works for the default release name; set explicitly

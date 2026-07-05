@@ -35,15 +35,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.existingSecret | default (include "bookstack.fullname" .) }}
           env:
-        {{- if not .Values.existingSecret }}
-          - name: DB_USERNAME
-            value: {{ .Values.config.dbUser | quote}}
-          - name: DB_PASSWORD
-            value: {{ .Values.config.dbPass | quote}}
-          - name: APP_KEY
-            value: {{ .Values.config.appKey | quote }}
-        {{- end }}
         {{- if .Values.config.dbHost }}
           - name: DB_HOST
             value: {{ .Values.config.dbHost | quote }}
@@ -57,7 +52,7 @@ spec:
           - name: DB_PORT
             value: {{ .Values.config.dbPort | quote }}
           - name: DB_DATABASE
-            value: {{ .Values.config.dbDatabase | quote }}
+            value: {{ include "bookstack.dbName" . | quote }}
           - name: CACHE_DRIVER
             value: {{ .Values.config.cacheDriver | quote }}
           - name: SESSION_DRIVER
@@ -67,11 +62,6 @@ spec:
         {{- range $key, $val := .Values.extraEnv }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}
-        {{- end }}
-        {{- if .Values.existingSecret }}
-          envFrom:
-          - secretRef:
-              name: {{ .Values.existingSecret }}
         {{- end }}
           ports:
             - name: "{{ .Values.service.name }}"
