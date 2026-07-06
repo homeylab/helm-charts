@@ -83,7 +83,7 @@ helm upgrade -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihol
 ### Upgrade Matrix For Releases
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `0.1.X` | `1.0.0` | **Hardened `securityContext` defaults now apply** (`runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem`, `drop: [ALL]`) — fine for the stock `ekofr` image; override `podSecurityContext`/`securityContext` if you run a customized one. This is what motivates the major bump. Credentials now render into a chart-managed Secret (`templates/secret.yaml`) wired via `envFrom` — behavior-preserving, the container still gets the same `PIHOLE_PASSWORD`, so no action is needed if you set `settings.auth.password`/`token`; `settings.auth.existingSecret` users are unaffected. New optional `httproute.*` (Gateway API v1) was added. |
+| `0.1.X` | `1.0.0` | **Hardened `securityContext` defaults now apply** (`runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem`, `drop: [ALL]`) — fine for the stock `ekofr` image; override `podSecurityContext`/`securityContext` if you run a customized one. This is what motivates the major bump. Credentials now render into a chart-managed Secret (`templates/secret.yaml`) wired via `envFrom` — behavior-preserving, the container still gets the same `PIHOLE_PASSWORD`, so no action is needed if you set `settings.auth.password`/`token`; `settings.auth.existingSecret` users are unaffected. New optional `httproute.*` (Gateway API v1) was added. The image block was standardized to `image.registry`/`image.repository`/`image.tag` (new `registry` field defaults to `docker.io` — no image change); for the post-install test image, `testConnImage.name` was renamed to `testConnImage.repository` and a `testConnImage.registry` field added — adjust only if you overrode those fields. |
 
 ## Values
 | Key | Type | Default | Description |
@@ -96,9 +96,10 @@ helm upgrade -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihol
 | httproute.hostnames | list | `[]` | hostnames matched by the route |
 | httproute.parentRefs | list | `[]` | parentRefs pointing at the Gateway(s) to attach to; `name` is required |
 | httproute.rules | list | `[]` | explicit HTTPRoute rules; if empty, a single rule routing all paths to the Service is generated |
-| image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"ekofr/pihole-exporter"` |  |
-| image.tag | string | `""` |  |
+| image.pullPolicy | string | `"IfNotPresent"` | image pull policy |
+| image.registry | string | `"docker.io"` | image registry |
+| image.repository | string | `"ekofr/pihole-exporter"` | image repository |
+| image.tag | string | `""` | overrides the image tag whose default is the chart appVersion |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.className | string | `""` |  |
@@ -166,11 +167,11 @@ helm upgrade -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihol
 | settings.config.hostname | string | `"pi-hole.localdomain"` | Set the pihole host or IP address |
 | settings.config.port | string | `nil` | Set the pihole port on the pihole host to use, default `80` set by container image |
 | settings.config.protocol | string | `""` | Set the pihole host protocol: `http` or `https`, default `http` set by container image |
-| testConnImage.name | string | `"busybox"` |  |
-| testConnImage.path | string | `"/metrics"` |  |
-| testConnImage.pullPolicy | string | `"IfNotPresent"` |  |
-| testConnImage.repository | string | `"docker.io"` |  |
-| testConnImage.tag | string | `"1.36.1"` |  |
+| testConnImage.path | string | `"/metrics"` | the path for the post-install connection check |
+| testConnImage.pullPolicy | string | `"IfNotPresent"` | test image pull policy |
+| testConnImage.registry | string | `"docker.io"` | test image registry |
+| testConnImage.repository | string | `"busybox"` | test image repository |
+| testConnImage.tag | string | `"1.36.1"` | test image tag |
 | tolerations | list | `[]` |  |
 | updateStrategy.type | string | `"Recreate"` | set the update strategy for the deployment |
 | volumeMounts | list | `[]` |  |

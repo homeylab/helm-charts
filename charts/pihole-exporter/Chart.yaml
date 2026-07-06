@@ -48,5 +48,7 @@ annotations:
       description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL); override if you run a customized image"
     - kind: changed
       description: "credentials now render into a chart-managed Secret and wire via envFrom (behavior-preserving; container still receives PIHOLE_PASSWORD; existingSecret still supported)"
+    - kind: changed
+      description: "BREAKING - image schema standardized to registry/repository/tag; testConnImage.name renamed to testConnImage.repository and a testConnImage.registry field added (default docker.io, no image change)"
     - kind: added
       description: "Gateway API HTTPRoute as an alternative to ingress (httproute.enabled)"
