@@ -1,0 +1,24 @@
+# ct install permutation: deprecated-token creds + ingress enabled.
+# Complements default-values.yaml (managed-Secret password path) by
+# exercising the settings.auth.token codepath and rendering an Ingress
+# object in-cluster. Reaches Ready under `ct install`.
+settings:
+  config:
+    hostname: pi-hole.ci.local
+  auth:
+    token: "ci-token"
+
+ingress:
+  enabled: true
+  hosts:
+    - host: pihole-exporter.ci.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 64Mi
