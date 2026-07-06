@@ -5,7 +5,7 @@ image:
   # -- image registry
   registry: docker.io
   # -- image repository
-  repository: caseyscarborough/qbittorrent-exporter
+  repository: esanchezm/prometheus-qbittorrent-exporter
   # -- image pull policy
   pullPolicy: IfNotPresent
   # -- overrides the image tag whose default is the chart appVersion
@@ -34,8 +34,8 @@ fullnameOverride: ""
 
 service:
   type: ClusterIP
-  # -- set port for qbittorrent-exporter scraping (upstream default 17871)
-  port: 17871
+  # -- set port for qbittorrent-exporter scraping (esanchezm exporter default 8000)
+  port: 8000
   # -- set name for the service port (referenced by probes and serviceMonitor)
   name: metrics
   # -- set protocol for the service
@@ -51,7 +51,7 @@ metrics:
     # -- set the path for prometheus scraping
     prometheus.io/path: /metrics
     # -- set the port for prometheus scraping, should match the service port
-    prometheus.io/port: "17871"
+    prometheus.io/port: "8000"
   ## if serviceMonitor enabled, pod annotations above will be ignored
   serviceMonitor:
     # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
@@ -79,25 +79,31 @@ metrics:
     rules: []
 
 ## provide settings for exporter
-## ref: https://github.com/caseyscarborough/qbittorrent-exporter#parameters
+## ref: https://github.com/esanchezm/prometheus-qbittorrent-exporter#configuration
 settings:
   # -- Add configuration as environment variables
   config:
-    # -- full qBittorrent base URL, e.g. `http://somehost:8080` or `https://qbit.example.org`. If set, host/port/protocol are ignored
-    base_url: ""
-    # -- qBittorrent host (used when base_url is empty)
+    # -- qBittorrent host (required). Maps to QBITTORRENT_HOST
     host: ""
-    # -- qBittorrent port (used when base_url is empty)
+    # -- qBittorrent WebUI port (required). Maps to QBITTORRENT_PORT
     port: ""
-    # -- qBittorrent protocol (used when base_url is empty)
-    protocol: "http"
-  # -- Set auth for qBittorrent. If no auth provided, the exporter runs unauthenticated
+    # -- use SSL/HTTPS to reach qBittorrent. Maps to QBITTORRENT_SSL (auto-true when port is 443)
+    ssl: false
+    # -- optional path/base for the WebUI. Maps to QBITTORRENT_URL_BASE
+    urlBase: ""
+    # -- validate the WebUI TLS certificate. Maps to VERIFY_WEBUI_CERTIFICATE (set false for self-signed)
+    verifyCert: true
+    # -- exporter log level (DEBUG/INFO/WARNING/ERROR). Maps to EXPORTER_LOG_LEVEL
+    logLevel: "INFO"
+  # -- Set auth for qBittorrent. If none set, the exporter connects unauthenticated
   auth:
-    # -- qBittorrent WebUI username. Maps to `QBITTORRENT_USERNAME`
-    username: ""
-    # -- qBittorrent WebUI password. Maps to `QBITTORRENT_PASSWORD`
-    password: ""
-    # -- use an existing secret instead of `auth.username`/`auth.password`. The secret must provide the `QBITTORRENT_USERNAME` and `QBITTORRENT_PASSWORD` keys
+    # -- qBittorrent WebUI username. Maps to QBITTORRENT_USER
+    user: ""
+    # -- qBittorrent WebUI password. Maps to QBITTORRENT_PASS
+    pass: ""
+    # -- qBittorrent API key (qBittorrent >= 5.2; overrides user/pass). Maps to QBITTORRENT_API_KEY
+    apiKey: ""
+    # -- use an existing secret instead of user/pass/apiKey. Must provide QBITTORRENT_USER + QBITTORRENT_PASS (and/or QBITTORRENT_API_KEY) keys
     existingSecret: ""
 
 # -- Add extra environment variables
@@ -165,16 +171,14 @@ httproute:
   rules: []
 
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. NOTE: this is a JVM (openjdk:17) image — if you set limits, give
-  # enough memory headroom (>=256Mi) or the JVM may OOM on start.
+  # esanchezm is a lightweight Python exporter; if you set limits, modest values suffice.
   # limits:
-  #   memory: 512Mi
-  # requests:
-  #   cpu: 25m
   #   memory: 128Mi
+  # requests:
+  #   cpu: 10m
+  #   memory: 32Mi
 
-## Liveness probe (TCP — upstream exposes only /metrics, no health endpoints)
+## Liveness probe (TCP — the exporter exposes only /metrics, no health endpoints)
 livenessProbe:
   tcpSocket:
     port: metrics
@@ -184,7 +188,7 @@ livenessProbe:
   failureThreshold: 5
   successThreshold: 1
 
-## Readiness probe (TCP — upstream exposes only /metrics, no health endpoints)
+## Readiness probe (TCP — the exporter exposes only /metrics, no health endpoints)
 readinessProbe:
   tcpSocket:
     port: metrics
@@ -195,15 +199,13 @@ readinessProbe:
   successThreshold: 1
 
 # Additional volumes on the output Deployment definition.
-# NOTE: the chart ALWAYS mounts a writable `/tmp` emptyDir (required for the hardened
-# readOnlyRootFilesystem JVM to boot); anything here is appended to it.
 volumes: []
 # - name: foo
 #   secret:
 #     secretName: mysecret
 #     optional: false
 
-# Additional volumeMounts on the output Deployment definition (appended after /tmp).
+# Additional volumeMounts on the output Deployment definition.
 volumeMounts: []
 # - name: foo
 #   mountPath: "/etc/foo"
