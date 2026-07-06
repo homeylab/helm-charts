@@ -161,6 +161,8 @@ Pipeline:
 
 **Consequence:** a templates-only change with an unchanged `version` ships **nothing** via chart-releaser. Always bump `version` when you want a release.
 
+**Artifact Hub annotations** (`artifacthub.io/*` in `Chart.yaml`) are catalog metadata for [artifacthub.io](https://artifacthub.io) — **ignored by Helm and the release pipeline** (they never affect rendering, install, or whether a release ships). Not every chart carries them yet. On charts that do, refresh `artifacthub.io/changes` for each release — a list of `{kind, description}` entries where `kind` is one of `added`, `changed`, `deprecated`, `removed`, `fixed`, `security` (Artifact Hub renders these as the version's changelog; `security` entries also trigger a notification). `artifacthub.io/license` and `artifacthub.io/links` rarely change.
+
 ## Gotchas
 
 - **`README.md` is generated — never hand-edit it.** Edit `README.md.gotmpl` and run `task docs APP=<chart>`. Value-table rows come from the `# --` comments in `values.yaml`.
