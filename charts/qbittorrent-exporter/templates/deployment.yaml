@@ -50,20 +50,30 @@ spec:
           env:
             - name: EXPORTER_PORT
               value: {{ .Values.service.port | quote }}
-            - name: QBITTORRENT_HOST
-              value: {{ .Values.settings.config.host | quote }}
-            - name: QBITTORRENT_PORT
-              value: {{ .Values.settings.config.port | quote }}
-            - name: QBITTORRENT_SSL
-              value: {{ ternary "True" "False" .Values.settings.config.ssl | quote }}
-          {{- with .Values.settings.config.urlBase }}
-            - name: QBITTORRENT_URL_BASE
-              value: {{ . | quote }}
-          {{- end }}
-            - name: VERIFY_WEBUI_CERTIFICATE
-              value: {{ ternary "True" "False" .Values.settings.config.verifyCert | quote }}
-            - name: EXPORTER_LOG_LEVEL
+            - name: QBITTORRENT_BASE_URL
+              value: {{ .Values.settings.config.baseUrl | quote }}
+            - name: QBITTORRENT_TIMEOUT
+              value: {{ .Values.settings.config.timeout | quote }}
+            - name: QBITTORRENT_FULL_REFRESH_INTERVAL
+              value: {{ .Values.settings.config.fullRefreshInterval | quote }}
+            - name: INSECURE_SKIP_VERIFY
+              value: {{ .Values.settings.config.insecureSkipVerify | quote }}
+            - name: MIN_TLS_VERSION
+              value: {{ .Values.settings.config.minTlsVersion | quote }}
+            - name: LOG_LEVEL
               value: {{ .Values.settings.config.logLevel | quote }}
+            - name: ENABLE_TRACKER
+              value: {{ .Values.settings.features.enableTracker | quote }}
+            - name: ENABLE_HIGH_CARDINALITY
+              value: {{ .Values.settings.features.enableHighCardinality | quote }}
+            - name: ENABLE_INCREASED_CARDINALITY
+              value: {{ .Values.settings.features.enableIncreasedCardinality | quote }}
+            - name: ENABLE_LABEL_WITH_TRACKER
+              value: {{ .Values.settings.features.enableLabelWithTracker | quote }}
+            - name: ENABLE_LABEL_WITH_HASH
+              value: {{ .Values.settings.features.enableLabelWithHash | quote }}
+            - name: ENABLE_LABEL_WITH_TAGS
+              value: {{ .Values.settings.features.enableLabelWithTags | quote }}
           {{- range $key, $val := .Values.extraEnv }}
             - name: {{ $key | upper }}
               value: {{ $val | quote }}

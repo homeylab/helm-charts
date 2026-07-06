@@ -3,7 +3,7 @@
 {{ template "chart.badgesSection" . }}
 {{ template "chart.description" . }}
 
-A Helm Chart to deploy a Prometheus [exporter](https://github.com/esanchezm/prometheus-qbittorrent-exporter) for qBittorrent. Based on the `esanchezm/prometheus-qbittorrent-exporter` image.
+A Helm Chart to deploy a Prometheus [exporter](https://github.com/martabal/qbittorrent-exporter) for qBittorrent. Based on the `martabal/qbittorrent-exporter` image.
 
 ## Table of Contents <!-- omit in toc -->
 - [Add Chart Repo](#add-chart-repo)
@@ -23,11 +23,13 @@ helm repo update homeylab
 ```
 
 ## Prerequisites
-Point the exporter at a reachable qBittorrent WebUI. Set `settings.config.host` and `settings.config.port` (required). For HTTPS set `settings.config.ssl: true` (auto-enabled when the port is `443`); for a self-signed certificate set `settings.config.verifyCert: false`.
+Point the exporter at a reachable qBittorrent WebUI. Set `settings.config.baseUrl` (e.g. `https://qbittorrent.example.org:443`) — **required**, since an empty value is treated as unset and silently falls back to the exporter's internal default (`http://localhost:8080`). For a self-signed certificate set `settings.config.insecureSkipVerify: true`.
 
-Authentication is optional. Set `settings.auth.user` + `settings.auth.pass`, or (qBittorrent >= 5.2) `settings.auth.apiKey` (which overrides user/pass). When using `settings.auth.existingSecret`, the referenced secret must provide `QBITTORRENT_USER` and `QBITTORRENT_PASS` (and/or `QBITTORRENT_API_KEY`) keys.
+Authentication is optional. Set `settings.auth.user` + `settings.auth.pass`, or (qBittorrent >= 5.2) `settings.auth.apiKey` (which overrides user/pass). When using `settings.auth.existingSecret`, the referenced secret must provide `QBITTORRENT_USERNAME` and `QBITTORRENT_PASSWORD` (and/or `QBITTORRENT_API_KEY`) keys.
 
-For the full environment-variable surface, see the upstream [configuration reference](https://github.com/esanchezm/prometheus-qbittorrent-exporter#configuration).
+Per-torrent metric cardinality is opt-in via `settings.features.*` (`enableHighCardinality`, `enableIncreasedCardinality`, `enableLabelWithTracker`, `enableLabelWithHash`, `enableLabelWithTags`) — leave these at their defaults unless you know you need the extra series.
+
+For the full environment-variable surface, see the upstream [configuration reference](https://github.com/martabal/qbittorrent-exporter#parameters).
 
 ## Install
 ```bash
@@ -53,9 +55,7 @@ Only some options are shown, view `values.yaml` for an exhaustive list.
 # custom-values.yaml
 settings:
   config:
-    host: "qbittorrent.example.org"
-    port: "8080"
-    ssl: false
+    baseUrl: "https://qbittorrent.example.org:443"
   auth:
     user: "admin"
     pass: "fakepassword"
@@ -95,21 +95,23 @@ _The matrix below displays certain versions of this helm chart that could result
 ## Migrating to 1.0.0
 First major release. This version **swaps the backing exporter image** and hardens the chart. Review all items before upgrading.
 
-- **Backing exporter changed (breaking).** The chart now deploys `esanchezm/prometheus-qbittorrent-exporter` (actively maintained, Python) instead of the unmaintained `caseyscarborough/qbittorrent-exporter` (Java, last released 2023). **Metric names and labels differ** — re-import the Grafana dashboard (see below) after upgrading.
-- **Values schema changed (breaking).** `settings.config.base_url` and `settings.config.protocol` are removed; set `settings.config.host` + `settings.config.port` + `settings.config.ssl` (+ optional `settings.config.urlBase`). Auth `settings.auth.username`/`password` are renamed to `settings.auth.user`/`settings.auth.pass`. A new `settings.auth.apiKey` supports qBittorrent >= 5.2.
-- **Credentials render into a chart-managed Secret.** `settings.auth.user`/`pass`/`apiKey` populate `templates/secret.yaml` (keys `QBITTORRENT_USER`/`QBITTORRENT_PASS`/`QBITTORRENT_API_KEY`), wired via `envFrom`. `settings.auth.existingSecret` must now provide those keys.
+- **Backing exporter changed (breaking).** The chart now deploys `martabal/qbittorrent-exporter` (actively maintained, Go) instead of the unmaintained `caseyscarborough/qbittorrent-exporter` (Java, last released 2023). **Metric names and labels differ** — re-import the Grafana dashboard (see below) after upgrading.
+- **Values schema changed (breaking).** `settings.config.base_url` and `settings.config.protocol` are removed; set `settings.config.baseUrl` (+ optional `settings.config.timeout`/`fullRefreshInterval`/`insecureSkipVerify`/`minTlsVersion`/`logLevel`). A new `settings.features` block controls metric cardinality (`enableTracker`/`enableHighCardinality`/`enableIncreasedCardinality`/`enableLabelWithTracker`/`enableLabelWithHash`/`enableLabelWithTags`). Auth `settings.auth.user`/`pass`/`apiKey` are unchanged.
+- **Credentials render into a chart-managed Secret.** `settings.auth.user`/`pass`/`apiKey` populate `templates/secret.yaml` (keys `QBITTORRENT_USERNAME`/`QBITTORRENT_PASSWORD`/`QBITTORRENT_API_KEY`), wired via `envFrom`. `settings.auth.existingSecret` must now provide those keys.
 - **Hardened `securityContext` defaults (breaking).** `runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem: true`, `drop: [ALL]`. Fine for the stock image; override if you run a customized one.
 - **Image schema standardized (breaking).** `image.registry`/`image.repository`/`image.tag`; the `helm test` connection-check image is `tests.image.registry`/`repository`/`tag`/`pullPolicy` and `tests.path`.
-- **Default listen port is now `8000`** (the esanchezm exporter default), exposed as the `metrics` service port.
+- **Default listen port is now `8090`** (the martabal exporter default), exposed as the `metrics` service port.
 - **New optional Ingress (`networking.k8s.io/v1`) and Gateway API `HTTPRoute`** (both disabled by default); **TCP liveness/readiness probes** on the metrics port.
 
 ## Configuration Options
 {{ template "chart.valuesTable" . }}
 
 ## Grafana Dashboards
-Use the dashboard shipped with the upstream exporter: [`esanchezm/prometheus-qbittorrent-exporter` → `grafana/dashboard.json`](https://github.com/esanchezm/prometheus-qbittorrent-exporter/blob/master/grafana/dashboard.json). Import it by uploading that JSON file (it is not published on grafana.com with a numeric import ID). It includes a built-in `server` template variable, so a single dashboard can switch between multiple exporter instances (run one release per qBittorrent instance).
+Use one of the dashboards shipped with the upstream exporter, imported by uploading the JSON file directly (neither is published on grafana.com with a numeric import ID):
+* [`grafana/dashboard.json`](https://github.com/martabal/qbittorrent-exporter/blob/main/grafana/dashboard.json) — standard dashboard, matching the default `settings.features` values.
+* [`grafana/dashboard_high_cardinality.json`](https://github.com/martabal/qbittorrent-exporter/blob/main/grafana/dashboard_high_cardinality.json) — pairs with `settings.features.enableHighCardinality: true` for per-torrent breakdowns.
 
 > **Note:** do not import the grafana.com dashboard [`15116`](https://grafana.com/grafana/dashboards/15116-qbittorrent-dashboard/) — it targets the old `caseyscarborough` exporter and its metric names/labels do not match this one.
 
 ## References
-* https://github.com/esanchezm/prometheus-qbittorrent-exporter
+* https://github.com/martabal/qbittorrent-exporter

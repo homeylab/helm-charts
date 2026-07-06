@@ -4,14 +4,14 @@ templates:
 release:
   name: qbittorrent-exporter
 tests:
-  - it: never renders a plaintext QBITTORRENT_PASS env
+  - it: never renders a plaintext QBITTORRENT_PASSWORD env
     set:
       settings.auth.user: admin
       settings.auth.pass: s3cret-pw
     asserts:
       - notContains:
           path: spec.template.spec.containers[0].env
-          content: { name: QBITTORRENT_PASS, value: s3cret-pw }
+          content: { name: QBITTORRENT_PASSWORD, value: s3cret-pw }
   - it: envFrom targets the chart-managed Secret when creds are set
     set:
       settings.auth.user: admin
@@ -46,36 +46,45 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/esanchezm/prometheus-qbittorrent-exporter:v1.7.0
-  - it: sets EXPORTER_PORT and QBITTORRENT_HOST env
+          value: ghcr.io/martabal/qbittorrent-exporter:v2.0.1
+  - it: sets EXPORTER_PORT and QBITTORRENT_BASE_URL env
     set:
-      settings.config.host: qb.local
+      settings.config.baseUrl: https://qb.local:443
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: { name: EXPORTER_PORT, value: "8000" }
+          content: { name: EXPORTER_PORT, value: "8090" }
       - contains:
           path: spec.template.spec.containers[0].env
-          content: { name: QBITTORRENT_HOST, value: qb.local }
-  - it: renders Python-style capitalized booleans (exporter compares == "True")
+          content: { name: QBITTORRENT_BASE_URL, value: https://qb.local:443 }
+  - it: renders lowercase booleans (martabal compares strings.ToLower(env) == "true")
     set:
-      settings.config.ssl: true
-      settings.config.verifyCert: false
+      settings.config.insecureSkipVerify: true
+      settings.features.enableHighCardinality: true
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: { name: QBITTORRENT_SSL, value: "True" }
+          content: { name: INSECURE_SKIP_VERIFY, value: "true" }
       - contains:
           path: spec.template.spec.containers[0].env
-          content: { name: VERIFY_WEBUI_CERTIFICATE, value: "False" }
-  - it: defaults render QBITTORRENT_SSL False and VERIFY_WEBUI_CERTIFICATE True
+          content: { name: ENABLE_HIGH_CARDINALITY, value: "true" }
+  - it: defaults render INSECURE_SKIP_VERIFY false, LOG_LEVEL INFO, ENABLE_TRACKER true, other flags false
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: { name: QBITTORRENT_SSL, value: "False" }
+          content: { name: INSECURE_SKIP_VERIFY, value: "false" }
       - contains:
           path: spec.template.spec.containers[0].env
-          content: { name: VERIFY_WEBUI_CERTIFICATE, value: "True" }
+          content: { name: LOG_LEVEL, value: "INFO" }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: ENABLE_TRACKER, value: "true" }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: ENABLE_INCREASED_CARDINALITY, value: "false" }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: ENABLE_LABEL_WITH_TAGS, value: "false" }
   - it: applies hardened pod and container securityContext defaults
     asserts:
       - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }

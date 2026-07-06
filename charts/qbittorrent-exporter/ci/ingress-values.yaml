@@ -2,9 +2,9 @@
 # Self-contained. Reaches Ready under `ct install`.
 settings:
   config:
-    host: "qbittorrent.ci.local"
-    port: "8080"
-    ssl: false
+    baseUrl: "http://localhost:8080"
+  features:
+    enableHighCardinality: true
   auth:
     user: "ci-admin"
     pass: "ci-password"

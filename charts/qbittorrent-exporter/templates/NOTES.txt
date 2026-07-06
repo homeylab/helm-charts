@@ -25,5 +25,6 @@ httproute.parentRefs exists and allows routes from namespace "{{ .Release.Namesp
 (via the listener's allowedRoutes or a ReferenceGrant).
 {{- end }}
 
-Sample Grafana dashboard is available from upstream (built-in multi-instance `server` variable):
-    - https://github.com/esanchezm/prometheus-qbittorrent-exporter/blob/master/grafana/dashboard.json
+Sample Grafana dashboard is available from upstream:
+    - https://github.com/martabal/qbittorrent-exporter/blob/main/grafana/dashboard.json
+    (a high-cardinality variant also exists for use with settings.features.enableHighCardinality: dashboard_high_cardinality.json)

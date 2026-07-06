@@ -2,8 +2,7 @@
 # Self-contained — no existingSecret. Reaches Ready under `ct install`.
 settings:
   config:
-    host: "qbittorrent.ci.local"
-    port: "8080"
+    baseUrl: "http://localhost:8080"
   auth:
     user: "ci-admin"
     pass: "ci-password"

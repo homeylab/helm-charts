@@ -3,9 +3,9 @@
 # Declare variables to be passed into your templates.
 image:
   # -- image registry
-  registry: docker.io
+  registry: ghcr.io
   # -- image repository
-  repository: esanchezm/prometheus-qbittorrent-exporter
+  repository: martabal/qbittorrent-exporter
   # -- image pull policy
   pullPolicy: IfNotPresent
   # -- overrides the image tag whose default is the chart appVersion
@@ -36,8 +36,8 @@ fullnameOverride: ""
 
 service:
   type: ClusterIP
-  # -- set port for qbittorrent-exporter scraping (esanchezm exporter default 8000)
-  port: 8000
+  # -- set port for qbittorrent-exporter scraping (martabal exporter default 8090)
+  port: 8090
   # -- set name for the service port (referenced by probes and serviceMonitor)
   name: metrics
   # -- set protocol for the service
@@ -53,7 +53,7 @@ metrics:
     # -- set the path for prometheus scraping
     prometheus.io/path: /metrics
     # -- set the port for prometheus scraping, should match the service port
-    prometheus.io/port: "8000"
+    prometheus.io/port: "8090"
   ## if serviceMonitor enabled, pod annotations above will be ignored
   serviceMonitor:
     # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
@@ -81,31 +81,45 @@ metrics:
     rules: []
 
 ## provide settings for exporter
-## ref: https://github.com/esanchezm/prometheus-qbittorrent-exporter#configuration
+## ref: https://github.com/martabal/qbittorrent-exporter#parameters
 settings:
   # -- Add configuration as environment variables
   config:
-    # -- qBittorrent host (required). Maps to QBITTORRENT_HOST
-    host: ""
-    # -- qBittorrent WebUI port (required). Maps to QBITTORRENT_PORT
-    port: ""
-    # -- use SSL/HTTPS to reach qBittorrent. Maps to QBITTORRENT_SSL (auto-true when port is 443)
-    ssl: false
-    # -- optional path/base for the WebUI. Maps to QBITTORRENT_URL_BASE
-    urlBase: ""
-    # -- validate the WebUI TLS certificate. Maps to VERIFY_WEBUI_CERTIFICATE (set false for self-signed)
-    verifyCert: true
-    # -- exporter log level (DEBUG/INFO/WARNING/ERROR). Maps to EXPORTER_LOG_LEVEL
+    # -- qBittorrent URL, e.g. https://qbit.example.org:443 (required, else falls back to the exporter's internal default). Maps to QBITTORRENT_BASE_URL
+    baseUrl: ""
+    # -- request timeout in seconds. Maps to QBITTORRENT_TIMEOUT
+    timeout: 30
+    # -- full refresh interval in seconds. Maps to QBITTORRENT_FULL_REFRESH_INTERVAL
+    fullRefreshInterval: 100
+    # -- skip TLS certificate verification (set true for self-signed). Maps to INSECURE_SKIP_VERIFY
+    insecureSkipVerify: false
+    # -- minimum TLS version (TLS_1_2/TLS_1_3). Maps to MIN_TLS_VERSION
+    minTlsVersion: "TLS_1_3"
+    # -- exporter log level (DEBUG/INFO/WARN/ERROR). Maps to LOG_LEVEL
     logLevel: "INFO"
+  # -- Feature flags controlling metric cardinality. Maps to ENABLE_* environment variables
+  features:
+    # -- expose tracker metrics. Maps to ENABLE_TRACKER
+    enableTracker: true
+    # -- enable high-cardinality per-torrent metrics. Maps to ENABLE_HIGH_CARDINALITY
+    enableHighCardinality: false
+    # -- enable increased-cardinality metrics. Maps to ENABLE_INCREASED_CARDINALITY
+    enableIncreasedCardinality: false
+    # -- add a tracker label to metrics. Maps to ENABLE_LABEL_WITH_TRACKER
+    enableLabelWithTracker: false
+    # -- add a torrent hash label to metrics. Maps to ENABLE_LABEL_WITH_HASH
+    enableLabelWithHash: false
+    # -- add a tags label to metrics. Maps to ENABLE_LABEL_WITH_TAGS
+    enableLabelWithTags: false
   # -- Set auth for qBittorrent. If none set, the exporter connects unauthenticated
   auth:
-    # -- qBittorrent WebUI username. Maps to QBITTORRENT_USER
+    # -- qBittorrent WebUI username. Maps to QBITTORRENT_USERNAME
     user: ""
-    # -- qBittorrent WebUI password. Maps to QBITTORRENT_PASS
+    # -- qBittorrent WebUI password. Maps to QBITTORRENT_PASSWORD
     pass: ""
     # -- qBittorrent API key (qBittorrent >= 5.2; overrides user/pass). Maps to QBITTORRENT_API_KEY
     apiKey: ""
-    # -- use an existing secret instead of user/pass/apiKey. Must provide QBITTORRENT_USER + QBITTORRENT_PASS (and/or QBITTORRENT_API_KEY) keys
+    # -- use an existing secret instead of user/pass/apiKey. Must provide QBITTORRENT_USERNAME + QBITTORRENT_PASSWORD (and/or QBITTORRENT_API_KEY) keys
     existingSecret: ""
 
 # -- Add extra environment variables
@@ -173,7 +187,7 @@ httproute:
   rules: []
 
 resources: {}
-  # esanchezm is a lightweight Python exporter; if you set limits, modest values suffice.
+  # martabal is a lightweight Go exporter; if you set limits, modest values suffice.
   # limits:
   #   memory: 128Mi
   # requests:
