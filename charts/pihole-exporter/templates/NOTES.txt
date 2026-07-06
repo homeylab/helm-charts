@@ -2,6 +2,21 @@
 
 Get the {{ .Chart.Name }} instances by running this command:
     - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "pihole-exporter.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+{{- if .Values.ingress.enabled }}
+
+Exposed via Ingress:
+{{- range $host := .Values.ingress.hosts }}
+{{- range .paths }}
+    - http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+{{- end }}
+{{- end }}
+{{- else if .Values.httproute.enabled }}
+
+Exposed via Gateway API HTTPRoute:
+{{- range .Values.httproute.hostnames }}
+    - http://{{ . }}/metrics
+{{- end }}
+{{- end }}
 
 A sample Grafana dashboard is available from upstream:
     - https://grafana.com/grafana/dashboards/10176-pi-hole-exporter/
