@@ -3,9 +3,9 @@ name: qbittorrent-exporter
 description: A Helm chart to export Prometheus metrics for qbittorrent.
 type: application
 
-home: https://github.com/caseyscarborough/qbittorrent-exporter
+home: https://github.com/esanchezm/prometheus-qbittorrent-exporter
 sources:
-  - https://github.com/caseyscarborough/qbittorrent-exporter
+  - https://github.com/esanchezm/prometheus-qbittorrent-exporter
   - https://github.com/homeylab/helm-charts
 keywords:
   - qbittorrent
@@ -17,30 +17,26 @@ maintainers:
   - name: homeylab
     url: https://github.com/homeylab
 
-# This is the chart version. Increment on every change to the chart/templates.
-# SemVer: https://semver.org/
+# This is the chart version. SemVer: https://semver.org/
 version: 1.0.0
 
-# Application version (the upstream image tag). Not SemVer-bound.
-# renovate: datasource=docker depName=caseyscarborough/qbittorrent-exporter
-appVersion: "v1.3.5"
+# Application version (upstream image tag). Not SemVer-bound.
+# renovate: datasource=docker depName=esanchezm/prometheus-qbittorrent-exporter
+appVersion: "1.7.0"
 
 annotations:
-  # NOTE: license annotation mirrors the sibling pihole-exporter/bookstack charts
-  # (repo convention). Upstream caseyscarborough/qbittorrent-exporter declares no
-  # LICENSE file; this annotation describes the homeylab chart, not the app.
   artifacthub.io/license: MIT
   artifacthub.io/links: |
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
   artifacthub.io/changes: |
     - kind: changed
-      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL) with a required writable /tmp emptyDir for the JVM; override if you run a customized image"
+      description: "BREAKING - backing exporter swapped to esanchezm/prometheus-qbittorrent-exporter (the unmaintained caseyscarborough image is replaced); metric names/labels and the values schema change accordingly"
     - kind: changed
-      description: "credentials now render into a chart-managed Secret and wire via envFrom (behavior-preserving; container still receives QBITTORRENT_USERNAME/QBITTORRENT_PASSWORD; existingSecret still supported)"
+      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL)"
     - kind: changed
-      description: "BREAKING - image schema standardized to registry/repository/tag; testCurlImage renamed to testConnImage with registry/repository/tag fields"
+      description: "credentials render into a chart-managed Secret and wire via envFrom (keys QBITTORRENT_USER/QBITTORRENT_PASS/QBITTORRENT_API_KEY); existingSecret supported"
+    - kind: changed
+      description: "BREAKING - values schema: config.base_url/protocol replaced by config.host/port/ssl/urlBase; auth.username/password renamed to auth.user/auth.pass; new auth.apiKey (qBittorrent >= 5.2)"
     - kind: added
-      description: "optional ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled)"
-    - kind: added
-      description: "TCP liveness/readiness probes on the metrics port"
+      description: "optional ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled); TCP liveness/readiness probes"
