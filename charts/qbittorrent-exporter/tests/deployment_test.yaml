@@ -1,0 +1,57 @@
+suite: qbittorrent-exporter deployment wiring
+templates:
+  - templates/deployment.yaml
+release:
+  name: qbittorrent-exporter
+tests:
+  - it: never renders a plaintext QBITTORRENT_PASSWORD env
+    set:
+      settings.auth.username: admin
+      settings.auth.password: s3cret-pw
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: QBITTORRENT_PASSWORD, value: s3cret-pw }
+  - it: envFrom targets the chart-managed Secret when creds are set
+    set:
+      settings.auth.username: admin
+      settings.auth.password: s3cret-pw
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: qbittorrent-exporter
+  - it: envFrom targets existingSecret when set
+    set:
+      settings.auth.existingSecret: my-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: my-secret
+  - it: omits envFrom entirely when no creds and no existingSecret
+    set:
+      settings.auth.username: ""
+      settings.auth.password: ""
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].envFrom
+  - it: renders the container image as registry/repository:tag
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/caseyscarborough/qbittorrent-exporter:v1.3.5
+  - it: applies hardened pod and container securityContext defaults
+    asserts:
+      - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }
+      - equal: { path: "spec.template.spec.securityContext.runAsUser", value: 65534 }
+      - equal: { path: "spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem", value: true }
+      - contains:
+          path: "spec.template.spec.containers[0].securityContext.capabilities.drop"
+          content: ALL
+  - it: mounts a writable /tmp emptyDir for the JVM
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: tmp, emptyDir: {} }
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: { name: tmp, mountPath: /tmp }
