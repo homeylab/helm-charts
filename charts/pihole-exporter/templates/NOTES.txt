@@ -10,12 +10,19 @@ Exposed via Ingress:
     - http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
 {{- end }}
 {{- end }}
-{{- else if .Values.httproute.enabled }}
+{{- else if and .Values.httproute.enabled .Values.httproute.hostnames }}
 
 Exposed via Gateway API HTTPRoute:
 {{- range .Values.httproute.hostnames }}
     - http://{{ . }}/metrics
 {{- end }}
+{{- end }}
+{{- if .Values.httproute.enabled }}
+
+NOTE: HTTPRoute is enabled. This chart does not create a Gateway.
+Ensure the Gateway API CRDs are installed and the Gateway referenced in
+httproute.parentRefs exists and allows routes from namespace "{{ .Release.Namespace }}"
+(via the listener's allowedRoutes or a ReferenceGrant).
 {{- end }}
 
 A sample Grafana dashboard is available from upstream:
