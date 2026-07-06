@@ -52,3 +52,5 @@ annotations:
       description: "BREAKING - image schema standardized to registry/repository/tag; testConnImage.name renamed to testConnImage.repository and a testConnImage.registry field added (default docker.io, no image change)"
     - kind: added
       description: "Gateway API HTTPRoute as an alternative to ingress (httproute.enabled)"
+    - kind: changed
+      description: "ingress template collapsed to networking.k8s.io/v1 (drops the removed v1beta1/extensions fallbacks; requires Kubernetes 1.19+)"
