@@ -45,8 +45,8 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
   artifacthub.io/changes: |
     - kind: changed
-      description: "BREAKING - credentials moved from plaintext Deployment env into a chart-managed Secret (existingSecret still supported)"
+      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL); override if you run a customized image"
+    - kind: changed
+      description: "credentials now render into a chart-managed Secret and wire via envFrom (behavior-preserving; container still receives PIHOLE_PASSWORD; existingSecret still supported)"
     - kind: added
       description: "Gateway API HTTPRoute as an alternative to ingress (httproute.enabled)"
-    - kind: added
-      description: "hardened securityContext / podSecurityContext defaults"

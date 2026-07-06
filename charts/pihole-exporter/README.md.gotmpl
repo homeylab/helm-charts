@@ -6,9 +6,10 @@
 A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exporter) for Pi-hole. Based on the `ekofr/pihole-exporter` image.
 
 > [!IMPORTANT]
-> **Chart `1.0.0` moves credentials into a chart-managed Secret.** This is a breaking change:
-> - `settings.auth.password` / `settings.auth.token` are no longer passed as plaintext Deployment env; the chart now renders a `Secret` (`templates/secret.yaml`) and wires it via `envFrom`. Behavior is preserved — the value still lands as `PIHOLE_PASSWORD`.
-> - `settings.auth.existingSecret` still overrides the managed Secret; the secret must provide the `PIHOLE_PASSWORD` key.
+> **Chart `1.0.0` changes default behavior — review before upgrading.**
+> - **Hardened `securityContext` defaults (potentially breaking).** The pod now defaults to `runAsNonRoot` / `runAsUser: 65534` / `readOnlyRootFilesystem: true` / `drop: [ALL]`. The stock `ekofr/pihole-exporter` image runs cleanly under these; a customized image or one that writes to the container filesystem may not. Override `podSecurityContext` / `securityContext` if needed.
+> - **Credentials now render into a chart-managed Secret (behavior-preserving).** `settings.auth.password` / `settings.auth.token` are no longer inlined as plaintext Deployment env; the chart renders a `Secret` (`templates/secret.yaml`) and wires it via `envFrom`. The container still receives the same `PIHOLE_PASSWORD` value — this is a security improvement, not a functional change. Upgrade edge case: if a Secret named after the release already exists in the namespace and is not owned by this release, helm will report an ownership conflict.
+> - `settings.auth.existingSecret` still overrides the managed Secret (unchanged); the secret must provide the `PIHOLE_PASSWORD` key.
 > - Requires a **Pi-hole v6+** server (exporter v1.x). Still on Pi-hole v5? Pin the chart to `0.0.2` (`--version 0.0.2`).
 
 ## Add Chart Repo
@@ -74,7 +75,7 @@ helm upgrade -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihol
 #### Upgrade Matrix For Releases
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `0.1.X` | `1.0.0` | Credentials moved from plaintext Deployment env into a chart-managed Secret (`templates/secret.yaml`), wired via `envFrom`. If you set `settings.auth.password`/`token`, no action is needed — the value now lands in a Secret. `settings.auth.existingSecret` users are unaffected. New optional `httproute.*` (Gateway API v1) and hardened `securityContext` defaults were added. |
+| `0.1.X` | `1.0.0` | **Hardened `securityContext` defaults now apply** (`runAsUser: 65534`, `readOnlyRootFilesystem`, etc.) — fine for the stock image; override if you run a customized one. Credentials now render into a chart-managed Secret (`templates/secret.yaml`) wired via `envFrom` — behavior-preserving, the container still gets the same `PIHOLE_PASSWORD`; no action needed if you set `settings.auth.password`/`token`. `settings.auth.existingSecret` users are unaffected. New optional `httproute.*` (Gateway API v1) was added. |
 
 {{ template "chart.valuesHeader" . }}
 {{ template "chart.valuesTable" . }}
