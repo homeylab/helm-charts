@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: "{{ .Values.testCurlImage.repository}}/{{ .Values.testCurlImage.name }}:{{ .Values.testCurlImage.tag }}"
+      image: "{{ .Values.testConnImage.registry }}/{{ .Values.testConnImage.repository }}:{{ .Values.testConnImage.tag }}"
       command: ['wget']
-      args: ['{{ include "qbittorrent-exporter.fullname" . }}:{{ .Values.service.port }}{{ .Values.testCurlImage.path }}']
+      args: ['{{ include "qbittorrent-exporter.fullname" . }}:{{ .Values.service.port }}{{ .Values.testConnImage.path }}']
   restartPolicy: Never

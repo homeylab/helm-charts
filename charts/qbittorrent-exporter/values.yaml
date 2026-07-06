@@ -1,52 +1,68 @@
 # Default values for qbittorrent-exporter.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
 image:
-  repository: docker.io
-  name: caseyscarborough/qbittorrent-exporter
+  # -- image registry
+  registry: docker.io
+  # -- image repository
+  repository: caseyscarborough/qbittorrent-exporter
+  # -- image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- overrides the image tag whose default is the chart appVersion
   tag: ""
+
+## set image for post install helm tests
+testConnImage:
+  # -- test image registry
+  registry: docker.io
+  # -- test image repository
+  repository: busybox
+  # -- test image tag
+  tag: "1.36.1"
+  # -- test image pull policy
+  pullPolicy: IfNotPresent
+  # -- the path for the post-install connection check
+  path: /metrics
+
+updateStrategy:
+  # -- set the update strategy for the deployment
+  type: Recreate
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-## set image for post install helm tests
-testCurlImage:
-  repository: docker.io
-  name: busybox
-  tag: "1.36.1"
-  pullPolicy: IfNotPresent
-  # the url for post install check test
-  path: /metrics
-
-## update strategy for newer versions
-updateStrategy:
-    type: Recreate
-
-## service properties
 service:
   type: ClusterIP
+  # -- set port for qbittorrent-exporter scraping (upstream default 17871)
   port: 17871
+  # -- set name for the service port (referenced by probes and serviceMonitor)
   name: metrics
+  # -- set protocol for the service
   protocol: TCP
 
-## metrics properties
+## set metrics export properties
 metrics:
-  ## -- Enable and configure a Prometheus serviceMonitor for the chart under this key.
+  # -- enable/disable prometheus podAnnotations and serviceMonitor
   enabled: true
+  # -- Add podAnnotations for prometheus scraping
   podAnnotations:
     prometheus.io/scrape: "true"
+    # -- set the path for prometheus scraping
     prometheus.io/path: /metrics
+    # -- set the port for prometheus scraping, should match the service port
     prometheus.io/port: "17871"
   ## if serviceMonitor enabled, pod annotations above will be ignored
   serviceMonitor:
+    # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
     enabled: false
+    # -- set the path for prometheus scraping for serviceMonitor
     path: /metrics
+    # -- how often to scrape for serviceMonitor
     interval: 2m
+    # -- scrapeTimeout for serviceMonitor
     scrapeTimeout: 30s
+    # -- set additional labels for serviceMonitor
     additionalLabels: {}
     targetLabels: []
     # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
@@ -55,45 +71,37 @@ metrics:
   ## Enable and configure Prometheus Rules for the chart under this key.
   ## not yet implemented
   prometheusRule:
+    # -- enable/disable prometheusRule
     enabled: false
+    # -- set labels for prometheusRule
     labels: {}
-    ## -- Configure additional rules for the chart under this key.
+    # -- Configure prometheusRule rules for the chart
     rules: []
-      # - alert: UpsStatusUnknown
-      #   annotations:
-      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
-      #     summary: UPS status unknown.
-      #   expr: |
-      #     nut_status == 0
-      #   for: 10s
-      #   labels:
-      #     severity: critical
 
 ## provide settings for exporter
+## ref: https://github.com/caseyscarborough/qbittorrent-exporter#parameters
 settings:
-  ## core configuration
-  ## ref: https://github.com/caseyscarborough/qbittorrent-exporter#parameters
+  # -- Add configuration as environment variables
   config:
-    # examples: `http://somehost:8080`, `https://qbit.somedomain.org`
+    # -- full qBittorrent base URL, e.g. `http://somehost:8080` or `https://qbit.example.org`. If set, host/port/protocol are ignored
     base_url: ""
-    # optionally provide host information by pieces
-    # if `base_url` is empty, we will try 3 below: `host`, `port`, `protocol`
+    # -- qBittorrent host (used when base_url is empty)
     host: ""
+    # -- qBittorrent port (used when base_url is empty)
     port: ""
+    # -- qBittorrent protocol (used when base_url is empty)
     protocol: "http"
-  ## provide auth settings
-  ## if no auth fields provided, no auth used
+  # -- Set auth for qBittorrent. If no auth provided, the exporter runs unauthenticated
   auth:
-    # can optionally provide `QBITTORRENT_USERNAME` and `QBITTORRENT_PASSWORD` in existingSecret
-    existingSecret: ""
-    # if existingSecret is given, username will be ignored
+    # -- qBittorrent WebUI username. Maps to `QBITTORRENT_USERNAME`
     username: ""
-    # if existingSecret is given, password will be ignored
+    # -- qBittorrent WebUI password. Maps to `QBITTORRENT_PASSWORD`
     password: ""
+    # -- use an existing secret instead of `auth.username`/`auth.password`. The secret must provide the `QBITTORRENT_USERNAME` and `QBITTORRENT_PASSWORD` keys
+    existingSecret: ""
 
-## extra env applied to exporter
+# -- Add extra environment variables
 extraEnv: {}
-  # SOME_VAR: true
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -109,37 +117,93 @@ serviceAccount:
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  fsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+httproute:
+  # -- enable a Gateway API (gateway.networking.k8s.io/v1) HTTPRoute as an alternative to ingress
+  enabled: false
+  # -- annotations added to the HTTPRoute
+  annotations: {}
+  # -- parentRefs pointing at the Gateway(s) to attach to; `name` is required
+  parentRefs: []
+  #  - name: traefik-gateway
+  #    namespace: traefik
+  #    sectionName: websecure
+  # -- hostnames matched by the route
+  hostnames: []
+  #  - qbittorrent-exporter.example.org
+  # -- explicit HTTPRoute rules; if empty, a single rule routing all paths to the Service is generated
+  rules: []
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # choice for the user. NOTE: this is a JVM (openjdk:17) image — if you set limits, give
+  # enough memory headroom (>=256Mi) or the JVM may OOM on start.
   # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
+  #   memory: 512Mi
   # requests:
-  #   cpu: 100m
+  #   cpu: 25m
   #   memory: 128Mi
 
+## Liveness probe (TCP — upstream exposes only /metrics, no health endpoints)
+livenessProbe:
+  tcpSocket:
+    port: metrics
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 3
+  failureThreshold: 5
+  successThreshold: 1
+
+## Readiness probe (TCP — upstream exposes only /metrics, no health endpoints)
+readinessProbe:
+  tcpSocket:
+    port: metrics
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 3
+  failureThreshold: 5
+  successThreshold: 1
+
 # Additional volumes on the output Deployment definition.
+# NOTE: the chart ALWAYS mounts a writable `/tmp` emptyDir (required for the hardened
+# readOnlyRootFilesystem JVM to boot); anything here is appended to it.
 volumes: []
 # - name: foo
 #   secret:
 #     secretName: mysecret
 #     optional: false
 
-# Additional volumeMounts on the output Deployment definition.
+# Additional volumeMounts on the output Deployment definition (appended after /tmp).
 volumeMounts: []
 # - name: foo
 #   mountPath: "/etc/foo"
