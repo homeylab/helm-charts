@@ -6,12 +6,9 @@ A Helm Chart to deploy a Prometheus exporter for Pi-hole
 
 A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exporter) for Pi-hole. Based on the `ekofr/pihole-exporter` image.
 
-> [!NOTE]
-> Requires a **Pi-hole v6+** server (exporter v1.x). Still on Pi-hole v5? Pin the chart to `0.0.2` (`--version 0.0.2`).
-> The exporter reads only `PIHOLE_PASSWORD`; the chart maps both `settings.auth.password` and the deprecated `settings.auth.token` to it (accepts a Pi-hole app password or the legacy WEBPASSWORD API token).
-
 ## Table of Contents <!-- omit in toc -->
 - [Add Chart Repo](#add-chart-repo)
+- [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Upgrade](#upgrade)
 - [Values](#values)
@@ -24,6 +21,11 @@ helm repo add homeylab https://homeylab.github.io/helm-charts/
 # update the chart, this can also be run to pull new versions of the chart for upgrades
 helm repo update homeylab
 ```
+
+## Prerequisites
+Requires a **Pi-hole v6+** server (exporter v1.x). Still on Pi-hole v5? Pin the chart to `0.0.2` (`--version 0.0.2`).
+
+The exporter reads only `PIHOLE_PASSWORD`; the chart maps both `settings.auth.password` and the deprecated `settings.auth.token` to it (accepts a Pi-hole app password or the legacy WEBPASSWORD API token). When using `settings.auth.existingSecret`, the referenced secret must provide the `PIHOLE_PASSWORD` key.
 
 ## Install
 ```bash

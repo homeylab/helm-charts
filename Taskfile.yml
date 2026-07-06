@@ -90,6 +90,15 @@ tasks:
       - task: unittest
         vars: { APP: '{{.APP}}' }
 
+  docs:
+    desc: Regenerate a chart's README from README.md.gotmpl via helm-docs (APP=<chart>)
+    # Scoped to a single chart on purpose: charts without a README.md.gotmpl would
+    # be overwritten with helm-docs' default template, clobbering hand-written READMEs.
+    requires:
+      vars: [APP]
+    cmds:
+      - helm-docs --chart-search-root {{.CHART_DIR}}/{{.APP}}
+
   local-template:
     desc: Render a chart with local values (APP=<chart>)
     requires:
