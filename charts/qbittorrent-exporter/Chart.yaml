@@ -22,7 +22,7 @@ version: 1.0.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=esanchezm/prometheus-qbittorrent-exporter
-appVersion: "1.7.0"
+appVersion: "v1.7.0"
 
 annotations:
   artifacthub.io/license: MIT
