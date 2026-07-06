@@ -55,13 +55,13 @@ spec:
             - name: QBITTORRENT_PORT
               value: {{ .Values.settings.config.port | quote }}
             - name: QBITTORRENT_SSL
-              value: {{ .Values.settings.config.ssl | quote }}
+              value: {{ ternary "True" "False" .Values.settings.config.ssl | quote }}
           {{- with .Values.settings.config.urlBase }}
             - name: QBITTORRENT_URL_BASE
               value: {{ . | quote }}
           {{- end }}
             - name: VERIFY_WEBUI_CERTIFICATE
-              value: {{ .Values.settings.config.verifyCert | quote }}
+              value: {{ ternary "True" "False" .Values.settings.config.verifyCert | quote }}
             - name: EXPORTER_LOG_LEVEL
               value: {{ .Values.settings.config.logLevel | quote }}
           {{- range $key, $val := .Values.extraEnv }}

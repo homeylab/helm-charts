@@ -57,6 +57,25 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content: { name: QBITTORRENT_HOST, value: qb.local }
+  - it: renders Python-style capitalized booleans (exporter compares == "True")
+    set:
+      settings.config.ssl: true
+      settings.config.verifyCert: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: QBITTORRENT_SSL, value: "True" }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: VERIFY_WEBUI_CERTIFICATE, value: "False" }
+  - it: defaults render QBITTORRENT_SSL False and VERIFY_WEBUI_CERTIFICATE True
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: QBITTORRENT_SSL, value: "False" }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: VERIFY_WEBUI_CERTIFICATE, value: "True" }
   - it: applies hardened pod and container securityContext defaults
     asserts:
       - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }
