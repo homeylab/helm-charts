@@ -10,6 +10,14 @@ A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exp
 > Requires a **Pi-hole v6+** server (exporter v1.x). Still on Pi-hole v5? Pin the chart to `0.0.2` (`--version 0.0.2`).
 > The exporter reads only `PIHOLE_PASSWORD`; the chart maps both `settings.auth.password` and the deprecated `settings.auth.token` to it (accepts a Pi-hole app password or the legacy WEBPASSWORD API token).
 
+## Table of Contents <!-- omit in toc -->
+- [Add Chart Repo](#add-chart-repo)
+- [Install](#install)
+- [Upgrade](#upgrade)
+- [Values](#values)
+- [Grafana Dashboards](#grafana-dashboards)
+- [References](#references)
+
 ## Add Chart Repo
 ```bash
 helm repo add homeylab https://homeylab.github.io/helm-charts/
