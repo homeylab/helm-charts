@@ -7,7 +7,6 @@ A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exp
 
 > [!NOTE]
 > Requires a **Pi-hole v6+** server (exporter v1.x). Still on Pi-hole v5? Pin the chart to `0.0.2` (`--version 0.0.2`).
-> Upgrading from `0.1.X`? See [Migrating to 1.0.0](#migrating-to-100).
 
 ## Add Chart Repo
 ```bash
@@ -72,32 +71,7 @@ helm upgrade -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihol
 #### Upgrade Matrix For Releases
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `0.1.X` | `1.0.0` | Review [Migrating to 1.0.0](#migrating-to-100). No values changes are required for the common case (`settings.auth.password`/`token` set, or `existingSecret`). |
-
-## Migrating to 1.0.0
-
-`1.0.0` is the first stable release. Two defaults change on upgrade; a third feature is added.
-
-### Hardened securityContext defaults (potentially breaking)
-
-The pod now defaults to a hardened security posture:
-
-- Pod: `runAsNonRoot: true`, `runAsUser: 65534`, `fsGroup: 65534`, `seccompProfile.type: RuntimeDefault`
-- Container: `readOnlyRootFilesystem: true`, `allowPrivilegeEscalation: false`, `runAsNonRoot: true`, `capabilities.drop: [ALL]`
-
-The stock `ekofr/pihole-exporter` image (a static Go binary) runs cleanly under these. A customized image, or one that writes to the container filesystem, may not — override `podSecurityContext` / `securityContext` in your values if needed. This is the change that motivates the major version bump.
-
-### Credentials moved to a chart-managed Secret (behavior-preserving)
-
-`settings.auth.password` / `settings.auth.token` are no longer inlined as plaintext Deployment env. The chart now renders a `Secret` (`templates/secret.yaml`) and wires it via `envFrom`. The container still receives the same `PIHOLE_PASSWORD` value, so **no action is needed** if you set these — it is a security improvement, not a functional change.
-
-- `settings.auth.existingSecret` still overrides the managed Secret (unchanged); the referenced secret must provide the `PIHOLE_PASSWORD` key.
-- The Secret only renders when a password/token is set — an unauthenticated Pi-hole (no creds) is still valid and renders no Secret.
-- Upgrade edge case: if a Secret named after the release already exists in the namespace and is not owned by this release, helm reports an ownership conflict. Remove or adopt the pre-existing Secret first.
-
-### New: optional Gateway API HTTPRoute
-
-An optional `HTTPRoute` (`httproute.enabled`, default off) is available as an alternative to ingress. The chart does not create the Gateway — see the install example below.
+| `0.1.X` | `1.0.0` | **Hardened `securityContext` defaults now apply** (`runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem`, `drop: [ALL]`) — fine for the stock `ekofr` image; override `podSecurityContext`/`securityContext` if you run a customized one. This is what motivates the major bump. Credentials now render into a chart-managed Secret (`templates/secret.yaml`) wired via `envFrom` — behavior-preserving, the container still gets the same `PIHOLE_PASSWORD`, so no action is needed if you set `settings.auth.password`/`token`; `settings.auth.existingSecret` users are unaffected. New optional `httproute.*` (Gateway API v1) was added. |
 
 {{ template "chart.valuesHeader" . }}
 {{ template "chart.valuesTable" . }}
