@@ -1,0 +1,7 @@
+# ct install permutation: chart-managed Secret path.
+# Also serves as a usage example. Reaches Ready under `ct install`.
+settings:
+  config:
+    hostname: pi-hole.ci.local
+  auth:
+    password: "ci-pass"
