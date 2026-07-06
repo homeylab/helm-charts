@@ -3,7 +3,7 @@
 {{ template "chart.badgesSection" . }}
 {{ template "chart.description" . }}
 
-A Helm Chart to deploy a Prometheus [exporter](https://github.com/caseyscarborough/qbittorrent-exporter) for qBittorrent. Based on the `caseyscarborough/qbittorrent-exporter` image.
+A Helm Chart to deploy a Prometheus [exporter](https://github.com/esanchezm/prometheus-qbittorrent-exporter) for qBittorrent. Based on the `esanchezm/prometheus-qbittorrent-exporter` image.
 
 ## Table of Contents <!-- omit in toc -->
 - [Add Chart Repo](#add-chart-repo)
@@ -23,9 +23,9 @@ helm repo update homeylab
 ```
 
 ## Prerequisites
-Point the exporter at a reachable qBittorrent WebUI. Set either `settings.config.base_url` (e.g. `http://qbittorrent:8080`) or the `settings.config.host`/`port`/`protocol` pieces.
+Point the exporter at a reachable qBittorrent WebUI. Set `settings.config.host` and `settings.config.port` (required). For HTTPS set `settings.config.ssl: true` (auto-enabled when the port is `443`); for a self-signed certificate set `settings.config.verifyCert: false`.
 
-Authentication is optional. To authenticate, set `settings.auth.username` and `settings.auth.password` (mapped to `QBITTORRENT_USERNAME` / `QBITTORRENT_PASSWORD`). When using `settings.auth.existingSecret`, the referenced secret must provide the `QBITTORRENT_USERNAME` and `QBITTORRENT_PASSWORD` keys.
+Authentication is optional. Set `settings.auth.user` + `settings.auth.pass`, or (qBittorrent >= 5.2) `settings.auth.apiKey` (which overrides user/pass). When using `settings.auth.existingSecret`, the referenced secret must provide `QBITTORRENT_USER` and `QBITTORRENT_PASS` (and/or `QBITTORRENT_API_KEY`) keys.
 
 ## Install
 ```bash
@@ -51,10 +51,12 @@ Only some options are shown, view `values.yaml` for an exhaustive list.
 # custom-values.yaml
 settings:
   config:
-    base_url: "http://qbittorrent:8080"
+    host: "qbittorrent.example.org"
+    port: "8080"
+    ssl: false
   auth:
-    username: "admin"
-    password: "fakepassword"
+    user: "admin"
+    pass: "fakepassword"
 
 metrics:
   enabled: true
@@ -86,22 +88,24 @@ _The matrix below displays certain versions of this helm chart that could result
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `0.1.X` | `1.0.0` | Hardened `securityContext` defaults and a standardized image schema now apply; credentials move into a chart-managed Secret (behavior-preserving). **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
+| `0.1.X` | `1.0.0` | Backing exporter swapped, hardened `securityContext`, standardized image schema, chart-managed Secret. **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
 ## Migrating to 1.0.0
-First major release. Most changes are transparent if you already set `settings.auth.username`/`password` — review the breaking items below before upgrading.
+First major release. This version **swaps the backing exporter image** and hardens the chart. Review all items before upgrading.
 
-- **Hardened `securityContext` defaults (breaking — motivates the major bump).** The pod now runs with `runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem: true`, and `drop: [ALL]`. Because the upstream image is a JVM (`openjdk:17`), the chart also mounts a writable `/tmp` emptyDir for `java.io.tmpdir`. Override `podSecurityContext`/`securityContext` if you run a customized image.
-- **Credentials render into a chart-managed Secret (behavior-preserving).** `settings.auth.username`/`password` now populate `templates/secret.yaml`, wired via `envFrom`. The container still receives the same `QBITTORRENT_USERNAME`/`QBITTORRENT_PASSWORD`, so no action is needed. `settings.auth.existingSecret` users are unaffected.
-- **Image schema standardized (breaking).** The image block moved to `image.registry`/`image.repository`/`image.tag`; the new `registry` field defaults to `docker.io` (no image change). The post-install test image renamed from `testCurlImage` (`repository`/`name`) to `testConnImage` (`registry`/`repository`/`tag`) — adjust only if you overrode those fields.
-- **New optional Ingress (`networking.k8s.io/v1`) and Gateway API `HTTPRoute`.** Both disabled by default; enable with `ingress.enabled` or `httproute.enabled` (the chart does not create the Gateway).
-- **TCP liveness/readiness probes** on the metrics port are now set by default (the exporter exposes only `/metrics`, so HTTP health probes are not used).
+- **Backing exporter changed (breaking).** The chart now deploys `esanchezm/prometheus-qbittorrent-exporter` (actively maintained, Python) instead of the unmaintained `caseyscarborough/qbittorrent-exporter` (Java, last released 2023). **Metric names and labels differ** — re-import the Grafana dashboard (see below) after upgrading.
+- **Values schema changed (breaking).** `settings.config.base_url` and `settings.config.protocol` are removed; set `settings.config.host` + `settings.config.port` + `settings.config.ssl` (+ optional `settings.config.urlBase`). Auth `settings.auth.username`/`password` are renamed to `settings.auth.user`/`settings.auth.pass`. A new `settings.auth.apiKey` supports qBittorrent >= 5.2.
+- **Credentials render into a chart-managed Secret.** `settings.auth.user`/`pass`/`apiKey` populate `templates/secret.yaml` (keys `QBITTORRENT_USER`/`QBITTORRENT_PASS`/`QBITTORRENT_API_KEY`), wired via `envFrom`. `settings.auth.existingSecret` must now provide those keys.
+- **Hardened `securityContext` defaults (breaking).** `runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem: true`, `drop: [ALL]`. Fine for the stock image; override if you run a customized one.
+- **Image schema standardized (breaking).** `image.registry`/`image.repository`/`image.tag`; test image is `testConnImage.registry`/`repository`/`tag`.
+- **Default listen port is now `8000`** (the esanchezm exporter default), exposed as the `metrics` service port.
+- **New optional Ingress (`networking.k8s.io/v1`) and Gateway API `HTTPRoute`** (both disabled by default); **TCP liveness/readiness probes** on the metrics port.
 
 ## Configuration Options
 {{ template "chart.valuesTable" . }}
 
 ## Grafana Dashboards
-Sample dashboards are available from [upstream](https://github.com/caseyscarborough/qbittorrent-grafana-dashboard).
+Use the dashboard shipped with the upstream exporter: [`esanchezm/prometheus-qbittorrent-exporter` → `grafana/dashboard.json`](https://github.com/esanchezm/prometheus-qbittorrent-exporter/blob/master/grafana/dashboard.json). It includes a built-in `server` template variable, so a single dashboard can switch between multiple exporter instances (run one release per qBittorrent instance).
 
 ## References
-* https://github.com/caseyscarborough/qbittorrent-exporter
+* https://github.com/esanchezm/prometheus-qbittorrent-exporter
