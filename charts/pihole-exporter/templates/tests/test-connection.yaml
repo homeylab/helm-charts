@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: "{{ .Values.testConnImage.repository}}/{{ .Values.testConnImage.name }}:{{ .Values.testConnImage.tag }}"
+      image: "{{ .Values.testConnImage.registry }}/{{ .Values.testConnImage.repository }}:{{ .Values.testConnImage.tag }}"
       command: ['wget']
       args: ['{{ include "pihole-exporter.fullname" . }}:{{ .Values.service.port }}{{ .Values.testConnImage.path }}']
   restartPolicy: Never

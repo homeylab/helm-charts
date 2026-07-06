@@ -2,18 +2,26 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 image:
+  # -- image registry
+  registry: docker.io
+  # -- image repository
   repository: ekofr/pihole-exporter
+  # -- image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- overrides the image tag whose default is the chart appVersion
   tag: ""
 
 ## set image for post install helm tests
 testConnImage:
-  repository: docker.io
-  name: busybox
+  # -- test image registry
+  registry: docker.io
+  # -- test image repository
+  repository: busybox
+  # -- test image tag
   tag: "1.36.1"
+  # -- test image pull policy
   pullPolicy: IfNotPresent
-  ## the path for post install check test
+  # -- the path for the post-install connection check
   path: /metrics
 
 updateStrategy:
@@ -123,16 +131,20 @@ serviceAccount:
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  fsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
 
 ingress:
   enabled: false
@@ -149,6 +161,22 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+httproute:
+  # -- enable a Gateway API (gateway.networking.k8s.io/v1) HTTPRoute as an alternative to ingress
+  enabled: false
+  # -- annotations added to the HTTPRoute
+  annotations: {}
+  # -- parentRefs pointing at the Gateway(s) to attach to; `name` is required
+  parentRefs: []
+  #  - name: traefik-gateway
+  #    namespace: traefik
+  #    sectionName: websecure
+  # -- hostnames matched by the route
+  hostnames: []
+  #  - pihole-exporter.example.org
+  # -- explicit HTTPRoute rules; if empty, a single rule routing all paths to the Service is generated
+  rules: []
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

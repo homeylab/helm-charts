@@ -1,0 +1,47 @@
+suite: pihole-exporter deployment wiring
+templates:
+  - templates/deployment.yaml
+release:
+  name: pihole-exporter
+tests:
+  - it: never renders a plaintext PIHOLE_PASSWORD env
+    set:
+      settings.auth.password: s3cret-pw
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: PIHOLE_PASSWORD, value: s3cret-pw }
+  - it: envFrom targets the chart-managed Secret when a password is set
+    set:
+      settings.auth.password: s3cret-pw
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: pihole-exporter
+  - it: envFrom targets existingSecret when set
+    set:
+      settings.auth.existingSecret: my-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: my-secret
+  - it: omits envFrom entirely when no creds and no existingSecret
+    set:
+      settings.auth.password: ""
+      settings.auth.token: ""
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].envFrom
+  - it: renders the container image as registry/repository:tag
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/ekofr/pihole-exporter:v1.2.0
+  - it: applies hardened pod and container securityContext defaults
+    asserts:
+      - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }
+      - equal: { path: "spec.template.spec.securityContext.runAsUser", value: 65534 }
+      - equal: { path: "spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem", value: true }
+      - contains:
+          path: "spec.template.spec.containers[0].securityContext.capabilities.drop"
+          content: ALL

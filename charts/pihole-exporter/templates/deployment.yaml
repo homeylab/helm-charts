@@ -41,7 +41,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: {{ .Values.service.name}}
@@ -64,19 +64,11 @@ spec:
             - name: {{ $key | upper }}
               value: {{ $val | quote }}
           {{- end }}
-        {{- if not .Values.settings.auth.existingSecret }}
-          {{- /* v1.x exposes only PIHOLE_PASSWORD; it accepts either a password
-                 or the legacy WEBPASSWORD API token. `token` is kept as a
-                 deprecated alias and routed to PIHOLE_PASSWORD. */}}
-          {{- with (.Values.settings.auth.token | default .Values.settings.auth.password) }}
-            - name: PIHOLE_PASSWORD
-              value: {{ . | quote }}
-          {{- end }}
-        {{- end }}
+          {{- $managedSecret := and (not .Values.settings.auth.existingSecret) (.Values.settings.auth.token | default .Values.settings.auth.password) }}
+          {{- if or .Values.settings.auth.existingSecret $managedSecret }}
           envFrom:
-          {{- if .Values.settings.auth.existingSecret }}
             - secretRef:
-                name: {{ .Values.settings.auth.existingSecret }}
+                name: {{ .Values.settings.auth.existingSecret | default (include "pihole-exporter.fullname" .) }}
           {{- end }}
         {{- if .Values.livenessProbe }}
           livenessProbe:

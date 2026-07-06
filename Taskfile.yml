@@ -64,6 +64,41 @@ tasks:
     cmds:
       - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} --debug
 
+  kubeconform:
+    desc: Validate rendered manifests against k8s schemas (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} | kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version {{.K8S_VERSION | default "1.30.0"}}
+
+  unittest:
+    desc: Run helm unittest for a chart (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm unittest {{.CHART_DIR}}/{{.APP}}
+
+  verify:
+    desc: Local gate — lint + kubeconform + unittest (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - task: lint
+        vars: { APP: '{{.APP}}' }
+      - task: kubeconform
+        vars: { APP: '{{.APP}}' }
+      - task: unittest
+        vars: { APP: '{{.APP}}' }
+
+  docs:
+    desc: Regenerate a chart's README from README.md.gotmpl via helm-docs (APP=<chart>)
+    # Scoped to a single chart on purpose: charts without a README.md.gotmpl would
+    # be overwritten with helm-docs' default template, clobbering hand-written READMEs.
+    requires:
+      vars: [APP]
+    cmds:
+      - helm-docs --chart-search-root {{.CHART_DIR}}/{{.APP}}
+
   local-template:
     desc: Render a chart with local values (APP=<chart>)
     requires:
