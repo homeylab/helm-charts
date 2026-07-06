@@ -1,25 +1,46 @@
 apiVersion: v2
 name: qbittorrent-exporter
 description: A Helm chart to export Prometheus metrics for qbittorrent.
-
-# A chart can be either an 'application' or a 'library' chart.
-#
-# Application charts are a collection of templates that can be packaged into versioned archives
-# to be deployed.
-#
-# Library charts provide useful utilities or functions for the chart developer. They're included as
-# a dependency of application charts to inject those utilities and functions into the rendering
-# pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.0
+home: https://github.com/caseyscarborough/qbittorrent-exporter
+sources:
+  - https://github.com/caseyscarborough/qbittorrent-exporter
+  - https://github.com/homeylab/helm-charts
+keywords:
+  - qbittorrent
+  - torrent
+  - prometheus
+  - exporter
+  - metrics
+maintainers:
+  - name: homeylab
+    url: https://github.com/homeylab
 
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
-# It is recommended to use it with quotes.
+# This is the chart version. Increment on every change to the chart/templates.
+# SemVer: https://semver.org/
+version: 1.0.0
+
+# Application version (the upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=caseyscarborough/qbittorrent-exporter
 appVersion: "v1.3.5"
+
+annotations:
+  # NOTE: license annotation mirrors the sibling pihole-exporter/bookstack charts
+  # (repo convention). Upstream caseyscarborough/qbittorrent-exporter declares no
+  # LICENSE file; this annotation describes the homeylab chart, not the app.
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
+  artifacthub.io/changes: |
+    - kind: changed
+      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL) with a required writable /tmp emptyDir for the JVM; override if you run a customized image"
+    - kind: changed
+      description: "credentials now render into a chart-managed Secret and wire via envFrom (behavior-preserving; container still receives QBITTORRENT_USERNAME/QBITTORRENT_PASSWORD; existingSecret still supported)"
+    - kind: changed
+      description: "BREAKING - image schema standardized to registry/repository/tag; testCurlImage renamed to testConnImage with registry/repository/tag fields"
+    - kind: added
+      description: "optional ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled)"
+    - kind: added
+      description: "TCP liveness/readiness probes on the metrics port"
