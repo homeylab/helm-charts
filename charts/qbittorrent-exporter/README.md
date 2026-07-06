@@ -98,7 +98,7 @@ First major release. This version **swaps the backing exporter image** and harde
 - **Values schema changed (breaking).** `settings.config.base_url` and `settings.config.protocol` are removed; set `settings.config.host` + `settings.config.port` + `settings.config.ssl` (+ optional `settings.config.urlBase`). Auth `settings.auth.username`/`password` are renamed to `settings.auth.user`/`settings.auth.pass`. A new `settings.auth.apiKey` supports qBittorrent >= 5.2.
 - **Credentials render into a chart-managed Secret.** `settings.auth.user`/`pass`/`apiKey` populate `templates/secret.yaml` (keys `QBITTORRENT_USER`/`QBITTORRENT_PASS`/`QBITTORRENT_API_KEY`), wired via `envFrom`. `settings.auth.existingSecret` must now provide those keys.
 - **Hardened `securityContext` defaults (breaking).** `runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem: true`, `drop: [ALL]`. Fine for the stock image; override if you run a customized one.
-- **Image schema standardized (breaking).** `image.registry`/`image.repository`/`image.tag`; test image is `testConnImage.registry`/`repository`/`tag`.
+- **Image schema standardized (breaking).** `image.registry`/`image.repository`/`image.tag`; the `helm test` connection-check image is `tests.image.registry`/`repository`/`tag`/`pullPolicy` and `tests.path`.
 - **Default listen port is now `8000`** (the esanchezm exporter default), exposed as the `metrics` service port.
 - **New optional Ingress (`networking.k8s.io/v1`) and Gateway API `HTTPRoute`** (both disabled by default); **TCP liveness/readiness probes** on the metrics port.
 
@@ -185,11 +185,11 @@ First major release. This version **swaps the backing exporter image** and harde
 | settings.config.ssl | bool | `false` | use SSL/HTTPS to reach qBittorrent. Maps to QBITTORRENT_SSL (auto-true when port is 443) |
 | settings.config.urlBase | string | `""` | optional path/base for the WebUI. Maps to QBITTORRENT_URL_BASE |
 | settings.config.verifyCert | bool | `true` | validate the WebUI TLS certificate. Maps to VERIFY_WEBUI_CERTIFICATE (set false for self-signed) |
-| testConnImage.path | string | `"/metrics"` | the path for the post-install connection check |
-| testConnImage.pullPolicy | string | `"IfNotPresent"` | test image pull policy |
-| testConnImage.registry | string | `"docker.io"` | test image registry |
-| testConnImage.repository | string | `"busybox"` | test image repository |
-| testConnImage.tag | string | `"1.36.1"` | test image tag |
+| tests.image.pullPolicy | string | `"IfNotPresent"` | pull policy for the `helm test` connection-check image |
+| tests.image.registry | string | `"docker.io"` | registry for the `helm test` connection-check image |
+| tests.image.repository | string | `"busybox"` | repository for the `helm test` connection-check image |
+| tests.image.tag | string | `"1.36.1"` | tag for the `helm test` connection-check image |
+| tests.path | string | `"/metrics"` | path the `helm test` request calls and expects a 200 from |
 | tolerations | list | `[]` |  |
 | updateStrategy.type | string | `"Recreate"` | set the update strategy for the deployment |
 | volumeMounts | list | `[]` |  |
