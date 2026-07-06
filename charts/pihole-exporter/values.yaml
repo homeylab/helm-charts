@@ -154,6 +154,22 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+httproute:
+  # -- enable a Gateway API (gateway.networking.k8s.io/v1) HTTPRoute as an alternative to ingress
+  enabled: false
+  # -- annotations added to the HTTPRoute
+  annotations: {}
+  # -- parentRefs pointing at the Gateway(s) to attach to; `name` is required
+  parentRefs: []
+  #  - name: traefik-gateway
+  #    namespace: traefik
+  #    sectionName: websecure
+  # -- hostnames matched by the route
+  hostnames: []
+  #  - pihole-exporter.example.org
+  # -- explicit HTTPRoute rules; if empty, a single rule routing all paths to the Service is generated
+  rules: []
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
