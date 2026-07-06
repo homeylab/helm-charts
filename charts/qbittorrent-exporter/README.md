@@ -28,6 +28,8 @@ Point the exporter at a reachable qBittorrent WebUI. Set `settings.config.host` 
 
 Authentication is optional. Set `settings.auth.user` + `settings.auth.pass`, or (qBittorrent >= 5.2) `settings.auth.apiKey` (which overrides user/pass). When using `settings.auth.existingSecret`, the referenced secret must provide `QBITTORRENT_USER` and `QBITTORRENT_PASS` (and/or `QBITTORRENT_API_KEY`) keys.
 
+For the full environment-variable surface, see the upstream [configuration reference](https://github.com/esanchezm/prometheus-qbittorrent-exporter#configuration).
+
 ## Install
 ```bash
 helm install qbittorrent-exporter homeylab/qbittorrent-exporter -n qbittorrent-exporter --create-namespace
@@ -196,7 +198,9 @@ First major release. This version **swaps the backing exporter image** and harde
 | volumes | list | `[]` |  |
 
 ## Grafana Dashboards
-Use the dashboard shipped with the upstream exporter: [`esanchezm/prometheus-qbittorrent-exporter` → `grafana/dashboard.json`](https://github.com/esanchezm/prometheus-qbittorrent-exporter/blob/master/grafana/dashboard.json). It includes a built-in `server` template variable, so a single dashboard can switch between multiple exporter instances (run one release per qBittorrent instance).
+Use the dashboard shipped with the upstream exporter: [`esanchezm/prometheus-qbittorrent-exporter` → `grafana/dashboard.json`](https://github.com/esanchezm/prometheus-qbittorrent-exporter/blob/master/grafana/dashboard.json). Import it by uploading that JSON file (it is not published on grafana.com with a numeric import ID). It includes a built-in `server` template variable, so a single dashboard can switch between multiple exporter instances (run one release per qBittorrent instance).
+
+> **Note:** do not import the grafana.com dashboard [`15116`](https://grafana.com/grafana/dashboards/15116-qbittorrent-dashboard/) — it targets the old `caseyscarborough` exporter and its metric names/labels do not match this one.
 
 ## References
 * https://github.com/esanchezm/prometheus-qbittorrent-exporter
