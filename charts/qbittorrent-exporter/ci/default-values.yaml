@@ -1,0 +1,14 @@
+# ct install permutation: chart-managed Secret (username+password) path.
+# Self-contained — no existingSecret. Reaches Ready under `ct install`.
+settings:
+  config:
+    base_url: "http://qbittorrent.ci.local:8080"
+  auth:
+    username: "ci-admin"
+    password: "ci-password"
+resources:
+  requests:
+    cpu: 25m
+    memory: 128Mi
+  limits:
+    memory: 512Mi

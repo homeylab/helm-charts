@@ -1,0 +1,24 @@
+# ct install permutation: inline creds + ingress enabled.
+# Complements default-values.yaml by exercising the host/port/protocol config
+# path and rendering an Ingress object. Self-contained. Reaches Ready under `ct install`.
+settings:
+  config:
+    host: "qbittorrent.ci.local"
+    port: "8080"
+    protocol: "http"
+  auth:
+    username: "ci-admin"
+    password: "ci-password"
+ingress:
+  enabled: true
+  hosts:
+    - host: qbittorrent-exporter.ci.local
+      paths:
+        - path: /
+          pathType: Prefix
+resources:
+  requests:
+    cpu: 25m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
