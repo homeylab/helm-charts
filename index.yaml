@@ -974,6 +974,45 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/nut-exporter-0.0.1/nut-exporter-0.0.1.tgz
     version: 0.0.1
   pihole-exporter:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL); override if you run a customized image"
+        - kind: changed
+          description: "credentials now render into a chart-managed Secret and wire via envFrom (behavior-preserving; container still receives PIHOLE_PASSWORD; existingSecret still supported)"
+        - kind: changed
+          description: "BREAKING - image schema standardized to registry/repository/tag; testConnImage.name renamed to testConnImage.repository and a testConnImage.registry field added (default docker.io, no image change)"
+        - kind: added
+          description: "Gateway API HTTPRoute as an alternative to ingress (httproute.enabled)"
+        - kind: changed
+          description: "ingress template collapsed to networking.k8s.io/v1 (drops the removed v1beta1/extensions fallbacks; requires Kubernetes 1.19+)"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
+    apiVersion: v2
+    appVersion: v1.2.0
+    created: "2026-07-06T05:42:56.309105057Z"
+    description: A Helm Chart to deploy a Prometheus exporter for Pi-hole
+    digest: eeb10fa7f62b552054d9b707f2865d4fce59d7e35c404272b0e3ddcade20fb18
+    home: https://github.com/eko/pihole-exporter
+    keywords:
+    - pihole
+    - pi-hole
+    - prometheus
+    - exporter
+    - metrics
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: pihole-exporter
+    sources:
+    - https://github.com/eko/pihole-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/pihole-exporter-1.0.0/pihole-exporter-1.0.0.tgz
+    version: 1.0.0
   - apiVersion: v2
     appVersion: v1.2.0
     created: "2026-05-27T03:30:05.277149288Z"
@@ -1270,4 +1309,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-05T07:07:37.917376672Z"
+generated: "2026-07-06T05:42:56.30929975Z"
