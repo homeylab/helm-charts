@@ -4,18 +4,18 @@ templates:
 release:
   name: qbittorrent-exporter
 tests:
-  - it: never renders a plaintext QBITTORRENT_PASSWORD env
+  - it: never renders a plaintext QBITTORRENT_PASS env
     set:
-      settings.auth.username: admin
-      settings.auth.password: s3cret-pw
+      settings.auth.user: admin
+      settings.auth.pass: s3cret-pw
     asserts:
       - notContains:
           path: spec.template.spec.containers[0].env
-          content: { name: QBITTORRENT_PASSWORD, value: s3cret-pw }
+          content: { name: QBITTORRENT_PASS, value: s3cret-pw }
   - it: envFrom targets the chart-managed Secret when creds are set
     set:
-      settings.auth.username: admin
-      settings.auth.password: s3cret-pw
+      settings.auth.user: admin
+      settings.auth.pass: s3cret-pw
     asserts:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
@@ -27,10 +27,18 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
           value: my-secret
+  - it: envFrom set when only apiKey provided
+    set:
+      settings.auth.apiKey: k-123
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: qbittorrent-exporter
   - it: omits envFrom entirely when no creds and no existingSecret
     set:
-      settings.auth.username: ""
-      settings.auth.password: ""
+      settings.auth.user: ""
+      settings.auth.pass: ""
+      settings.auth.apiKey: ""
     asserts:
       - notExists:
           path: spec.template.spec.containers[0].envFrom
@@ -38,7 +46,17 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/caseyscarborough/qbittorrent-exporter:v1.3.5
+          value: docker.io/esanchezm/prometheus-qbittorrent-exporter:1.7.0
+  - it: sets EXPORTER_PORT and QBITTORRENT_HOST env
+    set:
+      settings.config.host: qb.local
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: EXPORTER_PORT, value: "8000" }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: QBITTORRENT_HOST, value: qb.local }
   - it: applies hardened pod and container securityContext defaults
     asserts:
       - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }
@@ -47,11 +65,10 @@ tests:
       - contains:
           path: "spec.template.spec.containers[0].securityContext.capabilities.drop"
           content: ALL
-  - it: mounts a writable /tmp emptyDir for the JVM
+  - it: does not mount a /tmp emptyDir (JVM artifact removed)
+    set:
+      settings.auth.user: admin
+      settings.auth.pass: pw
     asserts:
-      - contains:
+      - notExists:
           path: spec.template.spec.volumes
-          content: { name: tmp, emptyDir: {} }
-      - contains:
-          path: spec.template.spec.containers[0].volumeMounts
-          content: { name: tmp, mountPath: /tmp }
