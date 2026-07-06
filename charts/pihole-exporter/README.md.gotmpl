@@ -7,6 +7,7 @@ A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exp
 
 > [!NOTE]
 > Requires a **Pi-hole v6+** server (exporter v1.x). Still on Pi-hole v5? Pin the chart to `0.0.2` (`--version 0.0.2`).
+> The exporter reads only `PIHOLE_PASSWORD`; the chart maps both `settings.auth.password` and the deprecated `settings.auth.token` to it (accepts a Pi-hole app password or the legacy WEBPASSWORD API token).
 
 ## Add Chart Repo
 ```bash
@@ -23,7 +24,7 @@ helm install pihole-exporter homeylab/pihole-exporter -n pihole-exporter --creat
 helm install -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihole-exporter --create-namespace
 ```
 
-#### OCI Registry Support
+### OCI Registry Support
 ```bash
 helm install pihole-exporter -n pihole-exporter oci://registry-1.docker.io/homeylabcharts/pihole-exporter --version X.Y.Z --create-namespace
 ```
@@ -68,7 +69,7 @@ helm upgrade pihole-exporter homeylab/pihole-exporter -n pihole-exporter
 helm upgrade -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihole-exporter
 ```
 
-#### Upgrade Matrix For Releases
+### Upgrade Matrix For Releases
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
 | `0.1.X` | `1.0.0` | **Hardened `securityContext` defaults now apply** (`runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem`, `drop: [ALL]`) — fine for the stock `ekofr` image; override `podSecurityContext`/`securityContext` if you run a customized one. This is what motivates the major bump. Credentials now render into a chart-managed Secret (`templates/secret.yaml`) wired via `envFrom` — behavior-preserving, the container still gets the same `PIHOLE_PASSWORD`, so no action is needed if you set `settings.auth.password`/`token`; `settings.auth.existingSecret` users are unaffected. New optional `httproute.*` (Gateway API v1) was added. |
