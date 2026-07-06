@@ -64,6 +64,32 @@ tasks:
     cmds:
       - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} --debug
 
+  kubeconform:
+    desc: Validate rendered manifests against k8s schemas (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} | kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version {{.K8S_VERSION | default "1.30.0"}}
+
+  unittest:
+    desc: Run helm unittest for a chart (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - helm unittest {{.CHART_DIR}}/{{.APP}}
+
+  verify:
+    desc: Local gate — lint + kubeconform + unittest (APP=<chart>)
+    requires:
+      vars: [APP]
+    cmds:
+      - task: lint
+        vars: { APP: '{{.APP}}' }
+      - task: kubeconform
+        vars: { APP: '{{.APP}}' }
+      - task: unittest
+        vars: { APP: '{{.APP}}' }
+
   local-template:
     desc: Render a chart with local values (APP=<chart>)
     requires:
