@@ -11,7 +11,7 @@ A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exp
 - [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Upgrade](#upgrade)
-- [Values](#values)
+- [Configuration Options](#configuration-options)
 - [Grafana Dashboards](#grafana-dashboards)
 - [References](#references)
 
@@ -85,7 +85,7 @@ helm upgrade -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihol
 | ------------------- | -------------------- | ------------- |
 | `0.1.X` | `1.0.0` | **Hardened `securityContext` defaults now apply** (`runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem`, `drop: [ALL]`) — fine for the stock `ekofr` image; override `podSecurityContext`/`securityContext` if you run a customized one. This is what motivates the major bump. Credentials now render into a chart-managed Secret (`templates/secret.yaml`) wired via `envFrom` — behavior-preserving, the container still gets the same `PIHOLE_PASSWORD`, so no action is needed if you set `settings.auth.password`/`token`; `settings.auth.existingSecret` users are unaffected. New optional `httproute.*` (Gateway API v1) was added. The image block was standardized to `image.registry`/`image.repository`/`image.tag` (new `registry` field defaults to `docker.io` — no image change); for the post-install test image, `testConnImage.name` was renamed to `testConnImage.repository` and a `testConnImage.registry` field added — adjust only if you overrode those fields. The ingress template was collapsed to `networking.k8s.io/v1` (removed the EOL `v1beta1`/`extensions` fallbacks) — requires Kubernetes 1.19+. |
 
-## Values
+## Configuration Options
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
