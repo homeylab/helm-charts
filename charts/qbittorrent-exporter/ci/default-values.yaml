@@ -1,0 +1,14 @@
+# ct install permutation: chart-managed Secret (user+pass) path.
+# Self-contained — no existingSecret. Reaches Ready under `ct install`.
+settings:
+  config:
+    baseUrl: "http://localhost:8080"
+  auth:
+    user: "ci-admin"
+    pass: "ci-password"
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 128Mi

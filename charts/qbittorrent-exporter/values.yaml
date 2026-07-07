@@ -1,52 +1,70 @@
 # Default values for qbittorrent-exporter.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
 image:
-  repository: docker.io
-  name: caseyscarborough/qbittorrent-exporter
+  # -- image registry
+  registry: ghcr.io
+  # -- image repository
+  repository: martabal/qbittorrent-exporter
+  # -- image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- overrides the image tag whose default is the chart appVersion
   tag: ""
+
+## images for the `helm test` connection check
+tests:
+  image:
+    # -- registry for the `helm test` connection-check image
+    registry: docker.io
+    # -- repository for the `helm test` connection-check image
+    repository: busybox
+    # -- tag for the `helm test` connection-check image
+    tag: "1.36.1"
+    # -- pull policy for the `helm test` connection-check image
+    pullPolicy: IfNotPresent
+  ## path the test requests and expects a 200 from
+  # -- path the `helm test` request calls and expects a 200 from
+  path: /metrics
+
+updateStrategy:
+  # -- set the update strategy for the deployment
+  type: Recreate
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-## set image for post install helm tests
-testCurlImage:
-  repository: docker.io
-  name: busybox
-  tag: "1.36.1"
-  pullPolicy: IfNotPresent
-  # the url for post install check test
-  path: /metrics
-
-## update strategy for newer versions
-updateStrategy:
-    type: Recreate
-
-## service properties
 service:
   type: ClusterIP
-  port: 17871
+  # -- set port for qbittorrent-exporter scraping (martabal exporter default 8090)
+  port: 8090
+  # -- set name for the service port (referenced by probes and serviceMonitor)
   name: metrics
+  # -- set protocol for the service
   protocol: TCP
 
-## metrics properties
+## set metrics export properties
 metrics:
-  ## -- Enable and configure a Prometheus serviceMonitor for the chart under this key.
+  # -- enable/disable prometheus podAnnotations and serviceMonitor
   enabled: true
+  # -- Add podAnnotations for prometheus scraping
   podAnnotations:
     prometheus.io/scrape: "true"
+    # -- set the path for prometheus scraping
     prometheus.io/path: /metrics
-    prometheus.io/port: "17871"
+    # -- set the port for prometheus scraping, should match the service port
+    prometheus.io/port: "8090"
   ## if serviceMonitor enabled, pod annotations above will be ignored
   serviceMonitor:
+    # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
     enabled: false
+    # -- set the path for prometheus scraping for serviceMonitor
     path: /metrics
+    # -- how often to scrape for serviceMonitor
     interval: 2m
+    # -- scrapeTimeout for serviceMonitor
     scrapeTimeout: 30s
+    # -- set additional labels for serviceMonitor
     additionalLabels: {}
     targetLabels: []
     # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
@@ -55,45 +73,57 @@ metrics:
   ## Enable and configure Prometheus Rules for the chart under this key.
   ## not yet implemented
   prometheusRule:
+    # -- enable/disable prometheusRule
     enabled: false
+    # -- set labels for prometheusRule
     labels: {}
-    ## -- Configure additional rules for the chart under this key.
+    # -- Configure prometheusRule rules for the chart
     rules: []
-      # - alert: UpsStatusUnknown
-      #   annotations:
-      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
-      #     summary: UPS status unknown.
-      #   expr: |
-      #     nut_status == 0
-      #   for: 10s
-      #   labels:
-      #     severity: critical
 
 ## provide settings for exporter
+## ref: https://github.com/martabal/qbittorrent-exporter#parameters
 settings:
-  ## core configuration
-  ## ref: https://github.com/caseyscarborough/qbittorrent-exporter#parameters
+  # -- Add configuration as environment variables
   config:
-    # examples: `http://somehost:8080`, `https://qbit.somedomain.org`
-    base_url: ""
-    # optionally provide host information by pieces
-    # if `base_url` is empty, we will try 3 below: `host`, `port`, `protocol`
-    host: ""
-    port: ""
-    protocol: "http"
-  ## provide auth settings
-  ## if no auth fields provided, no auth used
+    # -- qBittorrent URL, e.g. https://qbit.example.org:443 (required, else falls back to the exporter's internal default). Maps to QBITTORRENT_BASE_URL
+    baseUrl: ""
+    # -- request timeout in seconds. Maps to QBITTORRENT_TIMEOUT
+    timeout: 30
+    # -- full refresh interval in seconds. Maps to QBITTORRENT_FULL_REFRESH_INTERVAL
+    fullRefreshInterval: 100
+    # -- skip TLS certificate verification (set true for self-signed). Maps to INSECURE_SKIP_VERIFY
+    insecureSkipVerify: false
+    # -- minimum TLS version (TLS_1_2/TLS_1_3). Maps to MIN_TLS_VERSION
+    minTlsVersion: "TLS_1_3"
+    # -- exporter log level (DEBUG/INFO/WARN/ERROR). Maps to LOG_LEVEL
+    logLevel: "INFO"
+  # -- Feature flags controlling metric cardinality. Maps to ENABLE_* environment variables
+  features:
+    # -- expose tracker metrics. Maps to ENABLE_TRACKER
+    enableTracker: true
+    # -- enable high-cardinality per-torrent metrics. Maps to ENABLE_HIGH_CARDINALITY
+    enableHighCardinality: false
+    # -- enable increased-cardinality metrics. Maps to ENABLE_INCREASED_CARDINALITY
+    enableIncreasedCardinality: false
+    # -- add a tracker label to metrics. Maps to ENABLE_LABEL_WITH_TRACKER
+    enableLabelWithTracker: false
+    # -- add a torrent hash label to metrics. Maps to ENABLE_LABEL_WITH_HASH
+    enableLabelWithHash: false
+    # -- add a tags label to metrics. Maps to ENABLE_LABEL_WITH_TAGS
+    enableLabelWithTags: false
+  # -- Set auth for qBittorrent. If none set, the exporter connects unauthenticated
   auth:
-    # can optionally provide `QBITTORRENT_USERNAME` and `QBITTORRENT_PASSWORD` in existingSecret
+    # -- qBittorrent WebUI username. Maps to QBITTORRENT_USERNAME
+    user: ""
+    # -- qBittorrent WebUI password. Maps to QBITTORRENT_PASSWORD
+    pass: ""
+    # -- qBittorrent API key (qBittorrent >= 5.2; overrides user/pass). Maps to QBITTORRENT_API_KEY
+    apiKey: ""
+    # -- use an existing secret instead of user/pass/apiKey. Must provide QBITTORRENT_USERNAME + QBITTORRENT_PASSWORD (and/or QBITTORRENT_API_KEY) keys
     existingSecret: ""
-    # if existingSecret is given, username will be ignored
-    username: ""
-    # if existingSecret is given, password will be ignored
-    password: ""
 
-## extra env applied to exporter
+# -- Add extra environment variables
 extraEnv: {}
-  # SOME_VAR: true
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -109,28 +139,80 @@ serviceAccount:
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  fsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+httproute:
+  # -- enable a Gateway API (gateway.networking.k8s.io/v1) HTTPRoute as an alternative to ingress
+  enabled: false
+  # -- annotations added to the HTTPRoute
+  annotations: {}
+  # -- parentRefs pointing at the Gateway(s) to attach to; `name` is required
+  parentRefs: []
+  #  - name: traefik-gateway
+  #    namespace: traefik
+  #    sectionName: websecure
+  # -- hostnames matched by the route
+  hostnames: []
+  #  - qbittorrent-exporter.example.org
+  # -- explicit HTTPRoute rules; if empty, a single rule routing all paths to the Service is generated
+  rules: []
 
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # martabal is a lightweight Go exporter; if you set limits, modest values suffice.
   # limits:
-  #   cpu: 100m
   #   memory: 128Mi
   # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  #   cpu: 10m
+  #   memory: 32Mi
+
+## Liveness probe (TCP — the exporter exposes only /metrics, no health endpoints)
+livenessProbe:
+  tcpSocket:
+    port: metrics
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 3
+  failureThreshold: 5
+  successThreshold: 1
+
+## Readiness probe (TCP — the exporter exposes only /metrics, no health endpoints)
+readinessProbe:
+  tcpSocket:
+    port: metrics
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 3
+  failureThreshold: 5
+  successThreshold: 1
 
 # Additional volumes on the output Deployment definition.
 volumes: []

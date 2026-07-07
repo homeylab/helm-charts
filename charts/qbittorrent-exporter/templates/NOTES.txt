@@ -2,6 +2,29 @@
 
 Get the {{ .Chart.Name }} instances by running this command:
     - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "qbittorrent-exporter.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+{{- if .Values.ingress.enabled }}
 
-Sample Grafana dashboards are available from upstream:
-    - https://github.com/caseyscarborough/qbittorrent-grafana-dashboard
+Exposed via Ingress:
+{{- range $host := .Values.ingress.hosts }}
+{{- range .paths }}
+    - http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+{{- end }}
+{{- end }}
+{{- else if and .Values.httproute.enabled .Values.httproute.hostnames }}
+
+Exposed via Gateway API HTTPRoute:
+{{- range .Values.httproute.hostnames }}
+    - http://{{ . }}/metrics
+{{- end }}
+{{- end }}
+{{- if .Values.httproute.enabled }}
+
+NOTE: HTTPRoute is enabled. This chart does not create a Gateway.
+Ensure the Gateway API CRDs are installed and the Gateway referenced in
+httproute.parentRefs exists and allows routes from namespace "{{ .Release.Namespace }}"
+(via the listener's allowedRoutes or a ReferenceGrant).
+{{- end }}
+
+Sample Grafana dashboard is available from upstream:
+    - https://github.com/martabal/qbittorrent-exporter/blob/main/grafana/dashboard.json
+    (a high-cardinality variant also exists for use with settings.features.enableHighCardinality: dashboard_high_cardinality.json)

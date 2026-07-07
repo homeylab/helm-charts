@@ -1,0 +1,23 @@
+# ct install permutation: inline creds + ingress enabled.
+# Self-contained. Reaches Ready under `ct install`.
+settings:
+  config:
+    baseUrl: "http://localhost:8080"
+  features:
+    enableHighCardinality: true
+  auth:
+    user: "ci-admin"
+    pass: "ci-password"
+ingress:
+  enabled: true
+  hosts:
+    - host: qbittorrent-exporter.ci.local
+      paths:
+        - path: /
+          pathType: Prefix
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 128Mi
