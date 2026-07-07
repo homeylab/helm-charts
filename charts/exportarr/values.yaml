@@ -4,10 +4,13 @@
 exportarr:
   ## base image used for all exportarr instances
   image:
+    # -- image repository registry
     repository: ghcr.io
+    # -- image repository name
     name: onedr0p/exportarr
+    # -- image pull policy
     pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
+    # -- overrides the image tag whose default is the chart appVersion
     tag: ""
 
   ## set image for post install helm tests
@@ -20,6 +23,7 @@ exportarr:
 
   ## update strategy for newer versions
   updateStrategy:
+    # -- set the update strategy for the deployment
     type: Recreate
 
   imagePullSecrets: []
@@ -28,27 +32,39 @@ exportarr:
 
   ## set service properties
   service:
+    # -- Kubernetes Service type
     type: ClusterIP
+    # -- port for exportarr metrics scraping
     port: 9707
+    # -- name for the service port
     name: metrics
+    # -- protocol for the service
     protocol: TCP
 
   ## set default metrics export properties
   metrics:
     ## enable/disable metrics for all exportarr instances.
+    # -- enable/disable prometheus podAnnotations and serviceMonitor
     enabled: true
+    # -- Add podAnnotations for prometheus scraping
     podAnnotations:
       prometheus.io/scrape: "true"
+      # -- set the path for prometheus scraping
       prometheus.io/path: /metrics
+      # -- set the port for prometheus scraping, should match the service port
       prometheus.io/port: "9707"
     ## if serviceMonitor enabled, pod annotations above will be ignored
     ## ServiceMonitor for each exportarr instance will be deployed instead
     serviceMonitor:
+      # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
       enabled: false
+      # -- set the path for prometheus scraping for serviceMonitor
       path: /metrics
-      # how often to scrape
+      # -- how often to scrape for serviceMonitor
       interval: 4m
+      # -- scrapeTimeout for serviceMonitor
       scrapeTimeout: 60s
+      # -- set additional labels for serviceMonitor
       additionalLabels: {}
       targetLabels: []
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
@@ -57,7 +73,9 @@ exportarr:
     ## Enable and configure Prometheus Rules for the chart under this key.
     ## not yet implemented
     prometheusRule:
+      # -- enable/disable prometheusRule
       enabled: false
+      # -- set labels for prometheusRule
       labels: {}
       # -- Configure additionial rules for the chart under this key.
       rules: []
@@ -73,6 +91,7 @@ exportarr:
 
   ### exportarr configuration per instance/app ###
   # Use list format within keys for instances of each type, keep keys static for runtime args
+  # -- per-instance configuration; each key (radarr, sonarr, prowlarr, bazarr, lidarr, sabnzbd, readarr) takes a list of instance objects with fields: name, enabled, url, existingSecret.{name,secretKey}, apiKey, extraEnv, volumes, volumeMounts, metrics
   apps:
     radarr:
       # `exportarr-radarr-` prefix will be added to the pod name
@@ -223,10 +242,12 @@ exportarr:
   ### below section will be applied to all exportarr instances ###
   ## env applied to all exportarr exporters
   ## example: `ENABLE_ADDITIONAL_METRICS` to get additional metrics that may take longer to scrape
+  # -- extra environment variables applied to all exportarr instances
   extraEnv: {}
     # ENABLE_ADDITIONAL_METRICS: true
 
   ## Additional volumes to all exportarr exporters
+  # -- additional volumes for all exportarr deployments
   volumes: []
   # - name: foo
   #   secret:
@@ -241,18 +262,25 @@ exportarr:
 
   podAnnotations: {}
 
-  podSecurityContext: {}
-    # fsGroup: 2000
+  # -- pod-level security context applied to all exportarr instances
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
 
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  # -- container-level security context applied to all exportarr instances
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
 
   ## Set resource level per exportarr deployment
+  # -- resource requests/limits for each exportarr deployment
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -265,13 +293,17 @@ exportarr:
     #   cpu: 100m
     #   memory: 128Mi
 
+  # -- node selector for exportarr pods
   nodeSelector: {}
 
+  # -- tolerations for exportarr pods
   tolerations: []
 
+  # -- affinity rules for exportarr pods
   affinity: {}
   ## Use `/status` path for checks
   ## Liveness probe
+  # -- liveness probe configuration for the exportarr instances
   livenessProbe:
     httpGet:
       path: /healthz
@@ -283,6 +315,7 @@ exportarr:
     successThreshold: 1
 
   ## Readiness probe
+  # -- readiness probe configuration for the exportarr instances
   readinessProbe:
     httpGet:
       path: /healthz
@@ -294,6 +327,7 @@ exportarr:
     successThreshold: 1
 
   ## Startup Probe
+  # -- startup probe configuration for the exportarr instances
   startupProbe:
     httpGet:
       path: /healthz
@@ -304,6 +338,7 @@ exportarr:
     failureThreshold: 5
     successThreshold: 1
 
+  # -- serviceAccount configuration
   serviceAccount:
     # Specifies whether a service account should be created
     create: false
@@ -319,20 +354,29 @@ exportarr:
 ## set `enabled: true` to install qbittorrent prometheus exporter from separate chart
 ## Ref: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
 qbittorrent-exporter:
-  # enable/disable
+  # -- enable/disable the qbittorrent-exporter subchart
   enabled: false
   # more options available than shown
   metrics:
     serviceMonitor:
+      # -- enable/disable serviceMonitor for the qbittorrent-exporter subchart
       enabled: false
   settings:
     config:
-      base_url: ""
+      # -- qBittorrent base URL, e.g. https://qbit.example.org:443. Maps to subchart `settings.config.baseUrl`
+      baseUrl: ""
+      # -- skip TLS certificate verification for the qBittorrent connection. Maps to subchart `settings.config.insecureSkipVerify`
+      insecureSkipVerify: false
     auth:
+      # -- use an existing secret instead of user/pass/apiKey. Maps to subchart `settings.auth.existingSecret`
       existingSecret: ""
-      username: ""
-      password: ""
-  # extra env applied to exporter
+      # -- qBittorrent WebUI username. Maps to subchart `settings.auth.user`
+      user: ""
+      # -- qBittorrent WebUI password. Maps to subchart `settings.auth.pass`
+      pass: ""
+      # -- qBittorrent API key. Maps to subchart `settings.auth.apiKey`
+      apiKey: ""
+  # -- extra env applied to the qbittorrent-exporter subchart
   extraEnv: {}
 
 ### Optional included tdarr exporter ###

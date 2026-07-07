@@ -86,7 +86,10 @@ spec:
                   key: {{ $app.existingSecret.secretKey }}
           {{- else if $app.apiKey }}
             - name: API_KEY
-              value: {{ $app.apiKey | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $appName }}
+                  key: API_KEY
           {{- end }}
           {{- range $key_extra, $val_extra := $app.extraEnv }}
             - name: {{ $key_extra | upper }}

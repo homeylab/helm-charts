@@ -1,0 +1,59 @@
+suite: exportarr ServiceMonitor
+templates:
+  - templates/servicemonitor.yaml
+release:
+  name: ex
+tests:
+  - it: renders no ServiceMonitor by default (serviceMonitor disabled globally)
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - hasDocuments: { count: 0 }
+
+  - it: global metrics.serviceMonitor.enabled true renders a ServiceMonitor with correct name/component and endpoint
+    set:
+      exportarr.metrics.serviceMonitor.enabled: true
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: metadata.name, value: ex-exportarr-radarr-main }
+      - equal: { path: "metadata.labels[\"app.kubernetes.io/component\"]", value: ex-exportarr-radarr-main }
+      - equal: { path: "spec.selector.matchLabels[\"app.kubernetes.io/component\"]", value: ex-exportarr-radarr-main }
+      - equal: { path: "spec.endpoints[0].port", value: metrics }
+      - equal: { path: "spec.endpoints[0].path", value: /metrics }
+      - equal: { path: "spec.endpoints[0].interval", value: 4m }
+      - equal: { path: "spec.endpoints[0].scrapeTimeout", value: 60s }
+
+  - it: per-instance metrics.serviceMonitor.enabled true overrides a disabled global default
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          serviceMonitor:
+            enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: metadata.name, value: ex-exportarr-radarr-main }
+      - equal: { path: "metadata.labels[\"app.kubernetes.io/component\"]", value: ex-exportarr-radarr-main }
+      - equal: { path: "spec.endpoints[0].port", value: metrics }
+
+  - it: per-instance metrics.serviceMonitor.enabled false overrides an enabled global default
+    set:
+      exportarr.metrics.serviceMonitor.enabled: true
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          serviceMonitor:
+            enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
