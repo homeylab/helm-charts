@@ -16,7 +16,7 @@ This allows you to consolidate different `Arr`-related exporters into a single h
 - [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Upgrade](#upgrade)
-- [Migrating to 3.0.0](#migrating-to-300)
+  - [Migrating to 3.0.0](#migrating-to-300)
 - [Configuration Options](#configuration-options)
 - [Additional Exporters](#additional-exporters)
 - [Grafana Dashboards](#grafana-dashboards)
@@ -115,15 +115,16 @@ helm upgrade exportarr -n exportarr oci://registry-1.docker.io/homeylabcharts/ex
 helm upgrade -f my-values.yaml exportarr -n exportarr oci://registry-1.docker.io/homeylabcharts/exportarr --version X.Y.Z
 ```
 
-### Upgrade Matrix For Releases
-_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+### Potential Breaking Updates
+_The table below lists chart version upgrades that may introduce breaking changes or require manual steps._
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `3.0.X` | `3.1.0` | Optional `tdarr-exporter` subchart bumped `1.2.0` -> `2.0.0` (hardened `securityContext`, standardized image schema, `appVersion` -> upstream `v3.0.0`); passthrough value keys are unchanged. **Only affects installs with `tdarr-exporter.enabled`** — see the subchart's [Migrating to 2.0.0](https://github.com/homeylab/helm-charts/blob/main/charts/tdarr-exporter/README.md#migrating-to-200) notes. |
 | `2.1.X` | `3.0.0` | Backing `qbittorrent-exporter` subchart swapped image/schema, hardened `securityContext` on all exportarr instances, inline `apiKey` now renders into a chart-managed Secret. **Read the [Migrating to 3.0.0](#migrating-to-300) section in full before upgrading.** |
 | `1.X.X` | `2.0.0` | `exportarr.apps.<app>` (radarr/sonarr/etc.) changed from an object to a list, allowing multiple instances of the same `Arr` app (e.g. `radarr1`, `radarr2`). `exportarr.testCurlImage` was renamed to `exportarr.testImage`. |
 
-## Migrating to 3.0.0
+### Migrating to 3.0.0
 This version hardens the umbrella chart and swaps the backing image for the optional `qbittorrent-exporter` subchart. Review all items before upgrading.
 
 - **`qbittorrent-exporter` subchart swapped (breaking, only if enabled).** The optional `qbittorrent-exporter` dependency bumped `0.1.0` -> `1.0.0`, moving from the unmaintained `caseyscarborough/qbittorrent-exporter` (Java) to the actively maintained `martabal/qbittorrent-exporter` (Go). Its values schema changed (keys renamed, new options) — see the subchart's own [Migrating to 1.0.0](https://github.com/homeylab/helm-charts/blob/main/charts/qbittorrent-exporter/README.md#migrating-to-100) notes, which apply verbatim under this chart's top-level `qbittorrent-exporter:` key. **Metric names and labels differ** — re-import its Grafana dashboard after upgrading.

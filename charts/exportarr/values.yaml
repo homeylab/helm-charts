@@ -384,26 +384,28 @@ qbittorrent-exporter:
 ## set `enabled: true` to install tdarr prometheus exporter from separate chart
 ## Ref: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
 tdarr-exporter:
+  # -- enable/disable the tdarr-exporter subchart
   enabled: false
+  # more options available than shown
   metrics:
     serviceMonitor:
+      # -- enable/disable serviceMonitor for the tdarr-exporter subchart
       enabled: false
   settings:
-    # more options available than shown
     config:
-      # If no protocol is provided (http/https), defaults to using https. 
-      # Examples: `tdarr.example.com`, `http://tdarr.example.com`
+      # -- Tdarr URL. If no protocol is given, defaults to https (e.g. `tdarr.example.com`). Maps to subchart `settings.config.url`
       url: ""
-      # if auth is not required, do not provide any `secretKey` or `apiKey`
+      # -- use an existing secret instead of `apiKey`. Maps to subchart `settings.config.existingSecret`
       existingSecret:
         # name of secret
         name: ""
         # name of key within secret to use
         secretKey: ""
-      # ignored if `existingSecret` is used
+      # -- Tdarr API key. Ignored if `existingSecret` is set. Maps to subchart `settings.config.apiKey`
       apiKey: ""
-      # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
+      # -- verify the Tdarr instance's SSL certificate. Maps to subchart `settings.config.verify_ssl`
       verify_ssl: true
+      # -- exporter log level. Maps to subchart `settings.config.log_level`
       log_level: "info"
-  # extra env applied to exporter
+  # -- extra env applied to the tdarr-exporter subchart
   extraEnv: {}
