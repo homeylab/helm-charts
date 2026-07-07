@@ -1,0 +1,79 @@
+suite: tdarr-exporter deployment wiring
+templates:
+  - templates/deployment.yaml
+release:
+  name: tdarr-exporter
+tests:
+  - it: renders the container image as registry/repository:tag
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/homeylab/tdarr-exporter:3.0.0
+  - it: sets TDARR_URL env
+    set:
+      settings.config.url: https://tdarr.local:8265
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: TDARR_URL, value: https://tdarr.local:8265 }
+  - it: never renders a plaintext TDARR_API_KEY env
+    set:
+      settings.config.apiKey: s3cret-key
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: TDARR_API_KEY, value: s3cret-key }
+  - it: TDARR_API_KEY uses secretKeyRef to the chart-managed Secret when apiKey is set
+    set:
+      settings.config.apiKey: s3cret-key
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: TDARR_API_KEY
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name
+          value: tdarr-exporter
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.key
+          value: TDARR_API_KEY
+  - it: TDARR_API_KEY uses secretKeyRef to existingSecret when set, taking precedence over apiKey
+    set:
+      settings.config.apiKey: s3cret-key
+      settings.config.existingSecret.name: my-secret
+      settings.config.existingSecret.secretKey: my-key
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: TDARR_API_KEY
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name
+          value: my-secret
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.key
+          value: my-key
+  - it: omits TDARR_API_KEY entirely when neither apiKey nor existingSecret set (unauthenticated)
+    set:
+      settings.config.apiKey: ""
+      settings.config.existingSecret.name: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: TDARR_API_KEY }
+  - it: applies hardened pod and container securityContext defaults (UID 65532)
+    asserts:
+      - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }
+      - equal: { path: "spec.template.spec.securityContext.runAsUser", value: 65532 }
+      - equal: { path: "spec.template.spec.securityContext.runAsGroup", value: 65532 }
+      - equal: { path: "spec.template.spec.securityContext.fsGroup", value: 65532 }
+      - equal: { path: "spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem", value: true }
+      - contains:
+          path: "spec.template.spec.containers[0].securityContext.capabilities.drop"
+          content: ALL
+  - it: keeps httpGet /healthz liveness, readiness, and startup probes on the metrics port
+    asserts:
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.httpGet.path", value: /healthz }
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.httpGet.port", value: metrics }
+      - equal: { path: "spec.template.spec.containers[0].readinessProbe.httpGet.path", value: /healthz }
+      - equal: { path: "spec.template.spec.containers[0].readinessProbe.httpGet.port", value: metrics }
+      - equal: { path: "spec.template.spec.containers[0].startupProbe.httpGet.path", value: /healthz }
+      - equal: { path: "spec.template.spec.containers[0].startupProbe.httpGet.port", value: metrics }

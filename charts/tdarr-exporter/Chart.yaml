@@ -1,25 +1,44 @@
 apiVersion: v2
 name: tdarr-exporter
-description: A Helm chart for Kubernetes
-
-# A chart can be either an 'application' or a 'library' chart.
-#
-# Application charts are a collection of templates that can be packaged into versioned archives
-# to be deployed.
-#
-# Library charts provide useful utilities or functions for the chart developer. They're included as
-# a dependency of application charts to inject those utilities and functions into the rendering
-# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+description: A Helm chart to export Prometheus metrics for Tdarr.
 type: application
 
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.2.0
+home: https://github.com/homeylab/tdarr-exporter
+sources:
+  - https://github.com/homeylab/tdarr-exporter
+  - https://github.com/homeylab/helm-charts
+keywords:
+  - tdarr
+  - transcode
+  - prometheus
+  - exporter
+  - metrics
+maintainers:
+  - name: homeylab
+    url: https://github.com/homeylab
 
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
-# It is recommended to use it with quotes.
+# This is the chart version. SemVer: https://semver.org/
+version: 2.0.0
+
+# Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=homeylab/tdarr-exporter
-appVersion: "2.1.0"
+appVersion: "3.0.0"
+
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
+  artifacthub.io/changes: |
+    - kind: changed
+      description: "BREAKING - image schema standardized: image.name renamed to image.repository (image.repository, formerly the registry host, is now image.registry); no image change, this is a homeylab custom build"
+    - kind: changed
+      description: "BREAKING - image schema standardized for the helm test connection-check image: testCurlImage.* renamed to tests.image.* (registry/repository/tag/pullPolicy) and tests.path"
+    - kind: changed
+      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser/runAsGroup/fsGroup 65532, readOnlyRootFilesystem, drop ALL); the image runs as distroless nonroot (UID/GID 65532)"
+    - kind: changed
+      description: "inline settings.config.apiKey now renders into a chart-managed Secret and is wired via secretKeyRef instead of a plaintext env value; settings.config.existingSecret (object form, unchanged) still takes precedence"
+    - kind: added
+      description: "optional ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled)"
+    - kind: changed
+      description: "appVersion bumped 2.1.0 -> 3.0.0 (current upstream homeylab/tdarr-exporter image); env schema, /healthz, and metric names verified unchanged against this chart"

@@ -1,0 +1,19 @@
+# ct install permutation: inline apiKey + ingress enabled.
+# Self-contained. Reaches Ready under `ct install`.
+settings:
+  config:
+    url: "http://localhost:8265"
+    apiKey: "ci-api-key"
+ingress:
+  enabled: true
+  hosts:
+    - host: tdarr-exporter.ci.local
+      paths:
+        - path: /
+          pathType: Prefix
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 128Mi
