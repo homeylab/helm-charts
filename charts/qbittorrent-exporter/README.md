@@ -209,7 +209,5 @@ Use one of the dashboards shipped with the upstream exporter, imported by upload
 * [`grafana/dashboard.json`](https://github.com/martabal/qbittorrent-exporter/blob/main/grafana/dashboard.json) — standard dashboard, matching the default `settings.features` values.
 * [`grafana/dashboard_high_cardinality.json`](https://github.com/martabal/qbittorrent-exporter/blob/main/grafana/dashboard_high_cardinality.json) — pairs with `settings.features.enableHighCardinality: true` for per-torrent breakdowns.
 
-> **Note:** do not import the grafana.com dashboard [`15116`](https://grafana.com/grafana/dashboards/15116-qbittorrent-dashboard/) — it targets the old `caseyscarborough` exporter and its metric names/labels do not match this one.
-
 ## References
 * https://github.com/martabal/qbittorrent-exporter
