@@ -121,8 +121,8 @@ _The matrix below displays certain versions of this helm chart that could result
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `1.X.X` | `2.0.0` | `exportarr.apps.<app>` (radarr/sonarr/etc.) changed from an object to a list, allowing multiple instances of the same `Arr` app (e.g. `radarr1`, `radarr2`). `exportarr.testCurlImage` was renamed to `exportarr.testImage`. |
 | `2.1.X` | `3.0.0` | Backing `qbittorrent-exporter` subchart swapped image/schema, hardened `securityContext` on all exportarr instances, inline `apiKey` now renders into a chart-managed Secret. **Read the [Migrating to 3.0.0](#migrating-to-300) section in full before upgrading.** |
+| `1.X.X` | `2.0.0` | `exportarr.apps.<app>` (radarr/sonarr/etc.) changed from an object to a list, allowing multiple instances of the same `Arr` app (e.g. `radarr1`, `radarr2`). `exportarr.testCurlImage` was renamed to `exportarr.testImage`. |
 
 ## Migrating to 3.0.0
 This version hardens the umbrella chart and swaps the backing image for the optional `qbittorrent-exporter` subchart. Review all items before upgrading.
@@ -201,54 +201,13 @@ This version hardens the umbrella chart and swaps the backing image for the opti
 | tdarr-exporter.settings.config.verify_ssl | bool | `true` |  |
 
 ## Additional Exporters
-#### qbittorrent
-Enable the additional exporter for `qbittorrent-exporter` by setting `qbittorrent-exporter.enabled` to `true`.
-```yaml
-qbittorrent-exporter:
-  # enable/disable
-  enabled: true
-  # more options available than shown
-  metrics:
-    serviceMonitor:
-      enabled: false
-  settings:
-    config:
-      baseUrl: ""
-      insecureSkipVerify: false
-    auth:
-      existingSecret: ""
-      user: ""
-      pass: ""
-      apiKey: ""
-  # extra env applied to exporter
-  extraEnv: {}
-```
+This umbrella can optionally deploy two first-party exporters as subcharts. Configure each under its matching top-level key; every value in that subchart's own README applies verbatim under that key. The passthrough keys also appear in the [Configuration Options](#configuration-options) table above.
 
-More options and details are available from the upstream [qbittorrent-exporter chart](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter), which now wraps `martabal/qbittorrent-exporter` (see [Migrating to 3.0.0](#migrating-to-300) if you are upgrading from an earlier release).
+#### qbittorrent
+Set `qbittorrent-exporter.enabled: true` to deploy it (wraps `martabal/qbittorrent-exporter`). Configure it under the `qbittorrent-exporter:` key — e.g. `qbittorrent-exporter.settings.config.baseUrl`. See the [qbittorrent-exporter chart README](https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter) for the full value schema, and [Migrating to 3.0.0](#migrating-to-300) if upgrading from an earlier release.
 
 #### Tdarr
-Enable the additional exporter for `tdarr-exporter` by setting `tdarr-exporter.enabled` to `true`.
-
-```yaml
-tdarr-exporter:
-  enabled: false
-  metrics:
-    serviceMonitor:
-      enabled: false
-  settings:
-    # more options available than shown
-    config:
-      # If no protocol is provided (http/https), defaults to using https.
-      # Examples: `tdarr.example.com`, `http://tdarr.example.com`
-      url: ""
-      # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
-      verify_ssl: true
-      log_level: "info"
-  # extra env applied to exporter
-  extraEnv: {}
-```
-
-More options and details are available from the upstream [tdarr-exporter chart](https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter).
+Set `tdarr-exporter.enabled: true` to deploy it. Configure it under the `tdarr-exporter:` key — e.g. `tdarr-exporter.settings.config.url`. See the [tdarr-exporter chart README](https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter) for the full value schema.
 
 ## Grafana Dashboards
 A sample dashboard is available from upstream [onedr0p/exportarr](https://github.com/onedr0p/exportarr/tree/master/examples/grafana). A slightly modified version for this chart is shipped alongside it: [`examples/dashboard.json`](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr/examples/dashboard.json).
