@@ -10,7 +10,7 @@ A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exp
 - [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Upgrade](#upgrade)
-- [Migrating to 1.0.0](#migrating-to-100)
+  - [Migrating to 1.0.0](#migrating-to-100)
 - [Configuration Options](#configuration-options)
 - [Grafana Dashboards](#grafana-dashboards)
 - [References](#references)
@@ -80,14 +80,14 @@ helm upgrade pihole-exporter homeylab/pihole-exporter -n pihole-exporter
 helm upgrade -f my-values.yaml pihole-exporter homeylab/pihole-exporter -n pihole-exporter
 ```
 
-### Upgrade Matrix For Releases
-_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+### Potential Breaking Updates
+_The table below lists chart version upgrades that may introduce breaking changes or require manual steps._
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
 | `0.1.X` | `1.0.0` | Hardened `securityContext` defaults and a standardized image schema now apply; credentials move into a chart-managed Secret (behavior-preserving). **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
-## Migrating to 1.0.0
+### Migrating to 1.0.0
 First major release. Most changes are transparent if you already set `settings.auth.password`/`token` — review the breaking items below before upgrading.
 
 - **Hardened `securityContext` defaults (breaking — motivates the major bump).** The pod now runs with `runAsNonRoot`, `runAsUser: 65534`, `readOnlyRootFilesystem: true`, and `drop: [ALL]`. Fine for the stock `ekofr/pihole-exporter` image; override `podSecurityContext`/`securityContext` if you run a customized one.

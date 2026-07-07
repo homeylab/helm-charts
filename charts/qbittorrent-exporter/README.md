@@ -11,7 +11,7 @@ A Helm Chart to deploy a Prometheus [exporter](https://github.com/martabal/qbitt
 - [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Upgrade](#upgrade)
-- [Migrating to 1.0.0](#migrating-to-100)
+  - [Migrating to 1.0.0](#migrating-to-100)
 - [Configuration Options](#configuration-options)
 - [Grafana Dashboards](#grafana-dashboards)
 - [References](#references)
@@ -86,14 +86,14 @@ helm upgrade qbittorrent-exporter homeylab/qbittorrent-exporter -n qbittorrent-e
 helm upgrade -f my-values.yaml qbittorrent-exporter homeylab/qbittorrent-exporter -n qbittorrent-exporter
 ```
 
-### Upgrade Matrix For Releases
-_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+### Potential Breaking Updates
+_The table below lists chart version upgrades that may introduce breaking changes or require manual steps._
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
 | `0.1.X` | `1.0.0` | Backing exporter swapped, hardened `securityContext`, standardized image schema, chart-managed Secret. **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
-## Migrating to 1.0.0
+### Migrating to 1.0.0
 First major release. This version **swaps the backing exporter image** and hardens the chart. Review all items before upgrading.
 
 - **Backing exporter changed (breaking).** The chart now deploys `martabal/qbittorrent-exporter` (actively maintained, Go) instead of the unmaintained `caseyscarborough/qbittorrent-exporter` (Java, last released 2023). **Metric names and labels differ** — re-import the Grafana dashboard (see below) after upgrading.

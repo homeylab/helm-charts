@@ -12,7 +12,7 @@ This chart is also included as an optional deployment in the [exportarr](https:/
 - [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Upgrade](#upgrade)
-- [Migrating to 2.0.0](#migrating-to-200)
+  - [Migrating to 2.0.0](#migrating-to-200)
 - [Configuration Options](#configuration-options)
 - [Grafana Dashboards](#grafana-dashboards)
 - [References](#references)
@@ -81,15 +81,15 @@ helm upgrade tdarr-exporter homeylab/tdarr-exporter -n tdarr-exporter
 helm upgrade -f my-values.yaml tdarr-exporter homeylab/tdarr-exporter -n tdarr-exporter
 ```
 
-### Upgrade Matrix For Releases
-_The matrix below displays certain versions of this helm chart that could result in breaking changes._
+### Potential Breaking Updates
+_The table below lists chart version upgrades that may introduce breaking changes or require manual steps._
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
 | `1.X.X` | `2.0.0` | Hardened `securityContext`, standardized image schema, chart-managed Secret for the inline API key, and `appVersion` bumped to the current upstream `v3.0.0` image. **Read the [Migrating to 2.0.0](#migrating-to-200) section in full before upgrading.** |
 | `1.1.X` | `1.2.0` | Exporter upgraded to upstream `v2.x` (`appVersion` `1.4.3` -> `2.1.0`). No chart configuration changes. This is a breaking _upstream_ release: it requires Tdarr `v2.24.01`+ and renames/removes many Prometheus metrics and labels, so existing dashboards and alerts will break. Review the [upstream v2.0.0 release notes](https://github.com/homeylab/tdarr-exporter/releases/tag/v2.0.0) and reimport the [Grafana dashboard](https://grafana.com/grafana/dashboards/20388-tdarr/) before upgrading. |
 
-## Migrating to 2.0.0
+### Migrating to 2.0.0
 This version hardens the chart and standardizes its schema to match the other homeylab exporter charts, and moves `appVersion` to the current upstream image. The image repository is unchanged (still `homeylab/tdarr-exporter`). Review all items before upgrading.
 
 - **Image schema standardized (breaking).** `image.name` is renamed to `image.repository`; the previous `image.repository` (the registry host) is now `image.registry`. No image change — still `docker.io/homeylab/tdarr-exporter`.
