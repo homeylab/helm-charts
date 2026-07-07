@@ -1044,6 +1044,45 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/pihole-exporter-0.0.1/pihole-exporter-0.0.1.tgz
     version: 0.0.1
   qbittorrent-exporter:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "BREAKING - backing exporter swapped to martabal/qbittorrent-exporter (ghcr.io/martabal/qbittorrent-exporter, Go, the unmaintained caseyscarborough image is replaced); metric names/labels and the values schema change accordingly"
+        - kind: changed
+          description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL)"
+        - kind: changed
+          description: "credentials render into a chart-managed Secret and wire via envFrom (keys QBITTORRENT_USERNAME/QBITTORRENT_PASSWORD/QBITTORRENT_API_KEY); existingSecret supported"
+        - kind: changed
+          description: "BREAKING - values schema: config.host/port/ssl/urlBase/verifyCert replaced by config.baseUrl/timeout/fullRefreshInterval/insecureSkipVerify/minTlsVersion/logLevel, plus a new settings.features block (enableTracker/enableHighCardinality/enableIncreasedCardinality/enableLabelWithTracker/enableLabelWithHash/enableLabelWithTags); auth.user/pass/apiKey unchanged"
+        - kind: added
+          description: "optional ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled); TCP liveness/readiness probes"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
+    apiVersion: v2
+    appVersion: v2.0.1
+    created: "2026-07-07T03:02:11.199554204Z"
+    description: A Helm chart to export Prometheus metrics for qbittorrent.
+    digest: 965a58264868dadd292f950eff5525fcb3fec6cbb9d0c1084ffa52eaa0238896
+    home: https://github.com/martabal/qbittorrent-exporter
+    keywords:
+    - qbittorrent
+    - torrent
+    - prometheus
+    - exporter
+    - metrics
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: qbittorrent-exporter
+    sources:
+    - https://github.com/martabal/qbittorrent-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/qbittorrent-exporter-1.0.0/qbittorrent-exporter-1.0.0.tgz
+    version: 1.0.0
   - apiVersion: v2
     appVersion: v1.3.5
     created: "2023-12-19T07:48:51.296700992Z"
@@ -1309,4 +1348,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-06T05:42:56.30929975Z"
+generated: "2026-07-07T03:02:11.199720995Z"
