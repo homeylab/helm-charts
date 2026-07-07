@@ -520,6 +520,55 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-0.0.1/bookstack-file-exporter-0.0.1.tgz
     version: 0.0.1
   exportarr:
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: "BREAKING - qbittorrent-exporter subchart dependency bumped 0.1.0 -> 1.0.0, swapping the unmaintained caseyscarborough image for martabal/qbittorrent-exporter; passthrough value keys renamed accordingly: settings.config.base_url -> baseUrl, settings.auth.username/password -> auth.user/pass"
+        - kind: changed
+          description: "hardened pod/container securityContext defaults (runAsNonRoot, runAsUser 65532, readOnlyRootFilesystem, drop ALL)"
+        - kind: changed
+          description: "inline arr-instance apiKey now renders into a chart-managed Secret instead of being set as a plaintext environment variable"
+        - kind: added
+          description: "helm-docs README, helm-unittest test suites, and ci install values"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-07-07T04:29:23.007582673Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.2.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 2b7fd8ae483ac21237bc13b7ac9ea6a40ff619c34ff7a75442dde16b71ebc2d5
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-3.0.0/exportarr-3.0.0.tgz
+    version: 3.0.0
   - apiVersion: v2
     appVersion: v2.2.0
     created: "2026-05-30T19:12:09.602117051Z"
@@ -1348,4 +1397,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-07T03:02:11.199720995Z"
+generated: "2026-07-07T04:29:23.009165867Z"
