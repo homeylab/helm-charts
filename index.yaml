@@ -530,6 +530,57 @@ entries:
           description: "inline arr-instance apiKey now renders into a chart-managed Secret instead of being set as a plaintext environment variable"
         - kind: added
           description: "helm-docs README, helm-unittest test suites, and ci install values"
+        - kind: changed
+          description: "optional tdarr-exporter subchart dependency bumped 1.2.0 -> 2.0.0 (schema-normalized, hardened securityContext, appVersion 2.1.0 -> 3.0.0); passthrough value keys are unchanged, so only installs with tdarr-exporter.enabled that customize the image are affected"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-07-07T06:26:12.710516817Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 2.0.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 93d92c2b7a2a9f4da1a86cc52574b6bc51b52410700bbcbf4e5212893eeecda3
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-3.1.0/exportarr-3.1.0.tgz
+    version: 3.1.0
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: "BREAKING - qbittorrent-exporter subchart dependency bumped 0.1.0 -> 1.0.0, swapping the unmaintained caseyscarborough image for martabal/qbittorrent-exporter; passthrough value keys renamed accordingly: settings.config.base_url -> baseUrl, settings.auth.username/password -> auth.user/pass"
+        - kind: changed
+          description: "hardened pod/container securityContext defaults (runAsNonRoot, runAsUser 65532, readOnlyRootFilesystem, drop ALL)"
+        - kind: changed
+          description: "inline arr-instance apiKey now renders into a chart-managed Secret instead of being set as a plaintext environment variable"
+        - kind: added
+          description: "helm-docs README, helm-unittest test suites, and ci install values"
       artifacthub.io/images: |
         - name: exportarr
           image: ghcr.io/onedr0p/exportarr:v2.3.0
@@ -1438,4 +1489,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-07T06:02:25.347430802Z"
+generated: "2026-07-07T06:26:12.710807652Z"
