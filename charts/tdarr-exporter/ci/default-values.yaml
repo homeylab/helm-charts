@@ -1,0 +1,12 @@
+# ct install permutation: minimal working install, chart-managed Secret (inline apiKey) path.
+# Self-contained — no existingSecret. Reaches Ready under `ct install`.
+settings:
+  config:
+    url: "http://localhost:8265"
+    apiKey: "ci-api-key"
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 128Mi

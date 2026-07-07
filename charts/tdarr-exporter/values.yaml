@@ -2,53 +2,72 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 image:
-  repository: docker.io
-  name: homeylab/tdarr-exporter
+  # -- image registry
+  registry: docker.io
+  # -- image repository
+  repository: homeylab/tdarr-exporter
+  # -- image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- overrides the image tag whose default is the chart appVersion
   tag: ""
+
+## images for the `helm test` connection check
+tests:
+  image:
+    # -- registry for the `helm test` connection-check image
+    registry: docker.io
+    # -- repository for the `helm test` connection-check image
+    repository: busybox
+    # -- tag for the `helm test` connection-check image
+    tag: "1.36.1"
+    # -- pull policy for the `helm test` connection-check image
+    pullPolicy: IfNotPresent
+  ## path the test requests and expects a 200 from
+  # -- path the `helm test` request calls and expects a 200 from
+  path: /healthz
+
+updateStrategy:
+  # -- set the update strategy for the deployment
+  type: Recreate
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-## set image for post install helm tests
-testCurlImage:
-  repository: docker.io
-  name: busybox
-  tag: "1.36.1"
-  pullPolicy: IfNotPresent
-  # the url for post install check test
-  path: /healthz
-
-## update strategy for newer versions
-updateStrategy:
-    type: Recreate
-
 service:
   type: ClusterIP
+  # -- set port for tdarr-exporter scraping (tdarr-exporter default 9090)
   port: 9090
+  # -- set name for the service port (referenced by probes and serviceMonitor)
   name: metrics
+  # -- set protocol for the service
   protocol: TCP
 
-## metrics properties
+## set metrics export properties
 metrics:
-  ## -- Enable and configure a Prometheus serviceMonitor for the chart under this key.
+  # -- enable/disable prometheus podAnnotations and serviceMonitor
   enabled: true
+  # -- Add podAnnotations for prometheus scraping
   podAnnotations:
     prometheus.io/scrape: "true"
+    # -- set the path for prometheus scraping
     prometheus.io/path: /metrics
+    # -- set the port for prometheus scraping, should match the service port
     prometheus.io/port: "9090"
   ## if serviceMonitor enabled, pod annotations above will be ignored
   serviceMonitor:
+    # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
     enabled: false
+    # -- set the path for prometheus scraping for serviceMonitor
     path: /metrics
-    # change frequency of scrapes on tdarr here
-    # a decent value range to start from is 1m to 2m
-    # if you want your running transcode/health jobs to refresh more often, try lowering this
+    # -- how often to scrape for serviceMonitor
+    # change frequency of scrapes on tdarr here, a decent value range to start from is 1m to 2m;
+    # if you want your running transcode/health jobs to refresh more often, try lowering this;
     # if you find it hitting your tdarr instance too often, try increasing this
     interval: 1m
+    # -- scrapeTimeout for serviceMonitor
     scrapeTimeout: 15s
+    # -- set additional labels for serviceMonitor
     additionalLabels: {}
     targetLabels: []
     # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
@@ -57,63 +76,114 @@ metrics:
   ## Enable and configure Prometheus Rules for the chart under this key.
   ## not yet implemented
   prometheusRule:
+    # -- enable/disable prometheusRule
     enabled: false
+    # -- set labels for prometheusRule
     labels: {}
-    ## -- Configure additional rules for the chart under this key.
+    # -- Configure prometheusRule rules for the chart
     rules: []
-      # - alert: UpsStatusUnknown
-      #   annotations:
-      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
-      #     summary: UPS status unknown.
-      #   expr: |
-      #     nut_status == 0
-      #   for: 10s
-      #   labels:
-      #     severity: critical
 
-## define configuration for the exporter
+## provide settings for exporter
+## ref: https://github.com/homeylab/tdarr-exporter
 settings:
   ## tdarr connection settings
   config:
-    # `url` - This is a required property and must be provided.
-    # If no protocol is provided (http/https), defaults to using https. 
-    # Examples: `tdarr.example.com`, `http://tdarr.example.com`
+    # -- Tdarr URL. Required. If no protocol is provided (http/https), defaults to https. Examples: `tdarr.example.com`, `http://tdarr.example.com`. Maps to TDARR_URL
     url: ""
-    # if auth is not required, do not provide any `secretKey` or `apiKey`
+    # -- use an existing secret instead of `apiKey`. Must provide the key named by `secretKey` (ignored if empty)
     existingSecret:
-      # name of secret
+      # -- name of the existing secret
       name: ""
-      # name of key within secret to use
-      # example: "tdarr_api_key"
+      # -- name of the key within the existing secret to use for the Tdarr API key
       secretKey: ""
-    # ignored if `existingSecret` is used
+    # -- Tdarr API key, rendered into a chart-managed Secret. Ignored if `existingSecret.name` is set. If neither is set, the exporter connects unauthenticated
     apiKey: ""
-    # `verify_ssl` - This is an optional property and defaults to `true`.
-    # If set to `false`, the exporter will not verify the SSL certificate of the tdarr instance.
+    # -- skip TLS certificate verification (set false for self-signed). Maps to VERIFY_SSL
     verify_ssl: true
+    # -- exporter log level (debug/info/warn/error). Maps to LOG_LEVEL
     log_level: "info"
   ## if you change these, ensure you change `service` and `metrics.*` sections
   ## Generally you should not need to change below
   prometheus:
+    # -- port the exporter listens on for metrics. Maps to PROMETHEUS_PORT
     port: "9090"
+    # -- path the exporter serves metrics on. Maps to PROMETHEUS_PATH
     path: "/metrics"
 
-## Specify any additional env vars here
+# -- Add extra environment variables
 extraEnv: {}
 
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+httproute:
+  # -- enable a Gateway API (gateway.networking.k8s.io/v1) HTTPRoute as an alternative to ingress
+  enabled: false
+  # -- annotations added to the HTTPRoute
+  annotations: {}
+  # -- parentRefs pointing at the Gateway(s) to attach to; `name` is required
+  parentRefs: []
+  #  - name: traefik-gateway
+  #    namespace: traefik
+  #    sectionName: websecure
+  # -- hostnames matched by the route
+  hostnames: []
+  #  - tdarr-exporter.example.org
+  # -- explicit HTTPRoute rules; if empty, a single rule routing all paths to the Service is generated
+  rules: []
+
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # tdarr-exporter is a lightweight Go exporter; if you set limits, modest values suffice.
   # limits:
-  #   cpu: 100m
   #   memory: 128Mi
   # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  #   cpu: 10m
+  #   memory: 32Mi
 
-## Liveness probe
+## Liveness probe (httpGet — tdarr-exporter exposes a real /healthz endpoint)
 livenessProbe:
   httpGet:
     path: /healthz
@@ -124,7 +194,7 @@ livenessProbe:
   failureThreshold: 5
   successThreshold: 1
 
-## Readiness probe
+## Readiness probe (httpGet — tdarr-exporter exposes a real /healthz endpoint)
 readinessProbe:
   httpGet:
     path: /healthz
@@ -135,10 +205,7 @@ readinessProbe:
   failureThreshold: 5
   successThreshold: 1
 
-## Startup Probe
-## Initial delay of 30 seconds to wait for mariadb
-## long start up helps with chart-testing, change this as desired
-## shorter periodSeconds helps with pod restarts for db timeout conditions
+## Startup probe (httpGet — gives the exporter time to reach Tdarr before liveness/readiness kick in)
 startupProbe:
   httpGet:
     path: /healthz
@@ -161,33 +228,6 @@ volumeMounts: []
 # - name: foo
 #   mountPath: "/etc/foo"
 #   readOnly: true
-
-podAnnotations: {}
-podLabels: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: false
-  # Automatically mount a ServiceAccount's API credentials?
-  automount: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
 
 nodeSelector: {}
 
