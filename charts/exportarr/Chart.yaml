@@ -12,10 +12,24 @@ description: A Helm Chart to export Prometheus metrics for Arr applications.
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
+home: https://github.com/onedr0p/exportarr
+sources:
+  - https://github.com/onedr0p/exportarr
+  - https://github.com/homeylab/helm-charts
+keywords:
+  - exportarr
+  - arr
+  - prometheus
+  - exporter
+  - metrics
+maintainers:
+  - name: homeylab
+    url: https://github.com/homeylab
+
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.1.0
+version: 3.0.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -28,10 +42,28 @@ appVersion: "v2.3.0"
 # ref: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
 dependencies:
 - name: qbittorrent-exporter
-  version: "0.1.0"
+  version: "1.0.0"
   condition: qbittorrent-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
 - name: tdarr-exporter
   version: "1.2.0"
   condition: tdarr-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
+
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+  artifacthub.io/images: |
+    - name: exportarr
+      image: ghcr.io/onedr0p/exportarr:v2.3.0
+  artifacthub.io/changes: |
+    - kind: changed
+      description: "BREAKING - qbittorrent-exporter subchart dependency bumped 0.1.0 -> 1.0.0, swapping the unmaintained caseyscarborough image for martabal/qbittorrent-exporter; passthrough value keys renamed accordingly: settings.config.base_url -> baseUrl, settings.auth.username/password -> auth.user/pass"
+    - kind: changed
+      description: "hardened pod/container securityContext defaults (runAsNonRoot, runAsUser 65532, readOnlyRootFilesystem, drop ALL)"
+    - kind: changed
+      description: "inline arr-instance apiKey now renders into a chart-managed Secret instead of being set as a plaintext environment variable"
+    - kind: added
+      description: "helm-docs README, helm-unittest test suites, and ci install values"

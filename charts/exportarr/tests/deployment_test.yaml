@@ -1,0 +1,131 @@
+suite: exportarr deployment wiring
+templates:
+  - templates/deployment.yaml
+release:
+  name: ex
+tests:
+  - it: renders the container image as registry/name:tag and metrics containerPort
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/onedr0p/exportarr:v2.3.0
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 9707
+
+  - it: applies hardened pod and container securityContext defaults
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal: { path: spec.template.spec.securityContext.runAsNonRoot, value: true }
+      - equal: { path: spec.template.spec.securityContext.runAsUser, value: 65532 }
+      - equal: { path: spec.template.spec.securityContext.runAsGroup, value: 65532 }
+      - equal: { path: spec.template.spec.securityContext.fsGroup, value: 65532 }
+      - equal: { path: spec.template.spec.securityContext.seccompProfile.type, value: RuntimeDefault }
+      - equal: { path: "spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem", value: true }
+      - equal: { path: "spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation", value: false }
+      - contains:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop
+          content: ALL
+
+  - it: one enabled instance sets args[0] to the arr type and URL env to the instance url
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal:
+          path: spec.template.spec.containers[0].args[0]
+          value: radarr
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: URL, value: http://radarr:7878 }
+
+  - it: two enabled instances across different arr types render two Deployment documents
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+      exportarr.apps.sonarr[0]:
+        name: main
+        enabled: true
+        url: http://sonarr:8989
+    asserts:
+      - hasDocuments: { count: 2 }
+
+  - it: inline apiKey renders API_KEY as a secretKeyRef, never a plaintext value
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        apiKey: r-api-key-123
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: API_KEY
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name
+          value: ex-exportarr-radarr-main
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.key
+          value: API_KEY
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: API_KEY, value: r-api-key-123 }
+
+  - it: existingSecret set points API_KEY at the external secret name/key instead of the chart Secret
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        apiKey: r-api-key-123
+        existingSecret:
+          name: external-radarr-secret
+          secretKey: radarr_api_key
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: API_KEY
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name
+          value: external-radarr-secret
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.key
+          value: radarr_api_key
+
+  - it: neither apiKey nor existingSecret set omits the API_KEY env entirely
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: API_KEY }
+
+  - it: extraEnv on an instance renders as an upper-cased env var
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        extraEnv:
+          custom_flag: enabled
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: CUSTOM_FLAG, value: enabled }

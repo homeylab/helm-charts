@@ -617,10 +617,13 @@
                                 "existingSecret": {
                                     "type": "string"
                                 },
-                                "password": {
+                                "user": {
                                     "type": "string"
                                 },
-                                "username": {
+                                "pass": {
+                                    "type": "string"
+                                },
+                                "apiKey": {
                                     "type": "string"
                                 }
                             }
@@ -628,8 +631,11 @@
                         "config": {
                             "type": "object",
                             "properties": {
-                                "base_url": {
+                                "baseUrl": {
                                     "type": "string"
+                                },
+                                "insecureSkipVerify": {
+                                    "type": "boolean"
                                 }
                             }
                         }

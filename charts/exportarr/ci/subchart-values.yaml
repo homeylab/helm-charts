@@ -1,0 +1,34 @@
+# ct install permutation: subchart passthrough (qbittorrent-exporter + tdarr-exporter).
+# Exportarr's own arr instances stay disabled (defaults) to keep this install light —
+# the point of this scenario is verifying both dependency subcharts install cleanly
+# as deps in a fresh namespace.
+#
+# Both subcharts reach Ready without a reachable upstream:
+# - qbittorrent-exporter uses a TCP probe against its own `metrics` port (no health path).
+# - tdarr-exporter uses httpGet /healthz on its own `metrics` port, independent of `config.url`.
+qbittorrent-exporter:
+  enabled: true
+  settings:
+    config:
+      baseUrl: "http://localhost:8080"
+    auth:
+      user: "ci-admin"
+      pass: "ci-password"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+tdarr-exporter:
+  enabled: true
+  settings:
+    config:
+      url: "http://localhost:8265"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi

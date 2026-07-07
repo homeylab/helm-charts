@@ -1,0 +1,28 @@
+# ct install permutation: exportarr core only, one arr instance (radarr) enabled.
+# Subchart exporters (qbittorrent-exporter, tdarr-exporter) left disabled.
+# Self-contained — inline apiKey renders into a chart-managed Secret, no existingSecret.
+# Exercises Deployment + Service + Secret + hardened pod/container securityContext.
+#
+# Reaches Ready under `ct install` even though the radarr URL below is unreachable:
+# livenessProbe/readinessProbe/startupProbe all target exportarr's own `metrics` port
+# (httpGet /healthz), not the upstream arr instance, so pod health is independent of
+# whether `url` can actually be reached.
+exportarr:
+  apps:
+    radarr:
+      - name: main
+        enabled: true
+        url: "http://localhost:7878"
+        apiKey: "ci-test-key"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+qbittorrent-exporter:
+  enabled: false
+
+tdarr-exporter:
+  enabled: false
