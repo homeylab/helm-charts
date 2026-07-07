@@ -1153,6 +1153,47 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/qbittorrent-exporter-0.0.1/qbittorrent-exporter-0.0.1.tgz
     version: 0.0.1
   tdarr-exporter:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "BREAKING - image schema standardized: image.name renamed to image.repository (image.repository, formerly the registry host, is now image.registry); no image change, this is a homeylab custom build"
+        - kind: changed
+          description: "BREAKING - image schema standardized for the helm test connection-check image: testCurlImage.* renamed to tests.image.* (registry/repository/tag/pullPolicy) and tests.path"
+        - kind: changed
+          description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser/runAsGroup/fsGroup 65532, readOnlyRootFilesystem, drop ALL); the image runs as distroless nonroot (UID/GID 65532)"
+        - kind: changed
+          description: "inline settings.config.apiKey now renders into a chart-managed Secret and is wired via secretKeyRef instead of a plaintext env value; settings.config.existingSecret (object form, unchanged) still takes precedence"
+        - kind: added
+          description: "optional ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled)"
+        - kind: changed
+          description: "appVersion bumped 2.1.0 -> 3.0.0 (current upstream homeylab/tdarr-exporter image); env schema, /healthz, and metric names verified unchanged against this chart"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-07-07T06:02:25.34727979Z"
+    description: A Helm chart to export Prometheus metrics for Tdarr.
+    digest: 7cdcf8d8bfbbbd07e4e420cc1a6598fbcca0a0dcfa865daa967cab688de24069
+    home: https://github.com/homeylab/tdarr-exporter
+    keywords:
+    - tdarr
+    - transcode
+    - prometheus
+    - exporter
+    - metrics
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: tdarr-exporter
+    sources:
+    - https://github.com/homeylab/tdarr-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/tdarr-exporter-2.0.0/tdarr-exporter-2.0.0.tgz
+    version: 2.0.0
   - apiVersion: v2
     appVersion: 2.1.0
     created: "2026-05-27T04:15:26.156538761Z"
@@ -1397,4 +1438,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-07T04:29:23.009165867Z"
+generated: "2026-07-07T06:02:25.347430802Z"
