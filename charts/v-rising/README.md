@@ -97,7 +97,7 @@ V Rising's game and query ports are **UDP**, and RCON (if enabled) is TCP. A sta
 
 Both Services also support `externalTrafficPolicy`, `externalIPs`, and (for `LoadBalancer`) `loadBalancerIP`/`loadBalancerSourceRanges` if your environment needs them.
 
-If you already run a UDP-aware gateway, you can also front these Services with a CRD such as Gateway API `UDPRoute` or Traefik `IngressRouteUDP` instead of exposing them directly — this chart doesn't render those (they're controller-specific), but nothing prevents pointing one at the `Service`.
+UDP-aware gateway CRDs — Gateway API `UDPRoute` (experimental channel) or Traefik `IngressRouteUDP` — could also front these Services. The chart doesn't render them today; support can be added in future or on request. Note that UDP has no Host/SNI, so these route purely by entrypoint/port, and for a single game-server instance a `LoadBalancer` IP is usually the simpler choice.
 
 ## Upgrade
 ```bash
