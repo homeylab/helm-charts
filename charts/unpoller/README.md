@@ -108,7 +108,8 @@ This version hardens the chart and standardizes its schema to match the other ho
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
 | existingSecret | string | `""` | name of an existing secret providing the sensitive env vars below (e.g. `UP_UNIFI_CONTROLLER_0_PASS`); takes precedence over the chart-managed Secret rendered from `settings.unifi.auth`/`settings.influxdb.auth` |
-| extraEnv | object | `{}` | Add extra environment variables |
+| extraEnv | object | `{}` | Add extra environment variables (plaintext; non-sensitive only) |
+| extraEnvFrom | list | `[]` | extra envFrom sources merged into the container, in addition to the chart-managed or existing Secret. Use a `secretRef` for sensitive env (e.g. additional UniFi controllers' credentials) so they stay secret-backed, and a `configMapRef` for bulk non-sensitive env. |
 | fullnameOverride | string | `""` | override the full release name |
 | httproute.annotations | object | `{}` | annotations added to the HTTPRoute |
 | httproute.enabled | bool | `false` | enable a Gateway API (gateway.networking.k8s.io/v1) HTTPRoute as an alternative to ingress |
@@ -177,10 +178,10 @@ This version hardens the chart and standardizes its schema to match the other ho
 | serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
-| settings.influxdb.auth.auth_token | string | `""` | influxdb auth token (influxdb v2). Maps to UP_INFLUXDB_AUTH_TOKEN, omitted from the Secret if empty |
-| settings.influxdb.auth.pass | string | `""` | influxdb password. Maps to UP_INFLUXDB_PASS |
-| settings.influxdb.auth.user | string | `""` | influxdb username. Maps to UP_INFLUXDB_USER |
-| settings.influxdb.config | object | `{"db":"","interval":"","url":""}` | non-sensitive influxdb connection settings, rendered as `UP_INFLUXDB_*` env vars (uppercased keys) |
+| settings.influxdb.auth.auth_token | string | `""` | influxdb v2 auth token. Maps to UP_INFLUXDB_AUTH_TOKEN; when set, user/pass are omitted |
+| settings.influxdb.auth.pass | string | `""` | influxdb v1 password. Maps to UP_INFLUXDB_PASS (used only when auth_token is empty) |
+| settings.influxdb.auth.user | string | `""` | influxdb v1 username. Maps to UP_INFLUXDB_USER (used only when auth_token is empty) |
+| settings.influxdb.config | object | `{"db":"","interval":"","url":""}` | non-sensitive influxdb connection settings, rendered as `UP_INFLUXDB_*` env vars (uppercased keys). Empty values are omitted so unpoller applies its own defaults (an empty UP_INFLUXDB_INTERVAL is an invalid duration and crashes unpoller). |
 | settings.influxdb.config.db | string | `""` | influxdb database name. Maps to UP_INFLUXDB_DB |
 | settings.influxdb.config.interval | string | `""` | influxdb write interval. Maps to UP_INFLUXDB_INTERVAL |
 | settings.influxdb.config.url | string | `""` | influxdb URL. Maps to UP_INFLUXDB_URL |

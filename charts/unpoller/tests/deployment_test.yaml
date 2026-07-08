@@ -43,13 +43,64 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
           value: my-secret
-  - it: omits envFrom entirely when no auth and no existingSecret
+  - it: omits envFrom entirely when no auth, no existingSecret, no extraEnvFrom
     set:
       settings.unifi.auth.user: ""
       settings.unifi.auth.pass: ""
     asserts:
       - notExists:
           path: spec.template.spec.containers[0].envFrom
+  - it: omits empty influxdb.config env so unpoller does not fail on empty UP_INFLUXDB_INTERVAL
+    set:
+      settings.influxdb.enabled: true
+      settings.influxdb.config.url: http://influx:8086
+    asserts:
+      # url is set -> rendered; db/interval default empty -> omitted (empty duration would crash unpoller)
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: UP_INFLUXDB_URL
+            value: http://influx:8086
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: UP_INFLUXDB_INTERVAL
+            value: ""
+  - it: renders influxdb.config values that are set
+    set:
+      settings.influxdb.enabled: true
+      settings.influxdb.config.interval: 30s
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: UP_INFLUXDB_INTERVAL
+            value: "30s"
+  - it: appends extraEnvFrom after the chart Secret
+    set:
+      settings.unifi.auth.user: admin
+      settings.unifi.auth.pass: s3cret-pass
+      extraEnvFrom:
+        - secretRef:
+            name: unpoller-controller-1
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: unpoller
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[1].secretRef.name
+          value: unpoller-controller-1
+  - it: renders extraEnvFrom even with no chart Secret and no existingSecret
+    set:
+      settings.unifi.auth.user: ""
+      settings.unifi.auth.pass: ""
+      extraEnvFrom:
+        - configMapRef:
+            name: unpoller-extra-config
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].configMapRef.name
+          value: unpoller-extra-config
   - it: wires envFrom to the chart-managed Secret for influxdb-only creds
     set:
       settings.unifi.auth.user: ""

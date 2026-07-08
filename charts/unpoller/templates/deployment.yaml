@@ -48,8 +48,10 @@ spec:
           {{- end }}
         {{- if .Values.settings.influxdb.enabled }}
           {{- range $key, $val := .Values.settings.influxdb.config }}
+          {{- if $val }}
           - name: "UP_INFLUXDB_{{ $key | upper }}"
             value: {{ $val | quote }}
+          {{- end }}
           {{- end }}
         {{- else }}
           - name: "UP_INFLUXDB_DISABLE"
@@ -70,10 +72,15 @@ spec:
           {{- end }}
         {{- end }}
           {{- $managedSecret := eq (include "unpoller.renderSecret" .) "true" }}
-          {{- if or .Values.existingSecret $managedSecret }}
+          {{- if or .Values.existingSecret $managedSecret .Values.extraEnvFrom }}
           envFrom:
+          {{- if or .Values.existingSecret $managedSecret }}
             - secretRef:
                 name: {{ .Values.existingSecret | default (include "unpoller.fullname" .) }}
+          {{- end }}
+          {{- with .Values.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- end }}
           ports:
             - name: {{ .Values.service.name }}
