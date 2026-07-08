@@ -29,6 +29,12 @@ serviceAccount:
   # -- the name of the service account to use; if not set and create is true, a name is generated using the fullname template
   name: ""
 
+# -- deployment update strategy. `Recreate` terminates the old pod before creating the new one, avoiding a
+# ReadWriteOnce PVC multi-attach deadlock on upgrade (the game server holds its steam/world RWO volumes).
+# Override to `{type: RollingUpdate}` only if your persistence supports ReadWriteMany.
+updateStrategy:
+  type: Recreate
+
 # -- extra pod annotations
 podAnnotations: {}
 # -- extra pod labels

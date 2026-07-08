@@ -16,6 +16,19 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].image
           value: docker.io/trueosiris/vrising:3.0.1
+  - it: defaults the update strategy to Recreate to avoid RWO PVC multi-attach on upgrade
+    asserts:
+      - equal:
+          path: spec.strategy
+          value: { type: Recreate }
+  - it: renders an overridden update strategy
+    set:
+      updateStrategy:
+        type: RollingUpdate
+    asserts:
+      - equal:
+          path: spec.strategy
+          value: { type: RollingUpdate }
   - it: maps config to TZ/SERVERNAME/WORLDNAME/LOGDAYS env vars, keeping a zero logDays
     set:
       config:

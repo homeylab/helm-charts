@@ -38,5 +38,7 @@ annotations:
       description: "BREAKING - removed the dead/broken Ingress (referenced a nonexistent service.port, and the game protocol is UDP which L7 ingress cannot route); expose the server via the existing LoadBalancer/NodePort Service instead"
     - kind: fixed
       description: "config env vars no longer emit empty values (e.g. BRANCH=\"\") when left unset"
+    - kind: added
+      description: "updateStrategy value (default Recreate) to avoid a ReadWriteOnce PVC multi-attach deadlock on upgrade"
     - kind: changed
       description: "graduated to 1.0.0; chart is now enrolled in helm-docs and helm-unittest"
