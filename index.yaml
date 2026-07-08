@@ -1512,6 +1512,48 @@ entries:
     - https://homeylab.github.io/helm-charts/unpoller-1.0.0.tgz
     version: 1.0.0
   v-rising:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "BREAKING - image schema standardized: added image.registry (docker.io); image.repository unchanged (trueosiris/vrising)"
+        - kind: fixed
+          description: "BREAKING - rcon Service renamed from the chart fullname to <fullname>-rcon, fixing a name collision with the main Service when service.rcon.enabled is true"
+        - kind: removed
+          description: "BREAKING - removed the dead/broken Ingress (referenced a nonexistent service.port, and the game protocol is UDP which L7 ingress cannot route); expose the server via the existing LoadBalancer/NodePort Service instead"
+        - kind: fixed
+          description: "config env vars no longer emit empty values (e.g. BRANCH=\"\") when left unset"
+        - kind: added
+          description: "updateStrategy value (default Recreate) to avoid a ReadWriteOnce PVC multi-attach deadlock on upgrade"
+        - kind: changed
+          description: "graduated to 1.0.0; chart is now enrolled in helm-docs and helm-unittest"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
+    apiVersion: v2
+    appVersion: "3.0"
+    created: "2026-07-08T04:04:58.092249378Z"
+    description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
+      server
+    digest: 233d88dbc49d024176fd4c14f8a6de29de3aa31550bef043232377e807d236f3
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - v-rising
+    - vrising
+    - game-server
+    - gaming
+    - dedicated-server
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: v-rising
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/TrueOsiris/docker-vrising
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/v-rising-1.0.0/v-rising-1.0.0.tgz
+    version: 1.0.0
   - apiVersion: v2
     appVersion: "3.0"
     created: "2026-05-27T05:02:12.771578002Z"
@@ -1534,4 +1576,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-08T01:44:33.192448012Z"
+generated: "2026-07-08T04:04:58.092426389Z"
