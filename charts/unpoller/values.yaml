@@ -3,18 +3,28 @@ replicaCount: 1
 
 ## From: https://github.com/unpoller/unpoller/pkgs/container/unpoller
 image:
-  repository: ghcr.io
-  name: unpoller/unpoller
+  # -- image registry
+  registry: ghcr.io
+  # -- image repository
+  repository: unpoller/unpoller
+  # -- image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag, default is the chart appVersion.
+  # -- overrides the image tag whose default is the chart appVersion
   tag: ""
 
-## set image for post install helm tests
-testCurlImage:
-  repository: docker.io
-  name: busybox
-  tag: "1.36.1"
-  pullPolicy: IfNotPresent
+## images for the `helm test` connection check
+tests:
+  image:
+    # -- registry for the `helm test` connection-check image
+    registry: docker.io
+    # -- repository for the `helm test` connection-check image
+    repository: busybox
+    # -- tag for the `helm test` connection-check image
+    tag: "1.36.1"
+    # -- pull policy for the `helm test` connection-check image
+    pullPolicy: IfNotPresent
+  # -- path for the post-install connection check
+  path: /health
 
 updateStrategy:
   type: Recreate

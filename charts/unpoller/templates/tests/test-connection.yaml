@@ -9,7 +9,8 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: "{{ .Values.testCurlImage.repository}}/{{ .Values.testCurlImage.name }}:{{ .Values.testCurlImage.tag }}"
+      image: "{{ .Values.tests.image.registry }}/{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+      imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
       command: ['wget']
-      args: ['{{ include "unpoller.fullname" . }}:{{ .Values.service.port }}{{ .Values.readinessProbe.httpGet.path }}']
+      args: ['{{ include "unpoller.fullname" . }}:{{ .Values.service.port }}{{ .Values.tests.path }}']
   restartPolicy: Never
