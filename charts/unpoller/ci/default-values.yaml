@@ -1,0 +1,19 @@
+# ct install permutation: minimal working install, chart-managed Secret (unifi auth) path.
+# Self-contained — no existingSecret, no external UniFi controller needed (readiness serves
+# a last-good-snapshot /health even when the controller is unreachable). Reaches Ready under
+# `ct install`.
+serviceAccount:
+  create: true
+settings:
+  unifi:
+    config:
+      url: "https://127.0.0.1:8443"
+    auth:
+      user: "ci-user"
+      pass: "ci-pass"
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 128Mi
