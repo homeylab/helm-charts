@@ -1356,6 +1356,51 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/tdarr-exporter-0.0.1/tdarr-exporter-0.0.1.tgz
     version: 0.0.1
   unpoller:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "BREAKING - image schema standardized: image.name removed; use image.registry (was image.repository) + image.repository (the org/name path)"
+        - kind: changed
+          description: "BREAKING - helm test image schema: testCurlImage.* renamed to nested tests.image.* (registry/repository/tag/pullPolicy) + tests.path"
+        - kind: changed
+          description: "BREAKING - unifi/influxdb auth now renders into a chart-managed Secret wired via envFrom instead of plaintext Deployment env; existingSecret still takes precedence"
+        - kind: changed
+          description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, UID/GID/fsGroup 65532, readOnlyRootFilesystem, drop ALL); distroless-static image runs nonroot"
+        - kind: added
+          description: "ServiceAccount (serviceAccount.create), optional Ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled)"
+        - kind: added
+          description: "gated PrometheusRule template (metrics.prometheusRule.enabled) - previously the values block was a no-op"
+        - kind: changed
+          description: "appVersion bumped v3.2.0 -> v3.3.1 (current upstream); env schema, /health endpoint, and metric names verified unchanged against this chart"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
+    apiVersion: v2
+    appVersion: v3.3.1
+    created: "2026-07-08T01:44:33.192288292Z"
+    description: unpoller for unifi controller metrics
+    digest: ee27345f4b1ef0d199615763a239e4ad95c66c120921d218167401bb6683ab2a
+    home: https://unpoller.com
+    icon: https://unpoller.com/img/logo.png
+    keywords:
+    - unpoller
+    - unifi
+    - ubiquiti
+    - prometheus
+    - exporter
+    - metrics
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: unpoller
+    sources:
+    - https://github.com/unpoller/unpoller
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-4.0.0/unpoller-4.0.0.tgz
+    version: 4.0.0
   - apiVersion: v2
     appVersion: v3.2.0
     created: "2026-05-31T02:12:59.541743062Z"
@@ -1489,4 +1534,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-07T06:26:12.710807652Z"
+generated: "2026-07-08T01:44:33.192448012Z"
