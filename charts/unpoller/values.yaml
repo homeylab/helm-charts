@@ -1,4 +1,5 @@
 # Default values for unifi-unpoller.
+# -- number of replicas for the deployment
 replicaCount: 1
 
 ## From: https://github.com/unpoller/unpoller/pkgs/container/unpoller
@@ -27,37 +28,56 @@ tests:
   path: /health
 
 updateStrategy:
+  # -- set the update strategy for the deployment
   type: Recreate
 
+# -- image pull secrets for the deployment
 imagePullSecrets: []
+# -- override the chart name
 nameOverride: ""
+# -- override the full release name
 fullnameOverride: ""
 
-## extra pod annotations
+# -- extra pod annotations
 podAnnotations: {}
 
 service:
+  # -- set the service type
   type: ClusterIP
+  # -- set port for unpoller scraping (unpoller default 9130)
   port: 9130
+  # -- set protocol for the service
   protocol: TCP
+  # -- set name for the service port (referenced by probes and serviceMonitor)
   name: metrics
 
 ## Use prometheus service monitor instead for Prom operator
 metrics:
+  # -- enable/disable prometheus podAnnotations and serviceMonitor
   enabled: true
+  # -- Add podAnnotations for prometheus scraping
   podAnnotations:
     prometheus.io/scrape: "true"
+    # -- set the path for prometheus scraping
     prometheus.io/path: /metrics
+    # -- set the port for prometheus scraping, should match the service port
     prometheus.io/port: "9130"
   ## if serviceMonitor enabled, pod annotations will be ignored
   serviceMonitor:
+    # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
     enabled: false
+    # -- how often to scrape for serviceMonitor
     interval: 30s
+    # -- scrapeTimeout for serviceMonitor
     scrapeTimeout: 10s
+    # -- set additional labels for serviceMonitor
     additionalLabels: {}
+    # -- set targetLabels for serviceMonitor
     targetLabels: []
     # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+    # -- set relabelings for serviceMonitor
     relabelings: []
+    # -- set metricRelabelings for serviceMonitor
     metricRelabelings: []
   ## Enable and configure Prometheus Rules for the chart under this key.
   prometheusRule:
@@ -76,8 +96,7 @@ metrics:
       #   labels:
       #     severity: warning
 
-## Optionally place your credentials in a secret
-## Loaded in env
+# -- name of an existing secret providing the sensitive env vars below (e.g. `UP_UNIFI_CONTROLLER_0_PASS`); takes precedence over the chart-managed Secret rendered from `settings.unifi.auth`/`settings.influxdb.auth`
 existingSecret: ""
 
 ## General configuration
@@ -86,7 +105,9 @@ settings:
   ## Uses `_0_` number (ref: https://unpoller.com/docs/install/configuration - multiple controllers section)
   ## for additional controllers to scrape, use `extraEnv section` starting with `_1_`
   unifi:
+    # -- non-sensitive UniFi controller connection settings, rendered as `UP_UNIFI_CONTROLLER_0_*` env vars (uppercased keys)
     config:
+      # -- UniFi controller URL. Maps to UP_UNIFI_CONTROLLER_0_URL
       url: ""
       save_sites: true
       save_ids: false
@@ -94,29 +115,38 @@ settings:
       save_alarms: false
       save_anomalies: false
       save_dpi: false
+      # -- skip TLS certificate verification for the controller (set true for self-signed). Maps to UP_UNIFI_CONTROLLER_0_VERIFY_SSL
       verify_ssl: false
       # role: ""
       # api_key: ""  # required for Integration/v1 metrics on Network 9.3.43+ (unpoller v3+)
-    ## if existing secrets is supplied, below section is ignored
-    ## to use in an env variable, use `UP_UNIFI_CONTROLLER_0_{USER/PASS}` in secret key
+    ## if existingSecret is supplied, this section is ignored and must be provided in the existing secret
+    ## rendered into the chart-managed Secret; env var keys are `UP_UNIFI_CONTROLLER_0_{USER/PASS}`
     auth:
-      ## For the self-hosted UniFi Network Application, email field will be the `username`
-      ## change the below to your created user/pass
+      # -- UniFi controller username. For the self-hosted UniFi Network Application, this is the account's email. Maps to UP_UNIFI_CONTROLLER_0_USER
       user: ""
+      # -- UniFi controller password. Maps to UP_UNIFI_CONTROLLER_0_PASS
       pass: ""
   ## influxdb configuration if applicable
   ## additional configuration for influxdb can be specified in `extraEnv`
   influxdb:
+    # -- enable influxdb output (disables UP_INFLUXDB_DISABLE)
     enabled: false
+    # -- non-sensitive influxdb connection settings, rendered as `UP_INFLUXDB_*` env vars (uppercased keys)
     config:
+      # -- influxdb URL. Maps to UP_INFLUXDB_URL
       url: ""
+      # -- influxdb database name. Maps to UP_INFLUXDB_DB
       db: ""
+      # -- influxdb write interval. Maps to UP_INFLUXDB_INTERVAL
       interval: ""
-    ## if existing secrets is supplied, below section is ignored
-    ## to use in an env variable, use `UP_INFLUXDB_{USER/PASS}` in secret key
+    ## if existingSecret is supplied, this section is ignored and must be provided in the existing secret
+    ## rendered into the chart-managed Secret; env var keys are `UP_INFLUXDB_{USER/PASS/AUTH_TOKEN}`
     auth:
+      # -- influxdb username. Maps to UP_INFLUXDB_USER
       user: ""
+      # -- influxdb password. Maps to UP_INFLUXDB_PASS
       pass: ""
+      # -- influxdb auth token (influxdb v2). Maps to UP_INFLUXDB_AUTH_TOKEN, omitted from the Secret if empty
       auth_token: ""
   ## additional configuration for prometheus can be specified in `extraEnv`
   prometheus:
@@ -128,8 +158,9 @@ settings:
     ## Since the grafana charts (https://github.com/unpoller/dashboards) all have "unpoller" set in the prom queries, you should put this as "unpoller"
     ## TO work with the existing grafana dashboards unpoller provides, it is highly recommended to leave it as default: "unpoller"
     ## You can install this helm chart in any namespace you'd like though, just keep it the below var equal to "unpoller" for metrics
-    # UP_PROMETHEUS_NAMESPACE: "unpoller"
+    # -- metric namespace prefix, keep as "unpoller" to work with upstream Grafana dashboards. Maps to UP_PROMETHEUS_NAMESPACE
     namespace: "unpoller"
+    # -- address/port unpoller listens on for metrics. Maps to UP_PROMETHEUS_HTTP_LISTEN
     http_listen: "0.0.0.0:9130"
 
     ## Background poll interval for Prometheus metric collection (added in unpoller v3.2.0).
@@ -137,6 +168,7 @@ settings:
     ## Default "60s". Minimum effective value is 15s (values below are clamped by unpoller).
     ## The background cache cannot be disabled via this setting.
     ## Align your Prometheus scrape interval with this value to avoid stale data gaps.
+    # -- background poll interval for metric collection. Maps to UP_PROMETHEUS_INTERVAL
     interval: "60s"
 
     ## additional settings
@@ -144,25 +176,26 @@ settings:
     # buffer: "50"
   ## additional configuration for unpoller can be specified in `extraEnv`
   unpoller:
+    # -- enable debug logging. Maps to UP_POLLER_DEBUG
     debug: false
+    # -- suppress all but error logging. Maps to UP_POLLER_QUIET
     quiet: false
 
-
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- specifies whether a service account should be created
   create: false
-  # Automatically mount a ServiceAccount's API credentials?
+  # -- automatically mount a ServiceAccount's API credentials
   automount: true
-  # Annotations to add to the service account
+  # -- annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- the name of the service account to use; if not set and create is true, a name is generated using the fullname template
   name: ""
 
 ## additional configuration for the above unifi config section can be specified with `_0_`
 ## for additional controllers to scrape, start with `_1_`
 ## all keys will be uppercased just in case
 ## Ref: https://unpoller.com/docs/install/dockercompose
+# -- Add extra environment variables
 extraEnv: {}
   ## Some examples below
   # UP_UNIFI_DYNAMIC: false
