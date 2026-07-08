@@ -51,6 +51,22 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Whether to render a chart-managed credential Secret.
+Outputs "true" when no existingSecret is set AND at least one managed credential is
+provided: unifi user/pass, or influxdb auth (user/pass/token) when influxdb is enabled.
+Used by both secret.yaml and the deployment envFrom gate so the two never drift.
+*/}}
+{{- define "unpoller.renderSecret" -}}
+{{- if not .Values.existingSecret -}}
+{{- if or .Values.settings.unifi.auth.user .Values.settings.unifi.auth.pass -}}
+true
+{{- else if and .Values.settings.influxdb.enabled (or .Values.settings.influxdb.auth.user .Values.settings.influxdb.auth.pass .Values.settings.influxdb.auth.auth_token) -}}
+true
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "unpoller.serviceAccountName" -}}

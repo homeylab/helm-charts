@@ -31,13 +31,15 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "unpoller.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           {{- range $key, $val := .Values.settings.unifi.config }}
@@ -46,8 +48,10 @@ spec:
           {{- end }}
         {{- if .Values.settings.influxdb.enabled }}
           {{- range $key, $val := .Values.settings.influxdb.config }}
+          {{- if $val }}
           - name: "UP_INFLUXDB_{{ $key | upper }}"
             value: {{ $val | quote }}
+          {{- end }}
           {{- end }}
         {{- else }}
           - name: "UP_INFLUXDB_DISABLE"
@@ -61,29 +65,23 @@ spec:
           - name: "UP_POLLER_{{ $key | upper }}"
             value: {{ $val | quote }}
           {{- end }}
-        {{- if not .Values.existingSecret }}
-          {{- range $key, $val := .Values.settings.unifi.auth }}
-          - name: "UP_UNIFI_CONTROLLER_0_{{ $key | upper }}"
-            value: {{ $val | quote }}
-          {{- end }}
-          {{- if .Values.settings.influxdb.enabled }}
-          {{- range $key, $val := .Values.settings.influxdb.auth }}
-          - name: "UP_INFLUXDB_{{ $key | upper }}"
-            value: {{ $val | quote }}
-          {{- end }}
-          {{- end }}
-        {{- end }}
         {{- if .Values.extraEnv }}
           {{- range $key, $val := .Values.extraEnv }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}
           {{- end }}
         {{- end }}
-        {{- if .Values.existingSecret }}
+          {{- $managedSecret := eq (include "unpoller.renderSecret" .) "true" }}
+          {{- if or .Values.existingSecret $managedSecret .Values.extraEnvFrom }}
           envFrom:
-          - secretRef:
-              name: {{ .Values.existingSecret }}
-        {{- end }}
+          {{- if or .Values.existingSecret $managedSecret }}
+            - secretRef:
+                name: {{ .Values.existingSecret | default (include "unpoller.fullname" .) }}
+          {{- end }}
+          {{- with .Values.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
           ports:
             - name: {{ .Values.service.name }}
               containerPort: {{ .Values.service.port }}

@@ -12,11 +12,26 @@ icon: https://unpoller.com/img/logo.png
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
+home: https://unpoller.com
+sources:
+  - https://github.com/unpoller/unpoller
+  - https://github.com/homeylab/helm-charts
+keywords:
+  - unpoller
+  - unifi
+  - ubiquiti
+  - prometheus
+  - exporter
+  - metrics
+maintainers:
+  - name: homeylab
+    url: https://github.com/homeylab
+
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 ## Chart Version
-version: 3.0.0
+version: 4.0.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -24,4 +39,25 @@ version: 3.0.0
 # It is recommended to use it with quotes.
 ## App (unpoller) Version
 # renovate: datasource=docker depName=ghcr.io/unpoller/unpoller
-appVersion: "v3.2.0"
+appVersion: "v3.3.1"
+
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
+  artifacthub.io/changes: |
+    - kind: changed
+      description: "BREAKING - image schema standardized: image.name removed; use image.registry (was image.repository) + image.repository (the org/name path)"
+    - kind: changed
+      description: "BREAKING - helm test image schema: testCurlImage.* renamed to nested tests.image.* (registry/repository/tag/pullPolicy) + tests.path"
+    - kind: changed
+      description: "BREAKING - unifi/influxdb auth now renders into a chart-managed Secret wired via envFrom instead of plaintext Deployment env; existingSecret still takes precedence"
+    - kind: changed
+      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, UID/GID/fsGroup 65532, readOnlyRootFilesystem, drop ALL); distroless-static image runs nonroot"
+    - kind: added
+      description: "ServiceAccount (serviceAccount.create), optional Ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled)"
+    - kind: added
+      description: "gated PrometheusRule template (metrics.prometheusRule.enabled) - previously the values block was a no-op"
+    - kind: changed
+      description: "appVersion bumped v3.2.0 -> v3.3.1 (current upstream); env schema, /health endpoint, and metric names verified unchanged against this chart"

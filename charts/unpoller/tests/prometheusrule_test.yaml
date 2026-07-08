@@ -1,0 +1,44 @@
+suite: unpoller PrometheusRule
+templates:
+  - templates/prometheusrule.yaml
+release:
+  name: unpoller
+tests:
+  - it: does not render when disabled
+    set:
+      metrics.prometheusRule.enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: renders with one rule when enabled
+    set:
+      metrics.prometheusRule.enabled: true
+      metrics.prometheusRule.rules:
+        - alert: UnpollerTargetDown
+          annotations:
+            summary: unpoller metrics endpoint is down.
+          expr: up{job=~".*unpoller.*"} == 0
+          for: 5m
+          labels:
+            severity: warning
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: apiVersion, value: monitoring.coreos.com/v1 }
+      - equal: { path: kind, value: PrometheusRule }
+      - equal:
+          path: spec.groups[0].rules[0].alert
+          value: UnpollerTargetDown
+      - equal:
+          path: spec.groups[0].rules[0].expr
+          value: up{job=~".*unpoller.*"} == 0
+  - it: merges custom labels into metadata labels
+    set:
+      metrics.prometheusRule.enabled: true
+      metrics.prometheusRule.labels:
+        release: kube-prometheus-stack
+      metrics.prometheusRule.rules:
+        - alert: UnpollerTargetDown
+          expr: up{job=~".*unpoller.*"} == 0
+    asserts:
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus-stack
