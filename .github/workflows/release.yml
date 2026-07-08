@@ -31,7 +31,7 @@ jobs:
     environment: 'dockerhub' 
     steps:
       - name: Install Helm
-        uses: azure/setup-helm@v5.0.0
+        uses: azure/setup-helm@v5.0.1
         with:
           version: v4.2.2 # default is latest (stable)
         # id: install
