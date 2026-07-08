@@ -69,7 +69,7 @@ spec:
             value: {{ $val | quote }}
           {{- end }}
         {{- end }}
-          {{- $managedSecret := and (not .Values.existingSecret) (or .Values.settings.unifi.auth.user .Values.settings.unifi.auth.pass) }}
+          {{- $managedSecret := eq (include "unpoller.renderSecret" .) "true" }}
           {{- if or .Values.existingSecret $managedSecret }}
           envFrom:
             - secretRef:

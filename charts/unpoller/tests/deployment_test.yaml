@@ -50,6 +50,17 @@ tests:
     asserts:
       - notExists:
           path: spec.template.spec.containers[0].envFrom
+  - it: wires envFrom to the chart-managed Secret for influxdb-only creds
+    set:
+      settings.unifi.auth.user: ""
+      settings.unifi.auth.pass: ""
+      settings.influxdb.enabled: true
+      settings.influxdb.auth.user: influx-user
+      settings.influxdb.auth.pass: influx-pass
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: unpoller
   - it: never renders UP_UNIFI_CONTROLLER_0_PASS as a plaintext env value
     set:
       settings.unifi.auth.user: admin
