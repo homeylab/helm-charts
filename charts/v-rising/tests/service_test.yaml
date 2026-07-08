@@ -1,0 +1,25 @@
+suite: v-rising server Service
+templates:
+  - templates/service.yaml
+release:
+  name: v-rising
+tests:
+  - it: renders the server Service with the chart fullname
+    asserts:
+      - equal: { path: metadata.name, value: v-rising }
+  - it: exposes game and query ports as UDP
+    asserts:
+      - contains:
+          path: spec.ports
+          content: { name: gameport, port: 9876, targetPort: 9876, protocol: UDP }
+      - contains:
+          path: spec.ports
+          content: { name: queryport, port: 9877, targetPort: 9877, protocol: UDP }
+  - it: defaults to ClusterIP
+    asserts:
+      - equal: { path: spec.type, value: ClusterIP }
+  - it: honors service.server.type override
+    set:
+      service.server.type: LoadBalancer
+    asserts:
+      - equal: { path: spec.type, value: LoadBalancer }

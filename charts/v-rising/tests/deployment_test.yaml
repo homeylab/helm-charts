@@ -1,0 +1,109 @@
+suite: v-rising deployment wiring
+templates:
+  - templates/deployment.yaml
+release:
+  name: v-rising
+tests:
+  - it: renders the container image as registry/repository:tag
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/trueosiris/vrising:3.0
+  - it: uses an overridden image tag when set
+    set:
+      image.tag: "3.0.1"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/trueosiris/vrising:3.0.1
+  - it: defaults the update strategy to Recreate to avoid RWO PVC multi-attach on upgrade
+    asserts:
+      - equal:
+          path: spec.strategy
+          value: { type: Recreate }
+  - it: renders an overridden update strategy
+    set:
+      updateStrategy:
+        type: RollingUpdate
+    asserts:
+      - equal:
+          path: spec.strategy
+          value: { type: RollingUpdate }
+  - it: maps config to TZ/SERVERNAME/WORLDNAME/LOGDAYS env vars, keeping a zero logDays
+    set:
+      config:
+        tz: America/Chicago
+        serverName: myserver
+        worldName: myworld
+        logDays: 0
+        branch: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: TZ, value: America/Chicago }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: SERVERNAME, value: myserver }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: WORLDNAME, value: myworld }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: LOGDAYS, value: "0" }
+  - it: omits the BRANCH env entirely when config.branch is empty
+    set:
+      config.branch: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: BRANCH }
+  - it: renders the BRANCH env when config.branch is set
+    set:
+      config.branch: legacy-1.1.x-pc
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: BRANCH, value: legacy-1.1.x-pc }
+  - it: renders extraEnv as additional env vars
+    set:
+      extraEnv:
+        FOO: bar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: FOO, value: bar }
+  - it: renders game and query container ports as UDP
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content: { name: gameport, containerPort: 9876, protocol: UDP }
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content: { name: queryport, containerPort: 9877, protocol: UDP }
+  - it: omits the rcon container port when rcon is disabled (default)
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].ports
+          content: { name: rconport }
+  - it: renders the rcon container port as TCP when rcon is enabled
+    set:
+      service.rcon.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content: { name: rconport, containerPort: 25575, protocol: TCP }
+  - it: leaves podSecurityContext and container securityContext empty by default (runs as root by design)
+    asserts:
+      - equal: { path: spec.template.spec.securityContext, value: {} }
+      - equal: { path: "spec.template.spec.containers[0].securityContext", value: {} }
+  - it: deployment volumes reference existingClaim names when set, for both steam server and world files
+    set:
+      persistence.steamServer.existingClaim: my-steam-claim
+      persistence.world.existingClaim: my-world-claim
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].persistentVolumeClaim.claimName
+          value: my-steam-claim
+      - equal:
+          path: spec.template.spec.volumes[1].persistentVolumeClaim.claimName
+          value: my-world-claim

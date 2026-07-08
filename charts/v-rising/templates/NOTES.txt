@@ -1,7 +1,9 @@
-~~Thanks for using homeylab charts!~~
+Thanks for using homeylab charts!
 
 Get the {{ .Chart.Name }} instances by running this command:
     - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "v-rising.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+This is a UDP game server with no Ingress support. To reach it from outside the cluster, set service.server.type to LoadBalancer (get the external IP with `kubectl get svc`) or NodePort (get the node port with `kubectl get svc`).
 
 For more information and options on the image used in this chart:
     - https://github.com/TrueOsiris/docker-vrising

@@ -1,0 +1,21 @@
+suite: v-rising world files PVC
+templates:
+  - templates/world-files-pvc.yaml
+release:
+  name: v-rising
+tests:
+  - it: renders a PVC by default
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: metadata.name, value: v-rising-world-files }
+      - equal: { path: spec.resources.requests.storage, value: 5Gi }
+  - it: does not render when existingClaim is set
+    set:
+      persistence.world.existingClaim: my-existing-pvc
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: does not render when persistence is disabled
+    set:
+      persistence.world.enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
