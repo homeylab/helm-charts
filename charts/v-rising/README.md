@@ -90,12 +90,14 @@ helm install -f custom-values.yaml v-rising homeylab/v-rising -n v-rising --crea
 ```
 
 ## Exposing the Server (UDP)
-V Rising's game and query ports are **UDP**, and RCON (if enabled) is TCP. Kubernetes `Ingress` (and this chart's now-removed `Ingress` resource) only routes L7 HTTP(S) traffic and cannot route a UDP game server, so exposure is handled entirely through the `Service` resources this chart creates:
+V Rising's game and query ports are **UDP**, and RCON (if enabled) is TCP. A standard Kubernetes `Ingress` is HTTP(S)-only, so this chart doesn't ship one; a common setup is to expose the game `Service` with `type: LoadBalancer`. The chart's `Service` resources are the exposure point:
 
 - **`service.server`** — the main game/query port Service (`service.server.gamePort.port` default `9876`, `service.server.queryPort.port` default `9877`, both UDP). Set `service.server.type` to `LoadBalancer` (and optionally `service.server.loadBalancerIP`) to get an external IP from your cluster's load balancer, or `NodePort` (and optionally `service.server.gamePort.nodePort` / `service.server.queryPort.nodePort`) to expose it on a fixed node port instead.
 - **`service.rcon`** — an optional, separate TCP Service for RCON, created only when `service.rcon.enabled: true`. It is named `<fullname>-rcon` (suffixed to avoid colliding with the main Service). Expose it the same way via `service.rcon.type`.
 
-Both Services also support `externalTrafficPolicy`, `externalIPs`, and (for `LoadBalancer`) `loadBalancerIP` if your environment needs them.
+Both Services also support `externalTrafficPolicy`, `externalIPs`, and (for `LoadBalancer`) `loadBalancerIP`/`loadBalancerSourceRanges` if your environment needs them.
+
+If you already run a UDP-aware gateway, you can also front these Services with a CRD such as Gateway API `UDPRoute` or Traefik `IngressRouteUDP` instead of exposing them directly — this chart doesn't render those (they're controller-specific), but nothing prevents pointing one at the `Service`.
 
 ## Upgrade
 ```bash
