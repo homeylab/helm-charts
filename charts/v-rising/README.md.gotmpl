@@ -29,7 +29,7 @@ helm repo update homeylab
 ```
 
 ## Prerequisites
-This chart runs as **root by design** — the upstream image runs `steamcmd` and `wine` to install/update the game server on boot, both of which write to `/mnt` as root. The hardened, distroless `nonroot` (UID/GID 65532) `securityContext` used by the exporter charts in this repo does **not** apply here; `podSecurityContext`/`securityContext` are left as overridable empty defaults (`{}`).
+`podSecurityContext`/`securityContext` are left empty (`{}`) by default so the chart works out of the box with the upstream image's `steamcmd`/`wine` boot (which write to `/mnt`). Adjust them as needed for your environment.
 
 The game server needs meaningful CPU/memory (default request is `500m` CPU / `6G` memory) and persistent storage for the steam server files and world data — plan cluster capacity accordingly.
 

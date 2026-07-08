@@ -30,7 +30,7 @@ helm repo update homeylab
 ```
 
 ## Prerequisites
-This chart runs as **root by design** — the upstream image runs `steamcmd` and `wine` to install/update the game server on boot, both of which write to `/mnt` as root. The hardened, distroless `nonroot` (UID/GID 65532) `securityContext` used by the exporter charts in this repo does **not** apply here; `podSecurityContext`/`securityContext` are left as overridable empty defaults (`{}`).
+`podSecurityContext`/`securityContext` are left empty (`{}`) by default so the chart works out of the box with the upstream image's `steamcmd`/`wine` boot (which write to `/mnt`). Adjust them as needed for your environment.
 
 The game server needs meaningful CPU/memory (default request is `500m` CPU / `6G` memory) and persistent storage for the steam server files and world data — plan cluster capacity accordingly.
 
@@ -165,11 +165,11 @@ This version graduates the chart to `1.0.0` and standardizes its schema to match
 | persistence.world.storageClass | string | `""` | set the storage class to use |
 | podAnnotations | object | `{}` | extra pod annotations |
 | podLabels | object | `{}` | extra pod labels |
-| podSecurityContext | object | `{}` | pod-level securityContext. This chart intentionally runs as root by default (unlike the hardened 65532-nonroot exporter charts in this repo): the upstream trueosiris/vrising image runs steamcmd and wine to install/update the game server, both of which write to /mnt as root on first boot. Override only if you have verified a customized/rootless image. |
+| podSecurityContext | object | `{}` | pod-level securityContext. Left empty ({}) by default so the chart works out of the box with the upstream image's steamcmd/wine boot, which write to /mnt. Adjust as needed for your environment. |
 | readinessProbe | object | `{}` | readiness probe for the server container; not yet implemented upstream |
 | resources.requests.cpu | string | `"500m"` | CPU request for the server container |
 | resources.requests.memory | string | `"6G"` | memory request for the server container; the game server is memory-hungry, keep this generous |
-| securityContext | object | `{}` | container-level securityContext. Same caveat as podSecurityContext above: left permissive (default root) by design because steamcmd/wine need to write to /mnt. Do not apply the distroless/nonroot 65532 hardening used by the exporter charts here. |
+| securityContext | object | `{}` | container-level securityContext. Left empty ({}) by default, same as podSecurityContext above, to work with the steamcmd/wine boot. Adjust as needed for your environment. |
 | service.rcon.annotations | object | `{}` | annotations added to the rcon service |
 | service.rcon.clusterIP | string | `nil` | set the clusterIP of the service, useful when service.rcon.type is ClusterIP and a fixed IP is desired |
 | service.rcon.enabled | bool | `false` | optional enable rcon service port - note: also needs modification of settings file |

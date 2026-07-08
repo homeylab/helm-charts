@@ -34,16 +34,13 @@ podAnnotations: {}
 # -- extra pod labels
 podLabels: {}
 
-# -- pod-level securityContext. This chart intentionally runs as root by default (unlike the
-# hardened 65532-nonroot exporter charts in this repo): the upstream trueosiris/vrising image
-# runs steamcmd and wine to install/update the game server, both of which write to /mnt as root
-# on first boot. Override only if you have verified a customized/rootless image.
+# -- pod-level securityContext. Left empty ({}) by default so the chart works out of the box with
+# the upstream image's steamcmd/wine boot, which write to /mnt. Adjust as needed for your environment.
 podSecurityContext: {}
   # fsGroup: 2000
 
-# -- container-level securityContext. Same caveat as podSecurityContext above: left permissive
-# (default root) by design because steamcmd/wine need to write to /mnt. Do not apply the
-# distroless/nonroot 65532 hardening used by the exporter charts here.
+# -- container-level securityContext. Left empty ({}) by default, same as podSecurityContext above,
+# to work with the steamcmd/wine boot. Adjust as needed for your environment.
 securityContext: {}
   # capabilities:
   #   drop:
