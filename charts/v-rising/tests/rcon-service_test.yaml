@@ -1,0 +1,27 @@
+suite: v-rising rcon Service
+templates:
+  - templates/rcon-service.yaml
+release:
+  name: v-rising
+tests:
+  - it: does not render when service.rcon.enabled is false (default)
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: renders when service.rcon.enabled is true
+    set:
+      service.rcon.enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+  - it: names the rcon Service with a -rcon suffix, distinct from the main Service name
+    set:
+      service.rcon.enabled: true
+    asserts:
+      - equal: { path: metadata.name, value: v-rising-rcon }
+      - notEqual: { path: metadata.name, value: v-rising }
+  - it: exposes the rcon port as TCP
+    set:
+      service.rcon.enabled: true
+    asserts:
+      - contains:
+          path: spec.ports
+          content: { name: rconport, port: 25575, targetPort: 25575, protocol: TCP }

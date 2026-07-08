@@ -3,32 +3,47 @@
 # Declare variables to be passed into your templates.
 
 image:
+  # -- image registry
+  registry: docker.io
+  # -- image repository
   repository: trueosiris/vrising
+  # -- image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- overrides the image tag whose default is the chart appVersion
   tag: ""
 
+# -- image pull secrets for the deployment
 imagePullSecrets: []
+# -- override the chart name
 nameOverride: ""
+# -- override the full release name
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- specifies whether a service account should be created
   create: false
-  # Automatically mount a ServiceAccount's API credentials?
+  # -- automatically mount a ServiceAccount's API credentials
   automount: true
-  # Annotations to add to the service account
+  # -- annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- the name of the service account to use; if not set and create is true, a name is generated using the fullname template
   name: ""
 
+# -- extra pod annotations
 podAnnotations: {}
+# -- extra pod labels
 podLabels: {}
 
+# -- pod-level securityContext. This chart intentionally runs as root by default (unlike the
+# hardened 65532-nonroot exporter charts in this repo): the upstream trueosiris/vrising image
+# runs steamcmd and wine to install/update the game server, both of which write to /mnt as root
+# on first boot. Override only if you have verified a customized/rootless image.
 podSecurityContext: {}
   # fsGroup: 2000
 
+# -- container-level securityContext. Same caveat as podSecurityContext above: left permissive
+# (default root) by design because steamcmd/wine need to write to /mnt. Do not apply the
+# distroless/nonroot 65532 hardening used by the exporter charts here.
 securityContext: {}
   # capabilities:
   #   drop:
@@ -40,49 +55,57 @@ securityContext: {}
 service:
   ## Set service properties for the v-rising server
   server:
+    # -- annotations added to the v-rising server service
     annotations: {}
     # -- set type of service, example: `ClusterIP`, `NodePort`, `LoadBalancer` for v-rising server
     type: ClusterIP
     gamePort:
       # -- set game port for v rising
       port: 9876
-      # Set the port used if the serviceType is NodePort
+      # -- set the node port used if service.server.type is NodePort
       nodePort:
     queryPort:
       # -- set query port for v rising
       port: 9877
-      # Set the port used if the serviceType is NodePort
+      # -- set the node port used if service.server.type is NodePort
       nodePort:
-    # Set the external port of the service, useful when using the LoadBalancer service type
+    # -- set the clusterIP of the service, useful when service.server.type is ClusterIP and a fixed IP is desired
     clusterIP:
-    # Set the loadBalancerIP if the serviceType is LoadBalancer
+    # -- set the loadBalancerIP if service.server.type is LoadBalancer
     loadBalancerIP:
-    # Set the externalTrafficPolicy in the Service to either `Cluster` or `Local`
+    # -- restrict which client CIDRs may reach the service when service.server.type is LoadBalancer (empty allows all)
+    loadBalancerSourceRanges: []
+    # - 10.0.0.0/8
+    # -- set the externalTrafficPolicy in the Service to either `Cluster` or `Local`
     externalTrafficPolicy: ""
-    # Manually set the external IPs for the service
+    # -- manually set the external IPs for the service
     externalIPs: []
     # - XX.XX.XX.XX
   ## Add additional service for RCON
   rcon:
+    # -- annotations added to the rcon service
     annotations: {}
-     # -- optional enable rcon service port - note: also needs modification of settings file
+    # -- optional enable rcon service port - note: also needs modification of settings file
     enabled: false
     # -- set type of service, example: `ClusterIP`, `NodePort`, `LoadBalancer` for rcon service
     type: ClusterIP
     # -- rcon port for v rising
     port: 25575
-    # Set the port used if the serviceType is NodePort
+    # -- set the node port used if service.rcon.type is NodePort
     nodePort:
-    # Set the external port of the service, useful when using the LoadBalancer service type
+    # -- set the clusterIP of the service, useful when service.rcon.type is ClusterIP and a fixed IP is desired
     clusterIP:
-    # Set the loadBalancerIP if the serviceType is LoadBalancer
+    # -- set the loadBalancerIP if service.rcon.type is LoadBalancer
     loadBalancerIP:
-    # Set the externalTrafficPolicy in the Service to either `Cluster` or `Local`
+    # -- restrict which client CIDRs may reach the service when service.rcon.type is LoadBalancer (empty allows all)
+    loadBalancerSourceRanges: []
+    # - 10.0.0.0/8
+    # -- set the externalTrafficPolicy in the Service to either `Cluster` or `Local`
     externalTrafficPolicy: ""
-    # Manually set the external IPs for the service
+    # -- manually set the external IPs for the service
     externalIPs: []
     # - XX.XX.XX.XX
-  
+
 config:
   # -- timezone for server
   tz: America/New_York
@@ -92,7 +115,7 @@ config:
   worldName: "v-rising-world"
   # -- optional lifetime of logfiles
   logDays: 30
-  # -- (optional) pin the V Rising server version, e.g. `legacy-1.1.x-pc`; leave empty to auto-update to the latest build on boot
+  # -- optionally pin the V Rising server version, e.g. `legacy-1.1.x-pc`; leave empty to auto-update to the latest build on boot. Unset/empty values in this block are omitted from the container env rather than rendered as an empty string
   branch: ""
 
 # -- additional environment variables as key value pairs
@@ -116,11 +139,12 @@ persistence:
     size: 10Gi
     # -- set an existingClaim for volume, if set the rest of persistence parameters are ignored
     existingClaim: ""
+    # -- set the access modes for the volume
     accessModes:
       - ReadWriteOnce
     # -- set the mount path for the volume inside the container
     mountPath: "/mnt/vrising/server"
-    # Selector to match an existing Persistent Volume
+    # -- selector to match an existing Persistent Volume
     selector: {}
   world:
     # -- enable persistence using PVC for world files
@@ -139,29 +163,13 @@ persistence:
     size: 5Gi
     # -- set an existingClaim for volume, if set the rest of persistence parameters are ignored
     existingClaim: ""
+    # -- set the access modes for the volume
     accessModes:
       - ReadWriteOnce
     # -- set the mount path for the volume inside the container
     mountPath: "/mnt/vrising/persistentdata"
-    # Selector to match an existing Persistent Volume
+    # -- selector to match an existing Persistent Volume
     selector: {}
-
-## NOT USED
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -172,34 +180,41 @@ resources:
   #   cpu: 100m
   #   memory: 128Mi
   requests:
+    # -- CPU request for the server container
     cpu: 500m
+    # -- memory request for the server container; the game server is memory-hungry, keep this generous
     memory: 6G
 
-## Not yet implemented
+## Not yet implemented by the upstream image (no HTTP endpoint to probe)
+# -- liveness probe for the server container; not yet implemented upstream
 livenessProbe: {}
   # httpGet:
   #   path: /
   #   port: http
+# -- readiness probe for the server container; not yet implemented upstream
 readinessProbe: {}
   # httpGet:
   #   path: /
   #   port: http
 
-# Additional volumes on the output Deployment definition.
+# -- additional volumes on the output Deployment definition
 volumes: []
 # - name: foo
 #   secret:
 #     secretName: mysecret
 #     optional: false
 
-# Additional volumeMounts on the output Deployment definition.
+# -- additional volumeMounts on the output Deployment definition
 volumeMounts: []
 # - name: foo
 #   mountPath: "/etc/foo"
 #   readOnly: true
 
+# -- node labels for pod assignment
 nodeSelector: {}
 
+# -- tolerations for pod assignment
 tolerations: []
 
+# -- affinity rules for pod assignment
 affinity: {}

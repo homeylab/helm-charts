@@ -1,0 +1,21 @@
+suite: v-rising steam server files PVC
+templates:
+  - templates/server-files-pvc.yaml
+release:
+  name: v-rising
+tests:
+  - it: renders a PVC by default
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: metadata.name, value: v-rising-steam-server-files }
+      - equal: { path: spec.resources.requests.storage, value: 10Gi }
+  - it: does not render when existingClaim is set
+    set:
+      persistence.steamServer.existingClaim: my-existing-pvc
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: does not render when persistence is disabled
+    set:
+      persistence.steamServer.enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
