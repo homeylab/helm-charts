@@ -204,9 +204,7 @@ serviceAccount:
 # -- Add extra environment variables (plaintext; non-sensitive only)
 extraEnv: {}
 
-# -- extra envFrom sources merged into the container, in addition to the chart-managed or
-# existing Secret. Use a `secretRef` for sensitive env (e.g. additional UniFi controllers'
-# credentials) so they stay secret-backed, and a `configMapRef` for bulk non-sensitive env.
+# -- extra `envFrom` sources (`secretRef`/`configMapRef`) merged into the container, in addition to the chart-managed or existing Secret.
 extraEnvFrom: []
 #  - secretRef:
 #      name: unpoller-controller-1

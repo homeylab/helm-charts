@@ -81,14 +81,7 @@ metrics:
 ## Targeting Multiple UniFi Controllers
 A single unpoller can scrape several controllers. The chart configures **controller 0** from `settings.unifi.*` (rendered as `UP_UNIFI_CONTROLLER_0_*`, with its credentials in the chart-managed Secret). Additional controllers use the incrementing index `UP_UNIFI_CONTROLLER_1_*`, `UP_UNIFI_CONTROLLER_2_*`, ... (see the upstream [multiple controllers](https://unpoller.com/docs/install/configuration) docs).
 
-Add the **non-sensitive** per-controller settings via `extraEnv` (these render as plaintext env — fine for URLs and flags), and keep each extra controller's **credentials secret-backed** by putting them in your own Secret referenced through `extraEnvFrom`:
-
-```bash
-# credentials for controller 1 live in your own Secret, not in values
-kubectl create secret generic unpoller-controller-1 -n unpoller \
-  --from-literal=UP_UNIFI_CONTROLLER_1_USER=readonly \
-  --from-literal=UP_UNIFI_CONTROLLER_1_PASS=fakepassword
-```
+Every setting for an additional controller — URL, flags, and credentials — can go in `extraEnv`, which is the simplest approach:
 
 ```yaml
 # my-values.yaml
@@ -98,14 +91,30 @@ extraEnv:
   UP_UNIFI_CONTROLLER_1_URL: "https://unifi2.example.org:8443"
   UP_UNIFI_CONTROLLER_1_VERIFY_SSL: "false"
   UP_UNIFI_CONTROLLER_1_SAVE_SITES: "true"
+  UP_UNIFI_CONTROLLER_1_USER: "readonly"
+  UP_UNIFI_CONTROLLER_1_PASS: "fakepassword"
+```
 
-# secret-backed credentials for controller 1 (avoids plaintext in the pod spec)
+`extraEnv` values are written into the Deployment manifest as plaintext. That is fine for URLs and flags, and works for credentials too — but if you'd rather not have passwords / API keys in the manifest, the **recommended** approach is to keep them secret-backed. Put the extra controller's credentials in your own Secret and reference it via `extraEnvFrom`, leaving only the non-sensitive settings in `extraEnv`:
+
+```bash
+kubectl create secret generic unpoller-controller-1 -n unpoller \
+  --from-literal=UP_UNIFI_CONTROLLER_1_USER=readonly \
+  --from-literal=UP_UNIFI_CONTROLLER_1_PASS=fakepassword
+```
+
+```yaml
+# my-values.yaml
+extraEnv:
+  UP_UNIFI_DYNAMIC: "false"
+  UP_UNIFI_CONTROLLER_1_URL: "https://unifi2.example.org:8443"
+  UP_UNIFI_CONTROLLER_1_VERIFY_SSL: "false"
 extraEnvFrom:
   - secretRef:
       name: unpoller-controller-1
 ```
 
-> `extraEnv` values are written into the Deployment manifest in plaintext, so use it only for non-sensitive settings. Put any passwords / API keys in a Secret and reference it via `extraEnvFrom` (or place every controller's credentials in a single `existingSecret`).
+Alternatively, place every controller's credentials (including controller 0's) in a single `existingSecret`. Use whichever fits your workflow.
 
 ## Upgrade
 ```bash
@@ -130,7 +139,7 @@ This version hardens the chart and standardizes its schema to match the other ho
 - **unifi/influxdb auth now renders into a chart-managed Secret (breaking).** `settings.unifi.auth.{user,pass}` and, when `settings.influxdb.enabled`, `settings.influxdb.auth.{user,pass,auth_token}` are no longer emitted as plaintext Deployment env values. They now render into `templates/secret.yaml` and are wired via `envFrom`. `existingSecret` (unchanged field) still takes precedence and must provide the same `UP_*` keys if set.
 - **Hardened `securityContext` defaults (potentially breaking).** `runAsNonRoot`, `runAsUser`/`runAsGroup`/`fsGroup: 65532`, `readOnlyRootFilesystem: true`, `drop: [ALL]`. The upstream image has no `USER` directive (defaults to root), but the distroless-static binary runs fine as nonroot; `runAsUser: 65532` must be set explicitly since `runAsNonRoot: true` alone is not sufficient for a root-defaulting image. Override `podSecurityContext`/`securityContext` if you run a customized image.
 - **New optional ServiceAccount (`serviceAccount.create`), Ingress (`networking.k8s.io/v1`), and Gateway API `HTTPRoute`** (Ingress/HTTPRoute both disabled by default).
-- **New `extraEnvFrom`** — a list of additional `envFrom` sources (`secretRef`/`configMapRef`) merged after the chart-managed or existing Secret. Use it to keep additional UniFi controllers' credentials secret-backed rather than in plaintext `extraEnv` (see [Targeting Multiple UniFi Controllers](#targeting-multiple-unifi-controllers)).
+- **New `extraEnvFrom`** — a list of additional `envFrom` sources (`secretRef`/`configMapRef`) merged after the chart-managed or existing Secret, for any extra env you want to inject (see [Targeting Multiple UniFi Controllers](#targeting-multiple-unifi-controllers) for one use).
 - **`metrics.prometheusRule` is now implemented.** Previously this values block was a no-op (no template rendered it). `metrics.prometheusRule.enabled: true` now renders a real `PrometheusRule`; the previous cargo-culted example rule (`nut_status`/`UpsStatusUnknown`, copied from an unrelated exporter) has been replaced with a generic `up{job=~".*unpoller.*"} == 0` target-health example.
 - **`appVersion` bumped `v3.2.0` -> `v3.3.1`** (current upstream image). The chart's env schema and `/health` endpoint were verified unchanged against the `v3.3.1` image.
 
@@ -140,7 +149,7 @@ This version hardens the chart and standardizes its schema to match the other ho
 | affinity | object | `{}` |  |
 | existingSecret | string | `""` | name of an existing secret providing the sensitive env vars below (e.g. `UP_UNIFI_CONTROLLER_0_PASS`); takes precedence over the chart-managed Secret rendered from `settings.unifi.auth`/`settings.influxdb.auth` |
 | extraEnv | object | `{}` | Add extra environment variables (plaintext; non-sensitive only) |
-| extraEnvFrom | list | `[]` | extra envFrom sources merged into the container, in addition to the chart-managed or existing Secret. Use a `secretRef` for sensitive env (e.g. additional UniFi controllers' credentials) so they stay secret-backed, and a `configMapRef` for bulk non-sensitive env. |
+| extraEnvFrom | list | `[]` | extra `envFrom` sources (`secretRef`/`configMapRef`) merged into the container, in addition to the chart-managed or existing Secret. |
 | fullnameOverride | string | `""` | override the full release name |
 | httproute.annotations | object | `{}` | annotations added to the HTTPRoute |
 | httproute.enabled | bool | `false` | enable a Gateway API (gateway.networking.k8s.io/v1) HTTPRoute as an alternative to ingress |
