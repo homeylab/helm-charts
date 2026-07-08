@@ -1,0 +1,79 @@
+suite: unpoller deployment wiring
+templates:
+  - templates/deployment.yaml
+release:
+  name: unpoller
+tests:
+  - it: renders the container image as registry/repository:tag
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/unpoller/unpoller:v3.3.1
+  - it: sets serviceAccountName
+    set:
+      serviceAccount.create: true
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: unpoller
+  - it: applies hardened pod and container securityContext defaults (UID 65532)
+    asserts:
+      - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }
+      - equal: { path: "spec.template.spec.securityContext.runAsUser", value: 65532 }
+      - equal: { path: "spec.template.spec.securityContext.runAsGroup", value: 65532 }
+      - equal: { path: "spec.template.spec.securityContext.fsGroup", value: 65532 }
+      - equal: { path: "spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem", value: true }
+      - contains:
+          path: "spec.template.spec.containers[0].securityContext.capabilities.drop"
+          content: ALL
+  - it: wires envFrom to the chart-managed Secret when unifi auth is set
+    set:
+      settings.unifi.auth.user: admin
+      settings.unifi.auth.pass: s3cret-pass
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: unpoller
+  - it: wires envFrom to existingSecret when set, taking precedence over the chart Secret
+    set:
+      settings.unifi.auth.user: admin
+      settings.unifi.auth.pass: s3cret-pass
+      existingSecret: my-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: my-secret
+  - it: omits envFrom entirely when no auth and no existingSecret
+    set:
+      settings.unifi.auth.user: ""
+      settings.unifi.auth.pass: ""
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].envFrom
+  - it: never renders UP_UNIFI_CONTROLLER_0_PASS as a plaintext env value
+    set:
+      settings.unifi.auth.user: admin
+      settings.unifi.auth.pass: s3cret-pass
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: UP_UNIFI_CONTROLLER_0_PASS, value: s3cret-pass }
+  - it: never renders UP_INFLUXDB_PASS as a plaintext env value
+    set:
+      settings.influxdb.enabled: true
+      settings.influxdb.auth.user: influx-user
+      settings.influxdb.auth.pass: influx-pass
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: { name: UP_INFLUXDB_PASS, value: influx-pass }
+  - it: still renders non-sensitive unifi config and prometheus env
+    set:
+      settings.unifi.config.url: https://unifi.local:8443
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: UP_UNIFI_CONTROLLER_0_URL, value: "https://unifi.local:8443" }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: UP_PROMETHEUS_NAMESPACE, value: "unpoller" }
