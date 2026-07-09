@@ -74,6 +74,32 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
           value: my-secret
+  - it: appends extraEnvFrom after existingSecret (e.g. an ESO-synced Secret)
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      existingSecret: my-secret
+      extraEnvFrom:
+        - secretRef:
+            name: eso-synced-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: my-secret
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[1].secretRef.name
+          value: eso-synced-secret
+  - it: renders extraEnvFrom with no envFrom index gap when existingSecret is unset
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      extraEnvFrom:
+        - configMapRef:
+            name: extra-cm
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].configMapRef.name
+          value: extra-cm
   - it: omits liveness/readiness probes by default (config.health_port unset)
     template: templates/deployment.yaml
     set:

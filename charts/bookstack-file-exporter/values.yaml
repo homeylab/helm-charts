@@ -59,6 +59,12 @@ securityContext:
 
 # -- use an existing secret for credentials (e.g. BOOKSTACK_TOKEN_ID / BOOKSTACK_TOKEN_SECRET, object storage access/secret keys). See: https://github.com/homeylab/bookstack-file-exporter for the full list of supported env vars
 existingSecret: ""
+# -- additional `envFrom` sources (secretRef/configMapRef) for the container, e.g. a Secret you manage outside the chart such as one synced by External Secrets Operator (ESO). Standard k8s envFrom entries; combined with `existingSecret` if both are set
+extraEnvFrom: []
+# - secretRef:
+#     name: bookstack-file-exporter-eso
+# - configMapRef:
+#     name: my-extra-env
 # -- set extra environment variables
 extraEnv: {}
 

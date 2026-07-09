@@ -70,12 +70,12 @@ persistence:
 <br>
 
 ## Scheduling
-Scheduling is controlled entirely by `config.run_interval`:
+Set by `config.run_interval`:
 
-- **CronJob (default)** - `config.run_interval: 0` renders a k8s `CronJob` on the schedule in `cron.schedule` (default `@daily`). This gets you Job history, `cron.concurrencyPolicy`, and retries for free from Kubernetes.
-- **Deployment** - `config.run_interval` set to a number of seconds renders a `Deployment` instead, and the exporter loops in-pod, sleeping that many seconds between runs.
+- **CronJob (default)** - `config.run_interval: 0` renders a k8s `CronJob` on `cron.schedule` (default `@daily`).
+- **Deployment** - `config.run_interval: <seconds>` renders a `Deployment` that loops in-pod, sleeping that long between runs.
 
-> **Note** - upstream's app-native `config.run_schedule` (its own cron implementation) is **not supported** by this chart and is not exposed as a values key. A k8s `CronJob` pod runs once and exits, so `run_schedule` can never fire under CronJob mode, and it's redundant/inferior to k8s scheduling under Deployment mode (no Job history, `concurrencyPolicy`, or retries). If `config.run_schedule` is set (e.g. via `--set` or a raw values override), the chart fails the render with an explanatory error rather than silently producing a broken combination. Use CronJob scheduling or the `run_interval` loop instead.
+> **Note** - upstream's app-native `config.run_schedule` is disabled: the chart fails the render if it's set. Use the k8s `CronJob` or the `run_interval` loop instead.
 
 ## Remote Storage
 In addition to (or instead of) the local `persistence` volume, the exporter can upload backups to one or more S3 / S3-compatible targets via `config.object_storage` (a list, empty by default). Each entry requires `name`, `endpoint`, `region`, and `bucket`; leave `endpoint` unset to use AWS S3's default endpoint, or set it to point at an S3-compatible provider (e.g. MinIO).
@@ -97,7 +97,9 @@ existingSecret: my-object-storage-creds
 ```
 
 ## Advanced Configuration
-The chart renders `config.yml` from `.Values.config` as a near-passthrough: keys are snake_case and match the [upstream config.yml](https://github.com/homeylab/bookstack-file-exporter/blob/main/docs/configuration.md) 1:1, and any key left at its empty/default value is pruned from the rendered file rather than emitted as `null` or `""` (the exporter rejects both). This covers the vast majority of upstream options, but if you need a key the chart doesn't model yet, or prefer to manage `config.yml` via GitOps, set `config.existingConfigMap` to the name of your own ConfigMap (must contain a `config.yml` key) - the chart then skips rendering its own ConfigMap entirely and mounts yours instead.
+`config.yml` is rendered from `.Values.config`: keys are snake_case, match the [upstream config.yml](https://github.com/homeylab/bookstack-file-exporter/blob/main/docs/configuration.md) 1:1, and empty/default keys are pruned (the exporter rejects `null`/`""`). So any upstream key works even if it isn't in `values.yaml`.
+
+To manage `config.yml` yourself (GitOps, or a key the chart doesn't model), set `config.existingConfigMap` to a ConfigMap with a `config.yml` key - the chart mounts yours and skips rendering its own.
 
 ## Upgrade
 ```bash

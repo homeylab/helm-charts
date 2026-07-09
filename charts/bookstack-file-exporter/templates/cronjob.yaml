@@ -54,10 +54,15 @@ spec:
           {{- with .Values.volumeMounts }}
               {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.existingSecret }}
+          {{- if or .Values.existingSecret .Values.extraEnvFrom }}
             envFrom:
+          {{- if .Values.existingSecret }}
             - secretRef:
                 name: {{ .Values.existingSecret }}
+          {{- end }}
+          {{- with .Values.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- end }}
             {{- with .Values.resources }}
             resources:

@@ -52,10 +52,15 @@ spec:
             - name: {{ $key | upper }}
               value: {{ $val | quote }}
           {{- end }}
-        {{- if .Values.existingSecret }}
+        {{- if or .Values.existingSecret .Values.extraEnvFrom }}
           envFrom:
+        {{- if .Values.existingSecret }}
           - secretRef:
               name: {{ .Values.existingSecret }}
+        {{- end }}
+        {{- with .Values.extraEnvFrom }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         {{- end }}
           {{- with .Values.resources }}
           resources:
