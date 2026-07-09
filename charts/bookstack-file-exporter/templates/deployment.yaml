@@ -1,4 +1,4 @@
-{{- if .Values.config.runInterval }}
+{{- if .Values.config.run_interval }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,7 +18,9 @@ spec:
     metadata:
       annotations:
         # support restart on configmap changes
+        {{- if not .Values.config.existingConfigMap }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -43,22 +45,44 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+        {{- if or .Values.auth.tokenId .Values.auth.tokenSecret .Values.existingSecret.name }}
+        {{- $secretName := .Values.existingSecret.name | default (include "bookstack-file-exporter.fullname" .) }}
+            - name: BOOKSTACK_TOKEN_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ .Values.existingSecret.tokenIdKey }}
+            - name: BOOKSTACK_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ .Values.existingSecret.tokenSecretKey }}
+        {{- end }}
           {{- range $key, $val := .Values.extraEnv }}
             - name: {{ $key | upper }}
               value: {{ $val | quote }}
           {{- end }}
-        {{- if .Values.existingSecret }}
+        {{- with .Values.extraEnvFrom }}
           envFrom:
-          - secretRef:
-              name: {{ .Values.existingSecret }}
+            {{- toYaml . | nindent 10 }}
         {{- end }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- if .Values.config.health_port }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.config.health_port }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.config.health_port }}
+        {{- end }}
           volumeMounts:
             - mountPath: /export/config/config.yml
               name: config
@@ -73,7 +97,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ include "bookstack-file-exporter.fullname" . }}
+            name: {{ if .Values.config.existingConfigMap }}{{ .Values.config.existingConfigMap }}{{ else }}{{ include "bookstack-file-exporter.fullname" . }}{{ end }}
       {{- if .Values.persistence.enabled }}
         {{- if .Values.persistence.existingClaim }}
         - name: export-dump
