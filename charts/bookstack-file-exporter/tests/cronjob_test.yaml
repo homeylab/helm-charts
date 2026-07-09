@@ -45,13 +45,36 @@ tests:
       - equal:
           path: spec.jobTemplate.spec.template.spec.volumes[0].configMap.name
           value: my-external-cm
-  - it: wires existingSecret via envFrom.secretRef
+  - it: injects token env via secretKeyRef from the chart-managed Secret when auth.* is set
     set:
-      existingSecret: my-secret
+      auth.tokenId: my-id
+      auth.tokenSecret: my-token-secret
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].env[0].name
+          value: BOOKSTACK_TOKEN_ID
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name
+          value: bookstack-file-exporter
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.key
+          value: BOOKSTACK_TOKEN_SECRET
+  - it: points token secretKeyRef at existingSecret.name when set (chart Secret not used)
+    set:
+      existingSecret.name: my-secret
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name
+          value: my-secret
+  - it: renders extraEnvFrom at envFrom[0]
+    set:
+      extraEnvFrom:
+        - secretRef:
+            name: eso-synced-secret
     asserts:
       - equal:
           path: spec.jobTemplate.spec.template.spec.containers[0].envFrom[0].secretRef.name
-          value: my-secret
+          value: eso-synced-secret
   - it: applies hardened securityContext defaults (UID/GID 33333)
     asserts:
       - equal: { path: "spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot", value: true }

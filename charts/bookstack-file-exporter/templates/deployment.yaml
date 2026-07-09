@@ -48,19 +48,26 @@ spec:
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+        {{- if or .Values.auth.tokenId .Values.auth.tokenSecret .Values.existingSecret.name }}
+        {{- $secretName := .Values.existingSecret.name | default (include "bookstack-file-exporter.fullname" .) }}
+            - name: BOOKSTACK_TOKEN_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ .Values.existingSecret.tokenIdKey }}
+            - name: BOOKSTACK_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ .Values.existingSecret.tokenSecretKey }}
+        {{- end }}
           {{- range $key, $val := .Values.extraEnv }}
             - name: {{ $key | upper }}
               value: {{ $val | quote }}
           {{- end }}
-        {{- if or .Values.existingSecret .Values.extraEnvFrom }}
-          envFrom:
-        {{- if .Values.existingSecret }}
-          - secretRef:
-              name: {{ .Values.existingSecret }}
-        {{- end }}
         {{- with .Values.extraEnvFrom }}
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
+          envFrom:
+            {{- toYaml . | nindent 10 }}
         {{- end }}
           {{- with .Values.resources }}
           resources:

@@ -158,7 +158,7 @@ _The matrix below displays certain versions of this helm chart that could result
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `5.0.X` | `5.1.0` | Optional `bookstack-file-exporter` subchart bumped `0.0.2` -> `1.0.0` (breaking config rewrite). Only relevant if `bookstack-file-exporter.enabled: true`; follow the [exporter's Migrating to 1.0.0 notes](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter#migrating-to-100) for the `bookstack-file-exporter.*` values. |
+| `5.0.X` | `5.1.0` | Optional `bookstack-file-exporter` subchart bumped `0.0.2` -> `1.0.0` (breaking config rewrite; API token moved to `bookstack-file-exporter.auth.*`). Only relevant if `bookstack-file-exporter.enabled: true` — follow the [exporter's Migrating to 1.0.0 notes](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter#migrating-to-100). |
 | `4.1.X` | `5.0.0` | Embedded mariadb dependency switched from Bitnami to CloudPirates (MariaDB `12.3.2`), credentials/APP_KEY moved to a chart-managed Secret, several `values.yaml` fields were renamed, and BookStack was updated to `version-v26.05.2` from `version-v24.12` (the linuxserver image auto-runs DB migrations on start). **Read the [Migrating to 5.0.0](#migrating-to-500) section in full before upgrading** if you have existing data. |
 | `4.0.X` | `4.1.0` | `fileBackups` has been moved to its own chart and can be enabled by setting `bookstack-file-exporter.enabled` to `true` |
 | `3.X.X` | `4.0.0` | Bookstack version is updated to `v24.10` from `v24.05.2`. The docker image from `linuxserver/bookstack` introduces the requirement for an appKey to be set in the `config` section. This will required to be set by the user, see [here](https://github.com/linuxserver/docker-bookstack?tab=readme-ov-file#parameters) for more information or Configuration section below. `DB_USER` and `DB_PASS` env variables have been changed to `DB_USERNAME` and `DB_PASSWORD` for those that use the `existingSecret` option. |
@@ -246,8 +246,8 @@ extraEnv:
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| bookstack-file-exporter.config.credentials.token_id | string | `""` | set token id, ignored if `BOOKSTACK_TOKEN_ID` is defined in `existingSecret` or env variable. Maps to subchart `config.credentials.token_id` |
-| bookstack-file-exporter.config.credentials.token_secret | string | `""` | set token secret, ignored if `BOOKSTACK_TOKEN_SECRET` is defined in `existingSecret` or env variable. Maps to subchart `config.credentials.token_secret` |
+| bookstack-file-exporter.auth.tokenId | string | `""` | BookStack API token id. Stored in a chart-managed Secret and injected as env `BOOKSTACK_TOKEN_ID` (kept out of the exporter's ConfigMap). Maps to subchart `auth.tokenId` |
+| bookstack-file-exporter.auth.tokenSecret | string | `""` | BookStack API token secret. Stored in a chart-managed Secret and injected as env `BOOKSTACK_TOKEN_SECRET`. Maps to subchart `auth.tokenSecret` |
 | bookstack-file-exporter.config.host | string | `"http://bookstack.bookstack.svc.cluster.local"` | URL of this BookStack instance. Maps to subchart `config.host` |
 | bookstack-file-exporter.enabled | bool | `false` | enable/disable the bookstack-file-exporter subchart |
 | config.appKey | string | `""` | app encryption key; leave empty to auto-generate and persist in the chart Secret, or pin an existing key (required when upgrading with existing data, see "Migrating to 5.0.0") |

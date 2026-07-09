@@ -47,18 +47,21 @@ tests:
       - matchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^object_storage:" }
       - matchRegex: { path: "data[\"config.yml\"]", pattern: "name: primary" }
       - matchRegex: { path: "data[\"config.yml\"]", pattern: "access_key_env: AWS_ACCESS_KEY_ID" }
-  - it: renders credentials only for the field explicitly set
+  - it: does not leak auth.* tokens into config.yml (they are injected as env from a Secret instead)
+    set:
+      auth.tokenId: my-token-id
+      auth.tokenSecret: my-token-secret
+    asserts:
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^credentials:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "my-token-id" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "my-token-secret" }
+  - it: still passes a raw credentials block through to config.yml (literal passthrough escape hatch)
     set:
       config.credentials.token_id: my-token-id
     asserts:
       - matchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^credentials:" }
       - matchRegex: { path: "data[\"config.yml\"]", pattern: "token_id: my-token-id" }
       - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "token_secret" }
-  - it: omits credentials entirely when existingSecret is set and creds left default-empty
-    set:
-      existingSecret: my-secret
-    asserts:
-      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^credentials:" }
   - it: does not render when config.existingConfigMap is set
     set:
       config.existingConfigMap: my-external-cm

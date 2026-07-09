@@ -65,31 +65,69 @@ tests:
       config.existingConfigMap: my-external-cm
     asserts:
       - notExists: { path: "spec.template.metadata.annotations[\"checksum/config\"]" }
-  - it: wires existingSecret via envFrom.secretRef
+  - it: injects token env via secretKeyRef from the chart-managed Secret when auth.* is set
     template: templates/deployment.yaml
     set:
       config.run_interval: 60
-      existingSecret: my-secret
+      auth.tokenId: my-id
+      auth.tokenSecret: my-token-secret
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
-          value: my-secret
-  - it: appends extraEnvFrom after existingSecret (e.g. an ESO-synced Secret)
+          path: spec.template.spec.containers[0].env[0].name
+          value: BOOKSTACK_TOKEN_ID
+      - equal:
+          path: spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name
+          value: bookstack-file-exporter
+      - equal:
+          path: spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key
+          value: BOOKSTACK_TOKEN_ID
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: BOOKSTACK_TOKEN_SECRET
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name
+          value: bookstack-file-exporter
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.key
+          value: BOOKSTACK_TOKEN_SECRET
+  - it: points token secretKeyRef at existingSecret.name with custom keys when set
     template: templates/deployment.yaml
     set:
       config.run_interval: 60
-      existingSecret: my-secret
+      existingSecret.name: my-secret
+      existingSecret.tokenIdKey: TID
+      existingSecret.tokenSecretKey: TSEC
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name
+          value: my-secret
+      - equal:
+          path: spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key
+          value: TID
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name
+          value: my-secret
+      - equal:
+          path: spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.key
+          value: TSEC
+  - it: omits token env entirely when neither auth.* nor existingSecret.name is set
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - notExists: { path: "spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef" }
+  - it: renders extraEnvFrom (e.g. an ESO-synced Secret for object storage keys) at envFrom[0]
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
       extraEnvFrom:
         - secretRef:
             name: eso-synced-secret
     asserts:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
-          value: my-secret
-      - equal:
-          path: spec.template.spec.containers[0].envFrom[1].secretRef.name
           value: eso-synced-secret
-  - it: renders extraEnvFrom with no envFrom index gap when existingSecret is unset
+  - it: renders extraEnvFrom configMapRef standalone
     template: templates/deployment.yaml
     set:
       config.run_interval: 60

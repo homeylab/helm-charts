@@ -321,11 +321,11 @@ mariadb:
 bookstack-file-exporter:
   # -- enable/disable the bookstack-file-exporter subchart
   enabled: false
+  auth:
+    # -- BookStack API token id. Stored in a chart-managed Secret and injected as env `BOOKSTACK_TOKEN_ID` (kept out of the exporter's ConfigMap). Maps to subchart `auth.tokenId`
+    tokenId: ""
+    # -- BookStack API token secret. Stored in a chart-managed Secret and injected as env `BOOKSTACK_TOKEN_SECRET`. Maps to subchart `auth.tokenSecret`
+    tokenSecret: ""
   config:
     # -- URL of this BookStack instance. Maps to subchart `config.host`
     host: "http://bookstack.bookstack.svc.cluster.local"
-    credentials:
-      # -- set token id, ignored if `BOOKSTACK_TOKEN_ID` is defined in `existingSecret` or env variable. Maps to subchart `config.credentials.token_id`
-      token_id: ""
-      # -- set token secret, ignored if `BOOKSTACK_TOKEN_SECRET` is defined in `existingSecret` or env variable. Maps to subchart `config.credentials.token_secret`
-      token_secret: ""

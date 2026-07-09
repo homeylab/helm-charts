@@ -30,7 +30,12 @@ helm repo update homeylab
 ## Prerequisites
 Point the exporter at a reachable BookStack instance via `config.host` (e.g. `https://bookstack.example.org`) - **required**.
 
-Authentication uses a BookStack API token. Set `config.credentials.token_id` / `config.credentials.token_secret`, or leave them empty and provide `BOOKSTACK_TOKEN_ID` / `BOOKSTACK_TOKEN_SECRET` via `existingSecret` or `extraEnv` instead - the chart omits `credentials` from the rendered config entirely when both are left empty, so the environment variables take over cleanly.
+Authentication uses a BookStack API token, provided one of two ways:
+
+- **Chart-managed Secret** - set `auth.tokenId` / `auth.tokenSecret`. The chart stores them in its own `Secret` and injects them as the `BOOKSTACK_TOKEN_ID` / `BOOKSTACK_TOKEN_SECRET` env vars. Simplest for `helm install --set` or a values file.
+- **Bring your own Secret** - set `existingSecret.name` (the chart references it via `secretKeyRef` and creates no Secret of its own). Keys default to `BOOKSTACK_TOKEN_ID` / `BOOKSTACK_TOKEN_SECRET`; override with `existingSecret.tokenIdKey` / `existingSecret.tokenSecretKey`. Good for GitOps / External Secrets Operator.
+
+Either way the tokens are injected as environment variables and are **never written into the chart's `ConfigMap`** (a ConfigMap is not a Secret). Those env vars also override any `credentials` set in `config.yml`.
 
 ## Install
 ```bash
@@ -54,12 +59,14 @@ Only some options are shown, view `values.yaml` for an exhaustive list.
 
 ```yaml
 # custom-values.yaml
+# API token -> chart-managed Secret -> injected as BOOKSTACK_TOKEN_ID/SECRET env (kept out of the ConfigMap).
+# For GitOps/ESO, omit these and set existingSecret.name instead.
+auth:
+  tokenId: "my-token-id"
+  tokenSecret: "my-token-secret"
+
 config:
   host: "https://bookstack.example.org"
-  # inline creds shown for brevity; prefer existingSecret / extraEnvFrom (below) to keep them in a Secret
-  credentials:
-    token_id: "my-token-id"
-    token_secret: "my-token-secret"
   formats:
     - markdown
     - html
@@ -104,7 +111,9 @@ Set by `config.run_interval`:
 ## Remote Storage
 In addition to (or instead of) the local `persistence` volume, the exporter can upload backups to one or more S3 / S3-compatible targets via `config.object_storage` (a list, empty by default). Each entry requires `name`, `endpoint`, `region`, and `bucket`; leave `endpoint` unset to use AWS S3's default endpoint, or set it to point at an S3-compatible provider (e.g. MinIO).
 
-Prefer `access_key_env` / `secret_key_env` (paired with `existingSecret`, so the actual key material lives in a Secret) or `ambient_auth` (e.g. an IRSA/workload-identity role) for credentials. Setting `access_key` / `secret_key` inline works, but renders them into the chart's `ConfigMap` **in cleartext** - a ConfigMap is not a Secret - so it's discouraged for anything but local testing.
+Prefer `access_key_env` / `secret_key_env` (paired with a Secret injected via `extraEnvFrom`, so the actual key material lives in a Secret) or `ambient_auth` (e.g. an IRSA/workload-identity role) for credentials. Setting `access_key` / `secret_key` inline works, but renders them into the chart's `ConfigMap` **in cleartext** - a ConfigMap is not a Secret - so it's discouraged for anything but local testing.
+
+> **Note** - `existingSecret` is token-only (it wires the BookStack API token via `secretKeyRef`). Object-storage key material belongs in a **separate** Secret injected with `extraEnvFrom` (below), so those keys reach the container as env vars matching `access_key_env` / `secret_key_env`.
 
 ```yaml
 config:
@@ -117,7 +126,10 @@ config:
       access_key_env: "AWS_ACCESS_KEY_ID"
       secret_key_env: "AWS_SECRET_ACCESS_KEY"
 
-existingSecret: my-object-storage-creds
+# the S3 key material lives in a Secret you manage (e.g. synced by External Secrets Operator)
+extraEnvFrom:
+  - secretRef:
+      name: my-object-storage-creds
 ```
 
 ## Advanced Configuration
@@ -154,6 +166,8 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 - **`appVersion` bumped `2.1.0` -> `3.0.0` (BREAKING).** Upstream rewrote its config schema in `v3.0.0`: unrecognized keys and explicit `null` values are now rejected at startup. This chart's `config.yml` rendering was rebuilt to match (see below); review the [upstream `v3.0.0` release notes](https://github.com/homeylab/bookstack-file-exporter/releases/tag/v3.0.0) for the full upstream changelog.
 - **`config.minio` replaced by `config.object_storage` (BREAKING).** The old single `minio` object is gone; remote storage is now a list of S3/S3-compatible targets. Map old fields to a list entry: `host` -> `endpoint`, `region` -> `region`, `bucket` -> `bucket`, `path` -> `prefix`, `accessKey`/`secretKey` -> `access_key`/`secret_key` (or, preferably, `access_key_env`/`secret_key_env`), `keepLast` -> `keep_last`. See [Remote Storage](#remote-storage).
 - **`config:` keys are now snake_case, matching upstream `config.yml` 1:1 (BREAKING).** Previously camelCase chart keys (e.g. `credentials.tokenId`, `assets.modifyLinks`, `httpConfig.verifySSL`) are now their snake_case upstream equivalents (`credentials.token_id`, `assets.modify_links`, `http_config.verify_ssl`). This removes a translation layer that could silently mismap fields; every other `config` value is renamed the same way (camelCase -> snake_case, verbatim upstream names). Chart *scaffolding* outside `config:` (`image`, `persistence`, `securityContext`, etc.) is unchanged and stays camelCase.
+- **API credentials moved out of `config` to top-level `auth` / `existingSecret` (BREAKING).** Previously `config.credentials.token_id` / `token_secret` were rendered into the `config.yml` `ConfigMap` **in cleartext** (and were then silently overridden by the `BOOKSTACK_TOKEN_*` env vars anyway). They now live in top-level `auth.tokenId` / `auth.tokenSecret`, which the chart puts in a managed `Secret` and injects as `BOOKSTACK_TOKEN_ID` / `BOOKSTACK_TOKEN_SECRET` env vars - the tokens never touch the ConfigMap. Migrate `config.credentials.token_id` -> `auth.tokenId` and `config.credentials.token_secret` -> `auth.tokenSecret`. (A raw `config.credentials:` block still passes through to `config.yml` verbatim if you insist, but the env vars override it, so this is discouraged.)
+- **`existingSecret` is now an object and token-only (BREAKING).** It changed from a string (blind `envFrom` that dumped *every* key in the Secret into the pod env) to `existingSecret.name` + `existingSecret.tokenIdKey` / `tokenSecretKey`, referenced per-key via `secretKeyRef`. Replace `existingSecret: my-secret` with `existingSecret: {name: my-secret}`. If that Secret also carried **object-storage** keys, move those to a Secret injected via the new `extraEnvFrom` (see [Remote Storage](#remote-storage)) - `existingSecret` no longer bulk-injects them.
 - **Image schema standardized (BREAKING).** `image.repository` (previously the registry host) + `image.name` (previously the image path) are replaced by `image.registry` + `image.repository`. No image change - still `docker.io/homeylab/bookstack-file-exporter`.
 - **Unset/optional config keys are now pruned instead of always emitted.** Empty credentials, an empty `object_storage` list, an unset `output_path`/`ca_bundle`, etc. are all omitted from the rendered `config.yml` rather than rendered as `""`. This is required for compatibility with the `v3.0.0` image (which rejects unknown/null keys) and should not change behavior for existing non-empty values.
 - **`cron.timeZone` bug fixed.** The CronJob's `timeZone` field previously read a nonexistent values path and silently never rendered. If you had set `cron.timeZone`, it will now actually take effect - double check it's still the value you want.
@@ -164,9 +178,9 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"credentials":{"token_id":"","token_secret":""},"existingConfigMap":"","formats":["markdown"],"health_host":"","health_port":"","host":"http://bookstack.bookstack.svc.cluster.local","keep_last":1,"object_storage":[],"run_interval":0}` | exporter configuration, rendered into config.yml (snake_case, 1:1 with upstream; see notes above) |
-| config.credentials.token_id | string | `""` | token id, rendered into config.yml (pruned when empty). The env var `BOOKSTACK_TOKEN_ID` (e.g. via `existingSecret`/`extraEnvFrom`) always overrides this at runtime, so leave it empty when using a Secret - setting it here as well would be both ignored AND written into the ConfigMap in cleartext |
-| config.credentials.token_secret | string | `""` | token secret, rendered into config.yml (pruned when empty). The env var `BOOKSTACK_TOKEN_SECRET` (e.g. via `existingSecret`/`extraEnvFrom`) always overrides this at runtime, so leave it empty when using a Secret - setting it here as well would be both ignored AND written into the ConfigMap in cleartext |
+| auth.tokenId | string | `""` | BookStack API token id. Injected as env `BOOKSTACK_TOKEN_ID` via a chart-managed Secret. Leave empty when using `existingSecret` |
+| auth.tokenSecret | string | `""` | BookStack API token secret. Injected as env `BOOKSTACK_TOKEN_SECRET` via a chart-managed Secret. Leave empty when using `existingSecret` |
+| config | object | `{"existingConfigMap":"","formats":["markdown"],"health_host":"","health_port":"","host":"http://bookstack.bookstack.svc.cluster.local","keep_last":1,"object_storage":[],"run_interval":0}` | exporter configuration, rendered into config.yml (snake_case, 1:1 with upstream; see notes above) |
 | config.existingConfigMap | string | `""` | use an existing ConfigMap for config.yml instead of the chart-rendered one (must contain a `config.yml` key). When set, the rest of the `config` block below is ignored and the chart's own ConfigMap is not rendered. Useful for GitOps-managed config or upstream keys not yet modeled by this chart |
 | config.formats | list | `["markdown"]` | one or more export formats (markdown, html, pdf, plaintext, zip) |
 | config.health_host | string | `""` | optional health check server bind host; maps to upstream `health_host`. Omitted from the rendered config when empty |
@@ -179,9 +193,11 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 | cron.restartPolicy | string | `"OnFailure"` | set restart policy |
 | cron.schedule | string | `"@daily"` | applied when `config.run_interval == 0` (CronJob mode); set a valid cron schedule |
 | cron.timeZone | string | `""` | set a valid timezone if preferred |
-| existingSecret | string | `""` | use an existing secret for credentials (e.g. BOOKSTACK_TOKEN_ID / BOOKSTACK_TOKEN_SECRET, object storage access/secret keys). See: https://github.com/homeylab/bookstack-file-exporter for the full list of supported env vars |
+| existingSecret.name | string | `""` | name of an existing Secret holding the API token. When set, the chart does not create its own Secret and `auth.*` is ignored |
+| existingSecret.tokenIdKey | string | `"BOOKSTACK_TOKEN_ID"` | key in the existing Secret holding the token id (injected as env `BOOKSTACK_TOKEN_ID`) |
+| existingSecret.tokenSecretKey | string | `"BOOKSTACK_TOKEN_SECRET"` | key in the existing Secret holding the token secret (injected as env `BOOKSTACK_TOKEN_SECRET`) |
 | extraEnv | object | `{}` | set extra environment variables |
-| extraEnvFrom | list | `[]` | additional `envFrom` sources (secretRef/configMapRef) for the container, e.g. a Secret you manage outside the chart such as one synced by External Secrets Operator (ESO). Standard k8s envFrom entries; combined with `existingSecret` if both are set |
+| extraEnvFrom | list | `[]` | additional `envFrom` sources (secretRef/configMapRef) for the container, e.g. object storage access/secret keys, or any env you manage outside the chart such as a Secret synced by External Secrets Operator (ESO). Standard k8s envFrom entries |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | image pull policy |
 | image.registry | string | `"docker.io"` | image registry |
