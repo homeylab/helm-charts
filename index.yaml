@@ -2,6 +2,49 @@ apiVersion: v1
 entries:
   bookstack:
   - annotations:
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: "bumped the bookstack-file-exporter subchart dependency 0.0.2 -> 1.0.0 (exporter upgraded to upstream v3.0.0, a breaking config rewrite)"
+        - kind: changed
+          description: "POTENTIALLY BREAKING (only if bookstack-file-exporter.enabled: true) - the bookstack-file-exporter passthrough values block was rewritten for the v1.0.0 subchart's snake_case config schema and trimmed to a minimal override surface; the API token moved from config.credentials.tokenId/tokenSecret to top-level auth.tokenId/auth.tokenSecret (now injected as env from a chart-managed Secret, no longer written into the exporter's ConfigMap), and the config.minio / config.assets / config.httpConfig / top-level cron / persistence overrides (which had drifted out of sync with the subchart and were all redundant with its new defaults) were removed - see the bookstack-file-exporter chart's own values.yaml/README for the full schema and defaults"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-07-09T06:32:17.490728782Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.0
+    description: bookstack documentation platform
+    digest: cbc7c5c7003869d5ef114dbbb4bc1b8156a6b8956a7289d7fd0f8d97299f86b4
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.1.0/bookstack-5.1.0.tgz
+    version: 5.1.0
+  - annotations:
       artifacthub.io/license: MIT
       artifacthub.io/links: |-
         - name: Chart Source
@@ -1624,4 +1667,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-09T06:28:33.459530753Z"
+generated: "2026-07-09T06:32:17.490971262Z"
