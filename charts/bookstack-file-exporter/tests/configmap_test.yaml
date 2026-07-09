@@ -10,30 +10,9 @@ tests:
       - equal:
           path: "data[\"config.yml\"]"
           value: |
-            assets:
-              export_attachments: true
-              export_images: true
-              export_meta: false
-              modify_links: false
-            export_level: pages
-            export_workers: 1
             formats:
             - markdown
             host: http://bookstack.bookstack.svc.cluster.local
-            http_config:
-              additional_headers:
-                User-Agent: bookstack-file-exporter
-              backoff_factor: 2.5
-              retry_codes:
-              - 413
-              - 429
-              - 500
-              - 502
-              - 503
-              - 504
-              retry_count: 5
-              timeout: 30
-              verify_ssl: true
             keep_last: 1
             run_interval: 0
       - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "null" }
@@ -44,6 +23,11 @@ tests:
       - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^notifications:" }
       - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^filters:" }
       - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^output_path:" }
+      # demoted to commented examples in values.yaml (upstream owns defaults) - must not render by default
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^assets:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^http_config:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^export_level:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^export_workers:" }
   - it: "renders health as a flat health_port key (not a nested health block) when set"
     set:
       config.health_port: 8080

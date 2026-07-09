@@ -139,33 +139,16 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| config | object | `{"assets":{"export_attachments":true,"export_images":true,"export_meta":false,"modify_links":false},"credentials":{"token_id":"","token_secret":""},"existingConfigMap":"","export_level":"pages","export_workers":1,"filters":{},"formats":["markdown"],"health_host":"","health_port":"","host":"http://bookstack.bookstack.svc.cluster.local","http_config":{"additional_headers":{"User-Agent":"bookstack-file-exporter"},"backoff_factor":2.5,"ca_bundle":"","retry_codes":[413,429,500,502,503,504],"retry_count":5,"timeout":30,"verify_ssl":true},"keep_last":1,"notifications":{},"object_storage":[],"output_path":"","run_interval":0}` | exporter configuration, rendered into config.yml (see notes above on the snake_case keys and pruning behavior) |
-| config.assets.export_attachments | bool | `true` | export attachments |
-| config.assets.export_images | bool | `true` | export images |
-| config.assets.export_meta | bool | `false` | export page metadata |
-| config.assets.modify_links | bool | `false` | rewrite image and attachment links to local relative paths in markdown and html exports |
+| config | object | `{"credentials":{"token_id":"","token_secret":""},"existingConfigMap":"","formats":["markdown"],"health_host":"","health_port":"","host":"http://bookstack.bookstack.svc.cluster.local","keep_last":1,"object_storage":[],"run_interval":0}` | exporter configuration, rendered into config.yml (snake_case, 1:1 with upstream; see notes above) |
 | config.credentials.token_id | string | `""` | token id; omitted from the rendered config when empty so `BOOKSTACK_TOKEN_ID` (via `existingSecret` or env) can take over. Leave empty when using `existingSecret` |
 | config.credentials.token_secret | string | `""` | token secret; omitted from the rendered config when empty so `BOOKSTACK_TOKEN_SECRET` (via `existingSecret` or env) can take over. Leave empty when using `existingSecret` |
 | config.existingConfigMap | string | `""` | use an existing ConfigMap for config.yml instead of the chart-rendered one (must contain a `config.yml` key). When set, the rest of the `config` block below is ignored and the chart's own ConfigMap is not rendered. Useful for GitOps-managed config or upstream keys not yet modeled by this chart |
-| config.export_level | string | `"pages"` | export level: pages, books, or chapters |
-| config.export_workers | int | `1` | number of concurrent export workers |
-| config.filters | object | `{}` | optional filters passthrough (regex include/exclude), see upstream docs for supported fields; omitted from the rendered config when empty |
-| config.formats | list | `["markdown"]` | one or more export formats |
+| config.formats | list | `["markdown"]` | one or more export formats (markdown, html, pdf, plaintext, zip) |
 | config.health_host | string | `""` | optional health check server bind host; maps to upstream `health_host`. Omitted from the rendered config when empty |
 | config.health_port | string | `""` | optional health check server port; when set, the exporter binds a `/healthz` server and liveness/readiness probes are enabled in Deployment mode (`run_interval > 0`). Omitted from the rendered config (probes disabled) when empty. Maps to upstream `health_port` |
 | config.host | string | `"http://bookstack.bookstack.svc.cluster.local"` | required: URL of the BookStack instance to export from |
-| config.http_config | object | `{"additional_headers":{"User-Agent":"bookstack-file-exporter"},"backoff_factor":2.5,"ca_bundle":"","retry_codes":[413,429,500,502,503,504],"retry_count":5,"timeout":30,"verify_ssl":true}` | http client settings, override upstream defaults as needed |
-| config.http_config.additional_headers | object | `{"User-Agent":"bookstack-file-exporter"}` | additional headers for the http client |
-| config.http_config.backoff_factor | float | `2.5` | backoff factor in seconds between retries |
-| config.http_config.ca_bundle | string | `""` | path to a custom CA bundle; mutually exclusive with `verify_ssl: false`; omitted from the rendered config when empty |
-| config.http_config.retry_codes | list | `[413,429,500,502,503,504]` | http status codes that trigger a retry |
-| config.http_config.retry_count | int | `5` | number of retries before giving up |
-| config.http_config.timeout | int | `30` | http request timeout in seconds |
-| config.http_config.verify_ssl | bool | `true` | enable SSL verification for https requests |
 | config.keep_last | int | `1` | how many backups to keep on the local filesystem; `-1` keeps all (requires at least one `object_storage` target). Upstream default is `0`; this chart defaults to `1` to preserve the previous chart's default behavior |
-| config.notifications | object | `{}` | optional notifications passthrough, see upstream docs for supported providers/fields; omitted from the rendered config when empty |
 | config.object_storage | list | `[]` | optional list of S3 / S3-compatible remote storage targets to also upload backups to; omitted from the rendered config when empty. AWS S3 is used when `endpoint` is unset, otherwise treated as S3-compatible |
-| config.output_path | string | `""` | optional output path override inside the container; omitted from the rendered config when empty (upstream default used) |
 | config.run_interval | int | `0` | if `run_interval` is > `0`, the exporter runs as a Deployment and waits the given number of seconds between runs; `0` (default) uses a CronJob (see `cron.*`) instead. NOTE: upstream's app-native `run_schedule` is not supported by this chart (it cannot fire under CronJob mode, and is redundant under Deployment mode) and setting it will fail the render - use CronJob scheduling (`run_interval: 0` + `cron.schedule`) or this interval loop (`run_interval > 0`) instead |
 | cron.concurrencyPolicy | string | `"Forbid"` | set the concurrency policy |
 | cron.restartPolicy | string | `"OnFailure"` | set restart policy |
