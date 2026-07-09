@@ -4,13 +4,13 @@
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: docker.io
-  name: homeylab/bookstack-file-exporter
+  # -- image registry
+  registry: docker.io
+  # -- image repository
+  repository: homeylab/bookstack-file-exporter
+  # -- image pull policy
   pullPolicy: IfNotPresent
-  # You can optionally specify your preferred image tag here.
-  # For OS updates but consistent Bookstack version, use `version-X.X.X` tag
-  # for other variants refer: https://www.linuxserver.io/blog/docker-tags-so-many-tags-so-little-time#manifests
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- overrides the image tag whose default is the chart appVersion
   tag: ""
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -21,14 +21,13 @@ fullnameOverride: ""
 
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- specifies whether a service account should be created
   create: true
-  # Automatically mount a ServiceAccount's API credentials?
+  # -- automatically mount a ServiceAccount's API credentials?
   automount: true
-  # Annotations to add to the service account
+  # -- annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- the name of the service account to use. If not set and create is true, a name is generated using the fullname template
   name: ""
 
 # This is for setting Kubernetes Annotations to a Pod.
@@ -39,85 +38,119 @@ podAnnotations: {}
 podLabels: {}
 
 podSecurityContext:
+  # -- fsGroup for the pod, matches the image's `exporter` GID
   fsGroup: 33333
+  # -- runAsUser for the pod, matches the image's `exporter` UID
+  runAsUser: 33333
+  # -- runAsGroup for the pod, matches the image's `exporter` GID
+  runAsGroup: 33333
+  # -- require the pod to run as a non-root user
+  runAsNonRoot: true
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
+securityContext:
+  capabilities:
+    # -- drop all Linux capabilities
+    drop:
+      - ALL
+  # -- disallow privilege escalation
+  allowPrivilegeEscalation: false
   # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  # -- left commented (disabled) by default: the exporter writes export archives to `/export/dump`; only enable if `persistence.enabled` is backed by a writable mount and no other writes are needed
 
-# -- use an existing secret for credentials
+# -- use an existing secret for credentials (e.g. BOOKSTACK_TOKEN_ID / BOOKSTACK_TOKEN_SECRET, object storage access/secret keys). See: https://github.com/homeylab/bookstack-file-exporter for the full list of supported env vars
 existingSecret: ""
 # -- set extra environment variables
 extraEnv: {}
 
+## Keys inside `config:` are intentionally snake_case and map 1:1 to the upstream
+## bookstack-file-exporter `config.yml` (see https://github.com/homeylab/bookstack-file-exporter/blob/main/docs/configuration.md).
+## This is a deliberate exception to the rest of this chart's camelCase convention (the same
+## pattern the `grafana` chart uses for `grafana.ini`) so config keys never need hand-mapping
+## and always match upstream docs verbatim. Unset/empty keys are pruned before rendering, since
+## v3 rejects both unrecognized keys and explicit `null` values.
+# -- exporter configuration, rendered into config.yml (see notes above on the snake_case keys and pruning behavior)
 config:
-  # -- set the bookstack instance URL
+  # -- use an existing ConfigMap for config.yml instead of the chart-rendered one (must contain a `config.yml` key). When set, the rest of the `config` block below is ignored and the chart's own ConfigMap is not rendered. Useful for GitOps-managed config or upstream keys not yet modeled by this chart
+  existingConfigMap: ""
+  # -- required: URL of the BookStack instance to export from
   host: "http://bookstack.bookstack.svc.cluster.local"
   credentials:
-    # -- set token id, ignored if `BOOKSTACK_TOKEN_ID` is defined in `existingSecret` or env variable
-    tokenId: ""
-    # -- set token secret, ignored if `BOOKSTACK_TOKEN_SECRET` is defined in `existingSecret` or env variable
-    tokenSecret: ""
-  # -- set one or more export formats
+    # -- token id; omitted from the rendered config when empty so `BOOKSTACK_TOKEN_ID` (via `existingSecret` or env) can take over. Leave empty when using `existingSecret`
+    token_id: ""
+    # -- token secret; omitted from the rendered config when empty so `BOOKSTACK_TOKEN_SECRET` (via `existingSecret` or env) can take over. Leave empty when using `existingSecret`
+    token_secret: ""
+  # -- one or more export formats
   formats:
     - markdown
     # - html
     # - pdf
     # - plaintext
-  minio:
-    enabled: false
-    # set minio 
-    host: "minio.yourdomain.com"
-    # -- set minio access key, ignored if `MINIO_ACCESS_KEY` is defined in `existingSecret` or env variable
-    accessKey: ""
-    # -- set minio secret key, ignored if `MINIO_SECRET_KEY` is defined in `existingSecret` or env variable
-    secretKey: ""
-    # -- set region
-    region: "us-east-1"
-    # -- set bucket
-    bucket: "bookstack-bkps"
-    # -- set minio path to use
-    path: "bookstack/file_backups/"
-    # -- how many backups to keep
-    keepLast: 5
+    # - zip
+  # -- export level: pages, books, or chapters
+  export_level: pages
+  # -- number of concurrent export workers
+  export_workers: 1
+  # -- optional output path override inside the container; omitted from the rendered config when empty (upstream default used)
+  output_path: ""
   assets:
-    # -- set to export images
-    exportImages: true
-    # -- set to export attachments
-    exportAttachments: true
-    # -- set to rewrite image and attachment links to local relative paths in markdown and html exports
-    modifyLinks: false
-    # -- set to export page metadata
-    exportMeta: false
+    # -- export images
+    export_images: true
+    # -- export attachments
+    export_attachments: true
+    # -- rewrite image and attachment links to local relative paths in markdown and html exports
+    modify_links: false
+    # -- export page metadata
+    export_meta: false
   # -- http client settings, override upstream defaults as needed
-  httpConfig:
+  http_config:
     # -- enable SSL verification for https requests
-    verifySSL: true
+    verify_ssl: true
     # -- http request timeout in seconds
     timeout: 30
-    # -- backoff factor in seconds between retries
-    backoffFactor: 2.5
     # -- number of retries before giving up
-    retryCount: 5
+    retry_count: 5
     # -- http status codes that trigger a retry
-    retryCodes: [413, 429, 500, 502, 503, 504]
+    retry_codes: [413, 429, 500, 502, 503, 504]
+    # -- backoff factor in seconds between retries
+    backoff_factor: 2.5
     # -- additional headers for the http client
-    additionalHeaders:
+    additional_headers:
       User-Agent: "bookstack-file-exporter"
-  # -- how many backups to keep on filesystem
-  keepLast: 1
-  # -- If `runInterval` is > `0`, the exporter will run as a deployment and wait specified seconds between runs.
-  # -- setting to `0` uses CronJob resource instead of a deployment
-  runInterval: 0
-
+    # -- path to a custom CA bundle; mutually exclusive with `verify_ssl: false`; omitted from the rendered config when empty
+    ca_bundle: ""
+  # -- how many backups to keep on the local filesystem; `-1` keeps all (requires at least one `object_storage` target). Upstream default is `0`; this chart defaults to `1` to preserve the previous chart's default behavior
+  keep_last: 1
+  # -- if `run_interval` is > `0`, the exporter runs as a Deployment and waits the given number of seconds between runs; `0` (default) uses a CronJob (see `cron.*`) instead. NOTE: upstream's app-native `run_schedule` is not supported by this chart (it cannot fire under CronJob mode, and is redundant under Deployment mode) and setting it will fail the render - use CronJob scheduling (`run_interval: 0` + `cron.schedule`) or this interval loop (`run_interval > 0`) instead
+  run_interval: 0
+  # -- optional health check server port; when set, the exporter binds a `/healthz` server and liveness/readiness probes are enabled in Deployment mode (`run_interval > 0`). Omitted from the rendered config (probes disabled) when empty. Maps to upstream `health_port`
+  health_port: ""
+  # -- optional health check server bind host; maps to upstream `health_host`. Omitted from the rendered config when empty
+  health_host: ""
+  # -- optional list of S3 / S3-compatible remote storage targets to also upload backups to; omitted from the rendered config when empty. AWS S3 is used when `endpoint` is unset, otherwise treated as S3-compatible
+  object_storage: []
+  # - name: primary
+  #   endpoint: "s3.us-east-1.amazonaws.com" # leave unset to use AWS S3's default endpoint
+  #   region: "us-east-1"
+  #   bucket: "bookstack-bkps"
+  #   prefix: "bookstack/file_backups/"
+  #   secure: true
+  #   verify_ssl: true
+  #   keep_last: 5
+  #   # prefer access_key_env/secret_key_env (paired with existingSecret) or ambient_auth over inline creds below
+  #   access_key_env: "AWS_ACCESS_KEY_ID"
+  #   secret_key_env: "AWS_SECRET_ACCESS_KEY"
+  #   ambient_auth: false
+  #   # access_key / secret_key: setting these inline renders the credentials into a ConfigMap in
+  #   # cleartext (a ConfigMap is not a Secret). Prefer *_env + existingSecret, or ambient_auth, instead.
+  #   # access_key: ""
+  #   # secret_key: ""
+  # -- optional notifications passthrough, see upstream docs for supported providers/fields; omitted from the rendered config when empty
+  notifications: {}
+  # -- optional filters passthrough (regex include/exclude), see upstream docs for supported fields; omitted from the rendered config when empty
+  filters: {}
 
 cron:
-  # -- if `runInterval == 0` CronJob settings will be applied
-  # -- set a valid cron schedule
+  # -- applied when `config.run_interval == 0` (CronJob mode); set a valid cron schedule
   schedule: "@daily"
   # -- set a valid timezone if preferred
   timeZone: ""
@@ -127,7 +160,7 @@ cron:
   restartPolicy: OnFailure
 
 persistence:
-  # -- enable persistence using PVC for backup files if using `runMode: application`
+  # -- enable persistence using a PVC for backup files
   enabled: false
   # -- set additional annotations for the PVC
   annotations: {}
@@ -148,11 +181,12 @@ persistence:
   # probably will not have to change below
   # -- set the mount path for the volume inside the container
   mountPath: "/export/dump"
-  # Selector to match an existing Persistent Volume
+  # -- selector to match an existing Persistent Volume
   selector: {}
 
 ## for deployment
-updateStrategy: 
+updateStrategy:
+  # -- set the update strategy for the deployment
   type: Recreate
 
 resources: {}

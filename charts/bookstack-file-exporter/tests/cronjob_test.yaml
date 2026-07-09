@@ -1,0 +1,64 @@
+suite: bookstack-file-exporter cronjob
+templates:
+  - templates/cronjob.yaml
+release:
+  name: bookstack-file-exporter
+tests:
+  - it: renders the CronJob by default (config.run_interval == 0)
+    asserts:
+      - hasDocuments: { count: 1 }
+      - isKind: { of: CronJob }
+  - it: does not render when config.run_interval > 0 (Deployment mode instead)
+    set:
+      config.run_interval: 60
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: renders the container image as registry/repository:tag
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].image
+          value: docker.io/homeylab/bookstack-file-exporter:3.0.0
+  - it: overrides the image tag when image.tag is set
+    set:
+      image.tag: "3.0.1"
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].image
+          value: docker.io/homeylab/bookstack-file-exporter:3.0.1
+  - it: does not render timeZone by default (cron.timeZone unset)
+    asserts:
+      - notExists: { path: spec.timeZone }
+  - it: renders timeZone when cron.timeZone is set (regression guard - previously read the wrong values path and never rendered)
+    set:
+      cron.timeZone: "America/New_York"
+    asserts:
+      - equal: { path: spec.timeZone, value: "America/New_York" }
+  - it: mounts the chart-rendered ConfigMap by default
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.volumes[0].configMap.name
+          value: bookstack-file-exporter
+  - it: mounts config.existingConfigMap when set, instead of the chart-rendered ConfigMap
+    set:
+      config.existingConfigMap: my-external-cm
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.volumes[0].configMap.name
+          value: my-external-cm
+  - it: wires existingSecret via envFrom.secretRef
+    set:
+      existingSecret: my-secret
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: my-secret
+  - it: applies hardened securityContext defaults (UID/GID 33333)
+    asserts:
+      - equal: { path: "spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot", value: true }
+      - equal: { path: "spec.jobTemplate.spec.template.spec.securityContext.runAsUser", value: 33333 }
+      - equal: { path: "spec.jobTemplate.spec.template.spec.securityContext.runAsGroup", value: 33333 }
+      - equal: { path: "spec.jobTemplate.spec.template.spec.securityContext.fsGroup", value: 33333 }
+      - equal: { path: "spec.jobTemplate.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation", value: false }
+      - contains:
+          path: "spec.jobTemplate.spec.template.spec.containers[0].securityContext.capabilities.drop"
+          content: ALL

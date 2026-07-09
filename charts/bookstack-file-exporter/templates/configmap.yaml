@@ -1,3 +1,7 @@
+{{- if not .Values.config.existingConfigMap }}
+{{- if .Values.config.run_schedule }}
+{{- fail "config.run_schedule is not supported by this chart: a k8s CronJob pod runs once and exits, so upstream's app-native cron can never fire under CronJob mode (config.run_interval: 0), and it is redundant/inferior under Deployment mode (config.run_interval > 0), which loses Job history, concurrencyPolicy, and retries versus k8s scheduling. Use CronJob scheduling (config.run_interval: 0 + cron.schedule) or the in-pod interval loop (config.run_interval > 0) instead." }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,43 +10,5 @@ metadata:
     {{- include "bookstack-file-exporter.labels" . | nindent 4 }}
 data:
   config.yml: |
-    host: "{{ .Values.config.host }}"
-    credentials:
-      token_id: "{{ .Values.config.credentials.tokenId }}"
-      token_secret: "{{ .Values.config.credentials.tokenSecret }}"
-    formats:
-    {{- with .Values.config.formats }}
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-  {{- if .Values.config.minio.enabled }}
-    minio:
-      host: "{{ .Values.config.minio.host }}"
-    {{- if not .Values.existingSecret }}
-      access_key: "{{ .Values.config.minio.accessKey }}"
-      secret_key: "{{ .Values.config.minio.secretKey }}"
-    {{- end }}
-      region: "{{ .Values.config.minio.region }}"
-      bucket: "{{ .Values.config.minio.bucket }}"
-      path: "{{ .Values.config.minio.path }}"
-      keep_last: {{ .Values.config.minio.keepLast }}
-  {{- end }}
-    assets:
-      export_images: {{ .Values.config.assets.exportImages }}
-      export_attachments: {{ .Values.config.assets.exportAttachments }}
-      modify_links: {{ .Values.config.assets.modifyLinks }}
-      export_meta: {{ .Values.config.assets.exportMeta }}
-    http_config:
-      verify_ssl: {{ .Values.config.httpConfig.verifySSL }}
-      timeout: {{ .Values.config.httpConfig.timeout }}
-      backoff_factor: {{ .Values.config.httpConfig.backoffFactor }}
-      retry_count: {{ .Values.config.httpConfig.retryCount }}
-    {{- with .Values.config.httpConfig.retryCodes }}
-      retry_codes:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.config.httpConfig.additionalHeaders }}
-      additional_headers:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    keep_last: {{ .Values.config.keepLast }}
-    run_interval: {{ .Values.config.runInterval}}
+    {{- include "bookstack-file-exporter.pruneMap" (omit .Values.config "existingConfigMap") | nindent 4 }}
+{{- end }}

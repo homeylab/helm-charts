@@ -1,0 +1,17 @@
+# ct install permutation: Deployment mode (config.run_interval > 0), with persistence.
+# Self-contained - no existingSecret, no object_storage. Reaches Ready under `ct install`.
+config:
+  host: "http://bookstack.bookstack.svc.cluster.local"
+  credentials:
+    token_id: "ci-token-id"
+    token_secret: "ci-token-secret"
+  run_interval: 300
+persistence:
+  enabled: true
+  size: 1Gi
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 128Mi

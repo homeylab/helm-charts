@@ -1,0 +1,106 @@
+suite: bookstack-file-exporter deployment
+templates:
+  # configmap.yaml is loaded (not asserted against - see configmap_test.yaml) because
+  # deployment.yaml's checksum/config annotation includes it via $.Template.BasePath.
+  - templates/deployment.yaml
+  - templates/configmap.yaml
+release:
+  name: bookstack-file-exporter
+tests:
+  - it: does not render by default (config.run_interval == 0 uses CronJob instead)
+    template: templates/deployment.yaml
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: renders the Deployment when config.run_interval > 0
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - hasDocuments: { count: 1 }
+      - isKind: { of: Deployment }
+  - it: renders the container image as registry/repository:tag
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/homeylab/bookstack-file-exporter:3.0.0
+  - it: overrides the image tag when image.tag is set
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      image.tag: "3.0.1"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/homeylab/bookstack-file-exporter:3.0.1
+  - it: keeps updateStrategy Recreate by default (RWO persistence PVC)
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - equal: { path: spec.strategy.type, value: Recreate }
+  - it: mounts the chart-rendered ConfigMap by default
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].configMap.name
+          value: bookstack-file-exporter
+  - it: mounts config.existingConfigMap when set, instead of the chart-rendered ConfigMap
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      config.existingConfigMap: my-external-cm
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].configMap.name
+          value: my-external-cm
+  - it: omits the configmap checksum annotation when config.existingConfigMap is set
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      config.existingConfigMap: my-external-cm
+    asserts:
+      - notExists: { path: "spec.template.metadata.annotations[\"checksum/config\"]" }
+  - it: wires existingSecret via envFrom.secretRef
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      existingSecret: my-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].secretRef.name
+          value: my-secret
+  - it: omits liveness/readiness probes by default (config.health_port unset)
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - notExists: { path: "spec.template.spec.containers[0].livenessProbe" }
+      - notExists: { path: "spec.template.spec.containers[0].readinessProbe" }
+  - it: adds /healthz liveness/readiness probes when config.health_port is set
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      config.health_port: "8080"
+    asserts:
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.httpGet.path", value: /healthz }
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.httpGet.port", value: 8080 }
+      - equal: { path: "spec.template.spec.containers[0].readinessProbe.httpGet.path", value: /healthz }
+      - equal: { path: "spec.template.spec.containers[0].readinessProbe.httpGet.port", value: 8080 }
+  - it: applies hardened securityContext defaults (UID/GID 33333)
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }
+      - equal: { path: "spec.template.spec.securityContext.runAsUser", value: 33333 }
+      - equal: { path: "spec.template.spec.securityContext.runAsGroup", value: 33333 }
+      - equal: { path: "spec.template.spec.securityContext.fsGroup", value: 33333 }
+      - equal: { path: "spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation", value: false }
+      - contains:
+          path: "spec.template.spec.containers[0].securityContext.capabilities.drop"
+          content: ALL

@@ -60,3 +60,34 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Recursively prune nil / empty-string / empty-list / empty-map values from a map, returning YAML
+text of the pruned result. Numbers (including 0) and booleans (including false) are always kept -
+only the absence of a value is pruned, never a real zero/false value. Used to render config.yml as
+a near-passthrough of `.Values.config` without ever emitting an explicit `null` or an empty typed
+field, both of which the upstream v3 exporter rejects at startup.
+Usage: {{ include "bookstack-file-exporter.pruneMap" $someMap }}
+*/}}
+{{- define "bookstack-file-exporter.pruneMap" -}}
+{{- $pruned := dict -}}
+{{- range $k, $v := . -}}
+  {{- if kindIs "map" $v -}}
+    {{- $sub := fromYaml (include "bookstack-file-exporter.pruneMap" $v) -}}
+    {{- if $sub -}}
+      {{- $_ := set $pruned $k $sub -}}
+    {{- end -}}
+  {{- else if kindIs "slice" $v -}}
+    {{- if $v -}}
+      {{- $_ := set $pruned $k $v -}}
+    {{- end -}}
+  {{- else if kindIs "string" $v -}}
+    {{- if ne $v "" -}}
+      {{- $_ := set $pruned $k $v -}}
+    {{- end -}}
+  {{- else if not (kindIs "invalid" $v) -}}
+    {{- $_ := set $pruned $k $v -}}
+  {{- end -}}
+{{- end -}}
+{{- toYaml $pruned -}}
+{{- end -}}

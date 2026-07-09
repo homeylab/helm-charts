@@ -1,0 +1,94 @@
+suite: bookstack-file-exporter configmap
+templates:
+  - templates/configmap.yaml
+release:
+  name: bookstack-file-exporter
+tests:
+  - it: renders default config with no null/empty optional keys
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal:
+          path: "data[\"config.yml\"]"
+          value: |
+            assets:
+              export_attachments: true
+              export_images: true
+              export_meta: false
+              modify_links: false
+            export_level: pages
+            export_workers: 1
+            formats:
+            - markdown
+            host: http://bookstack.bookstack.svc.cluster.local
+            http_config:
+              additional_headers:
+                User-Agent: bookstack-file-exporter
+              backoff_factor: 2.5
+              retry_codes:
+              - 413
+              - 429
+              - 500
+              - 502
+              - 503
+              - 504
+              retry_count: 5
+              timeout: 30
+              verify_ssl: true
+            keep_last: 1
+            run_interval: 0
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "null" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^minio:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^credentials:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^object_storage:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^health_port:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^notifications:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^filters:" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^output_path:" }
+  - it: "renders health as a flat health_port key (not a nested health block) when set"
+    set:
+      config.health_port: 8080
+    asserts:
+      - matchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^health_port: 8080$" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^health:" }
+  - it: renders object_storage list when set
+    set:
+      config.object_storage:
+        - name: primary
+          endpoint: s3.example.com
+          region: us-east-1
+          bucket: my-bucket
+          access_key_env: AWS_ACCESS_KEY_ID
+          secret_key_env: AWS_SECRET_ACCESS_KEY
+    asserts:
+      - matchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^object_storage:" }
+      - matchRegex: { path: "data[\"config.yml\"]", pattern: "name: primary" }
+      - matchRegex: { path: "data[\"config.yml\"]", pattern: "access_key_env: AWS_ACCESS_KEY_ID" }
+  - it: renders credentials only for the field explicitly set
+    set:
+      config.credentials.token_id: my-token-id
+    asserts:
+      - matchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^credentials:" }
+      - matchRegex: { path: "data[\"config.yml\"]", pattern: "token_id: my-token-id" }
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "token_secret" }
+  - it: omits credentials entirely when existingSecret is set and creds left default-empty
+    set:
+      existingSecret: my-secret
+    asserts:
+      - notMatchRegex: { path: "data[\"config.yml\"]", pattern: "(?m)^credentials:" }
+  - it: does not render when config.existingConfigMap is set
+    set:
+      config.existingConfigMap: my-external-cm
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: fails the render when config.run_schedule is set
+    set:
+      config.run_schedule: "0 3 * * *"
+    asserts:
+      - failedTemplate:
+          errorMessage: "config.run_schedule is not supported by this chart: a k8s CronJob pod runs once and exits, so upstream's app-native cron can never fire under CronJob mode (config.run_interval: 0), and it is redundant/inferior under Deployment mode (config.run_interval > 0), which loses Job history, concurrencyPolicy, and retries versus k8s scheduling. Use CronJob scheduling (config.run_interval: 0 + cron.schedule) or the in-pod interval loop (config.run_interval > 0) instead."
+  - it: does not fail when config.existingConfigMap is set even if config.run_schedule is also set
+    set:
+      config.existingConfigMap: my-external-cm
+      config.run_schedule: "0 3 * * *"
+    asserts:
+      - hasDocuments: { count: 0 }
