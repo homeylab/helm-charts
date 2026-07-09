@@ -479,6 +479,54 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-0.1.2/bookstack-0.1.2.tgz
     version: 0.1.2
   bookstack-file-exporter:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "BREAKING - appVersion bumped 2.1.0 -> 3.0.0 (current upstream homeylab/bookstack-file-exporter image); the v3 config schema is a breaking rewrite from v2"
+        - kind: changed
+          description: "BREAKING - config.minio (single object) replaced by config.object_storage (list); values + rendered config.yml both change shape"
+        - kind: changed
+          description: "BREAKING - inner config: values are now snake_case, matching the upstream config.yml 1:1 (e.g. credentials.token_id, assets.modify_links, http_config.verify_ssl); previously camelCase keys were hand-mapped to snake_case, a mismap-prone translation layer that is now removed"
+        - kind: changed
+          description: "BREAKING - image schema standardized: image.repository (previously the registry host) + image.name (previously the image path) replaced by image.registry + image.repository, matching the other homeylab exporter charts"
+        - kind: fixed
+          description: "cronjob.yaml timeZone bug fixed: the CronJob's timeZone previously read a nonexistent .Values.timeZone and silently never rendered; it now correctly reads cron.timeZone"
+        - kind: added
+          description: "config.existingConfigMap escape hatch: mount your own ConfigMap for config.yml (e.g. GitOps-managed, or upstream keys not yet modeled) instead of the chart-rendered one"
+        - kind: changed
+          description: "the rendered config.yml now prunes unset/empty keys instead of always emitting every field, since v3 rejects unknown keys and explicit null values"
+        - kind: changed
+          description: "config.run_schedule (upstream app-native cron) is intentionally unsupported and not exposed as a values key; the chart fails fast with a helpful error if set, since it cannot fire under CronJob mode and is redundant under Deployment mode - use config.run_interval: 0 + cron.schedule, or config.run_interval > 0 instead"
+        - kind: changed
+          description: "graduated to 1.0.0; chart is now enrolled in helm-docs and helm-unittest"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-07-09T06:28:33.459369802Z"
+    description: A Helm chart to run scheduled exports/backups of a BookStack instance's
+      pages, images, and attachments.
+    digest: 11bdc8f914482392217780c26748c42ca9b63784a4bdf3ecc1807cd7222c9869
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - bookstack
+    - backup
+    - export
+    - wiki
+    - documentation
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack-file-exporter
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/homeylab/bookstack-file-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-1.0.0/bookstack-file-exporter-1.0.0.tgz
+    version: 1.0.0
   - apiVersion: v2
     appVersion: 2.1.0
     created: "2026-05-27T06:14:48.251421504Z"
@@ -1576,4 +1624,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-08T04:04:58.092426389Z"
+generated: "2026-07-09T06:28:33.459530753Z"
