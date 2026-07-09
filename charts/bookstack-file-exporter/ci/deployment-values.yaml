@@ -1,10 +1,11 @@
 # ct install permutation: Deployment mode (config.run_interval > 0), with persistence.
-# Self-contained - no existingSecret, no object_storage. Reaches Ready under `ct install`.
+# Exercises the auth.* -> chart-managed Secret -> secretKeyRef path. Self-contained
+# (no existingSecret, no object_storage). Reaches Ready under `ct install`.
+auth:
+  tokenId: "ci-token-id"
+  tokenSecret: "ci-token-secret"
 config:
   host: "http://bookstack.bookstack.svc.cluster.local"
-  credentials:
-    token_id: "ci-token-id"
-    token_secret: "ci-token-secret"
   run_interval: 300
 persistence:
   enabled: true

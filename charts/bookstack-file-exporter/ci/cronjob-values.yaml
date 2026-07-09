@@ -1,10 +1,11 @@
-# ct install permutation: default CronJob mode (config.run_interval: 0), inline token.
-# Self-contained - no existingSecret, no object_storage. Reaches Ready under `ct install`.
+# ct install permutation: default CronJob mode (config.run_interval: 0).
+# Exercises the auth.* -> chart-managed Secret -> secretKeyRef path. Self-contained
+# (no existingSecret, no object_storage). Reaches Ready under `ct install`.
+auth:
+  tokenId: "ci-token-id"
+  tokenSecret: "ci-token-secret"
 config:
   host: "http://bookstack.bookstack.svc.cluster.local"
-  credentials:
-    token_id: "ci-token-id"
-    token_secret: "ci-token-secret"
 resources:
   requests:
     cpu: 10m
