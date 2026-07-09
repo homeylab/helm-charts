@@ -55,12 +55,35 @@ Only some options are shown, view `values.yaml` for an exhaustive list.
 # custom-values.yaml
 config:
   host: "https://bookstack.example.org"
+  # inline creds shown for brevity; prefer existingSecret / extraEnvFrom (below) to keep them in a Secret
   credentials:
     token_id: "my-token-id"
     token_secret: "my-token-secret"
   formats:
     - markdown
     - html
+  # assets/* are snake_case and pass through 1:1 to upstream config.yml (see Advanced Configuration)
+  assets:
+    export_images: true
+    export_attachments: true
+    export_meta: true
+  keep_last: 5
+  # also upload each backup to an S3 / S3-compatible target; the key material comes from a Secret, not here
+  object_storage:
+    - name: primary
+      endpoint: "minio.example.org"   # leave unset to use AWS S3's default endpoint
+      region: "us-east-1"
+      bucket: "bookstack-bkps"
+      prefix: "bookstack/file_backups/"
+      keep_last: 30
+      access_key_env: "AWS_ACCESS_KEY_ID"
+      secret_key_env: "AWS_SECRET_ACCESS_KEY"
+
+# inject the object_storage keys (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY) from a Secret you manage
+# yourself - e.g. one synced by External Secrets Operator - instead of putting them in config
+extraEnvFrom:
+  - secretRef:
+      name: bookstack-file-exporter-s3
 
 persistence:
   enabled: true

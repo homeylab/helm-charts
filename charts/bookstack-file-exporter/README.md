@@ -56,12 +56,35 @@ Only some options are shown, view `values.yaml` for an exhaustive list.
 # custom-values.yaml
 config:
   host: "https://bookstack.example.org"
+  # inline creds shown for brevity; prefer existingSecret / extraEnvFrom (below) to keep them in a Secret
   credentials:
     token_id: "my-token-id"
     token_secret: "my-token-secret"
   formats:
     - markdown
     - html
+  # assets/* are snake_case and pass through 1:1 to upstream config.yml (see Advanced Configuration)
+  assets:
+    export_images: true
+    export_attachments: true
+    export_meta: true
+  keep_last: 5
+  # also upload each backup to an S3 / S3-compatible target; the key material comes from a Secret, not here
+  object_storage:
+    - name: primary
+      endpoint: "minio.example.org"   # leave unset to use AWS S3's default endpoint
+      region: "us-east-1"
+      bucket: "bookstack-bkps"
+      prefix: "bookstack/file_backups/"
+      keep_last: 30
+      access_key_env: "AWS_ACCESS_KEY_ID"
+      secret_key_env: "AWS_SECRET_ACCESS_KEY"
+
+# inject the object_storage keys (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY) from a Secret you manage
+# yourself - e.g. one synced by External Secrets Operator - instead of putting them in config
+extraEnvFrom:
+  - secretRef:
+      name: bookstack-file-exporter-s3
 
 persistence:
   enabled: true
@@ -142,8 +165,8 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
 | config | object | `{"credentials":{"token_id":"","token_secret":""},"existingConfigMap":"","formats":["markdown"],"health_host":"","health_port":"","host":"http://bookstack.bookstack.svc.cluster.local","keep_last":1,"object_storage":[],"run_interval":0}` | exporter configuration, rendered into config.yml (snake_case, 1:1 with upstream; see notes above) |
-| config.credentials.token_id | string | `""` | token id; omitted from the rendered config when empty so `BOOKSTACK_TOKEN_ID` (via `existingSecret` or env) can take over. Leave empty when using `existingSecret` |
-| config.credentials.token_secret | string | `""` | token secret; omitted from the rendered config when empty so `BOOKSTACK_TOKEN_SECRET` (via `existingSecret` or env) can take over. Leave empty when using `existingSecret` |
+| config.credentials.token_id | string | `""` | token id, rendered into config.yml (pruned when empty). The env var `BOOKSTACK_TOKEN_ID` (e.g. via `existingSecret`/`extraEnvFrom`) always overrides this at runtime, so leave it empty when using a Secret - setting it here as well would be both ignored AND written into the ConfigMap in cleartext |
+| config.credentials.token_secret | string | `""` | token secret, rendered into config.yml (pruned when empty). The env var `BOOKSTACK_TOKEN_SECRET` (e.g. via `existingSecret`/`extraEnvFrom`) always overrides this at runtime, so leave it empty when using a Secret - setting it here as well would be both ignored AND written into the ConfigMap in cleartext |
 | config.existingConfigMap | string | `""` | use an existing ConfigMap for config.yml instead of the chart-rendered one (must contain a `config.yml` key). When set, the rest of the `config` block below is ignored and the chart's own ConfigMap is not rendered. Useful for GitOps-managed config or upstream keys not yet modeled by this chart |
 | config.formats | list | `["markdown"]` | one or more export formats (markdown, html, pdf, plaintext, zip) |
 | config.health_host | string | `""` | optional health check server bind host; maps to upstream `health_host`. Omitted from the rendered config when empty |
