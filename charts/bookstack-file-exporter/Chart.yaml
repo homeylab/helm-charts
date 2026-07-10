@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.0.0
+version: 1.0.1
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=homeylab/bookstack-file-exporter
@@ -30,21 +30,5 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
   artifacthub.io/changes: |
-    - kind: changed
-      description: "BREAKING - appVersion bumped 2.1.0 -> 3.0.0 (current upstream homeylab/bookstack-file-exporter image); the v3 config schema is a breaking rewrite from v2"
-    - kind: changed
-      description: "BREAKING - config.minio (single object) replaced by config.object_storage (list); values + rendered config.yml both change shape"
-    - kind: changed
-      description: "BREAKING - inner config: values are now snake_case, matching the upstream config.yml 1:1 (e.g. credentials.token_id, assets.modify_links, http_config.verify_ssl); previously camelCase keys were hand-mapped to snake_case, a mismap-prone translation layer that is now removed"
-    - kind: changed
-      description: "BREAKING - image schema standardized: image.repository (previously the registry host) + image.name (previously the image path) replaced by image.registry + image.repository, matching the other homeylab exporter charts"
     - kind: fixed
-      description: "cronjob.yaml timeZone bug fixed: the CronJob's timeZone previously read a nonexistent .Values.timeZone and silently never rendered; it now correctly reads cron.timeZone"
-    - kind: added
-      description: "config.existingConfigMap escape hatch: mount your own ConfigMap for config.yml (e.g. GitOps-managed, or upstream keys not yet modeled) instead of the chart-rendered one"
-    - kind: changed
-      description: "the rendered config.yml now prunes unset/empty keys instead of always emitting every field, since v3 rejects unknown keys and explicit null values"
-    - kind: changed
-      description: "config.run_schedule (upstream app-native cron) is intentionally unsupported and not exposed as a values key; the chart fails fast with a helpful error if set, since it cannot fire under CronJob mode and is redundant under Deployment mode - use config.run_interval: 0 + cron.schedule, or config.run_interval > 0 instead"
-    - kind: changed
-      description: "graduated to 1.0.0; chart is now enrolled in helm-docs and helm-unittest"
+      description: "PVC storageClassName is now omitted when persistence.storageClass is unset (the default) so the cluster's default StorageClass provisions; previously it rendered storageClassName: \"\", which disables dynamic provisioning and left the Deployment-mode PVC Pending"
