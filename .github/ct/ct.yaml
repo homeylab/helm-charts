@@ -1,0 +1,16 @@
+# chart-testing config — the single source of truth for CI validation.
+# Local dev: `ct lint --config .github/ct/ct.yaml [--charts charts/<name>]`
+target-branch: main
+chart-dirs:
+  - charts
+chart-yaml-schema: .github/ct/chart_schema.yaml
+lint-conf: .github/ct/lintconf.yaml
+# We don't require maintainer names to be real GitHub accounts.
+validate-maintainers: false
+# Fail a PR that changes a chart without bumping Chart.yaml version (chart-releaser
+# silently skips unbumped charts, so this gate prevents "shipped nothing" merges).
+check-version-increment: true
+# ct runs these as bare argv per changed chart (NO shell — no pipes). {{ .Path }} = chart dir.
+additional-commands:
+  - "helm unittest {{ .Path }}"
+  - "bash scripts/ci/kubeconform.sh {{ .Path }}"
