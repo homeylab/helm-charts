@@ -44,7 +44,7 @@ settings:
     # -- Set the pihole host or IP address
     hostname: pi-hole.localdomain
     # -- Set the pihole port on the pihole host to use, default `80` set by container image
-    port: 
+    port:
     # -- Set the port for metrics scraping
     containerPort: 9617
   # -- Set auth configuration for pihole.
