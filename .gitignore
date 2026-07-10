@@ -9,3 +9,6 @@ kube_config
 .DS_Store
 
 .claude/
+
+# Locally packaged charts (task pkg / pkg-with-dep)
+/*.tgz
