@@ -19,3 +19,16 @@ tests:
       persistence.steamServer.enabled: false
     asserts:
       - hasDocuments: { count: 0 }
+  - it: omits storageClassName when storageClass is unset (default provisioner)
+    asserts:
+      - notExists: { path: spec.storageClassName }
+  - it: disables dynamic provisioning when storageClass is "-"
+    set:
+      persistence.steamServer.storageClass: "-"
+    asserts:
+      - equal: { path: spec.storageClassName, value: "" }
+  - it: sets storageClassName when storageClass is a class name
+    set:
+      persistence.steamServer.storageClass: fast-ssd
+    asserts:
+      - equal: { path: spec.storageClassName, value: fast-ssd }

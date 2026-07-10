@@ -1,0 +1,13 @@
+# ct install permutation: trims the game server's memory request so the pod
+# schedules on the free 2vCPU/7GB CI runner (the shipped default 6G is sized for
+# real gameplay, not a smoke test). No health endpoint upstream, so there is no
+# readiness probe — the pod reaches Ready once the container is running.
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+persistence:
+  steamServer:
+    size: 1Gi
+  world:
+    size: 1Gi

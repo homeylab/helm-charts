@@ -21,7 +21,7 @@ spec:
       storage: {{ .Values.persistence.steamServer.size | quote }}
 {{- if (eq "-" .Values.persistence.steamServer.storageClass) }}
   storageClassName: ""
-{{- else }}
+{{- else if .Values.persistence.steamServer.storageClass }}
   storageClassName: "{{ .Values.persistence.steamServer.storageClass }}"
 {{- end }}
   {{- if .Values.persistence.steamServer.selector }}

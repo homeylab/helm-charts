@@ -21,7 +21,7 @@ spec:
       storage: {{ .Values.persistence.world.size | quote }}
 {{- if (eq "-" .Values.persistence.world.storageClass) }}
   storageClassName: ""
-{{- else }}
+{{- else if .Values.persistence.world.storageClass }}
   storageClassName: "{{ .Values.persistence.world.storageClass }}"
 {{- end }}
   {{- if .Values.persistence.world.selector }}
