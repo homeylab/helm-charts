@@ -175,6 +175,12 @@ Pipeline:
 
 **Consequence:** a templates-only change with an unchanged `version` ships **nothing** via chart-releaser. Always bump `version` when you want a release.
 
+### Umbrella charts: release the subchart first
+
+Two charts bundle **first-party** subcharts from the OCI registry — `bookstack` (→ `bookstack-file-exporter`) and `exportarr` (→ `qbittorrent-exporter`, `tdarr-exporter`). At release, `release.yml` packages the parent by pulling those subcharts *from OCI*, but the job that pushes subcharts to OCI runs later in the same run. So bumping a subchart **and** the parent's dependency on it in one merge fails — the parent can't find the not-yet-published subchart version, and the **whole release aborts** (not just that chart).
+
+**Rule:** ship the subchart bump in its own PR first (it lands in OCI + Pages), then bump the parent's `dependencies[].version` to match in a follow-up PR. `mariadb` is third-party and already published, so it needs no ordering.
+
 **Artifact Hub annotations** (`artifacthub.io/*` in `Chart.yaml`) are catalog metadata for [artifacthub.io](https://artifacthub.io) — **ignored by Helm and the release pipeline** (they never affect rendering, install, or whether a release ships). Not every chart carries them yet. On charts that do, refresh `artifacthub.io/changes` for each release — a list of `{kind, description}` entries where `kind` is one of `added`, `changed`, `deprecated`, `removed`, `fixed`, `security` (Artifact Hub renders these as the version's changelog; `security` entries also trigger a notification). `artifacthub.io/license` and `artifacthub.io/links` rarely change.
 
 ## Gotchas
