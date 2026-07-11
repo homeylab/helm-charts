@@ -67,3 +67,14 @@ jobs:
       - name: Lint (version gate + yamllint/yamale + unittest + kubeconform)
         if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --config .github/ct/ct.yaml
+
+      - name: Create kind cluster
+        if: steps.list-changed.outputs.changed == 'true'
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
+
+      # Integration tier: prove changed charts install and reach Ready on a real cluster.
+      # nut-exporter is deprecated (still linted above, just not installed) — exclude it here
+      # only, via the CLI flag, so the shared ct.yaml keeps covering it for lint.
+      - name: Install changed charts (ct install on kind)
+        if: steps.list-changed.outputs.changed == 'true'
+        run: ct install --config .github/ct/ct.yaml --excluded-charts nut-exporter --helm-extra-args "--timeout 600s"
