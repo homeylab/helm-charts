@@ -31,6 +31,18 @@ tests:
       mariadb.auth.database: bs_db
     asserts:
       - contains: { path: "spec.template.spec.containers[0].env", content: { name: DB_DATABASE, value: "bs_db" } }
+  - it: external dbHost wires directly into the DB_HOST env (embedded mariadb disabled)
+    set:
+      mariadb.enabled: false
+      config.dbHost: mariadb.example.svc.cluster.local
+    asserts:
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: DB_HOST, value: "mariadb.example.svc.cluster.local" } }
+  - it: DB_HOST falls back to the release-derived mariadb host when config.dbHost is unset
+    release:
+      name: bookstack
+      namespace: bookstack-ns
+    asserts:
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: DB_HOST, value: "bookstack-mariadb.bookstack-ns.svc.cluster.local" } }
   - it: omits linuxserver env when linuxserver.enabled is false
     set:
       linuxserver.enabled: false
