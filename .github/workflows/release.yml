@@ -33,7 +33,8 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v5.0.1
         with:
-          version: v4.2.2 # default is latest (stable)
+          # renovate: datasource=github-releases depName=helm/helm
+          version: v4.2.3
         # id: install
       - name: Helm Registry Login
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | helm registry login registry-1.docker.io --password-stdin -u ${{ secrets.DOCKERHUB_USERNAME }}
