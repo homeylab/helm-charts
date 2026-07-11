@@ -16,6 +16,14 @@
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Track CI/release tool versions pinned in workflow files (helm, chart-testing, helm-unittest, kubeconform). Covers both `with: version:` inputs and `*_VERSION` env vars; the built-in github-actions manager only handles `uses:` refs.",
+      "managerFilePatterns": [".github/workflows/*.yml"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?(?: extractVersion=(?<extractVersion>\\S+))?\\s+(?:[A-Za-z0-9_]+_VERSION|version)\\s*:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ]
     }
   ],
   "packageRules": [
