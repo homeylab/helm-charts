@@ -1,16 +1,16 @@
 # Contributing
 
-Thanks for contributing to the homeylab Helm charts. This repo is a **monorepo of independent Helm charts** under `charts/<chart>/`, each wrapping a single upstream app or Prometheus exporter. This guide explains the toolchain, the `Taskfile` that drives it, the layout of a chart, and the workflow from edit to release.
+Thanks for contributing to the homeylab Helm charts. This repo is a **monorepo of independent Helm charts** under `charts/<chart>/`, each wrapping a single upstream app or Prometheus exporter. This guide covers the tooling and the `Taskfile` that drives it, the layout of a chart, and the workflow from edit to release.
 
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [The toolchain — what each tool does](#the-toolchain--what-each-tool-does)
 - [The Taskfile — how it helps](#the-taskfile--how-it-helps)
 - [Anatomy of a chart](#anatomy-of-a-chart)
 - [Testing layers](#testing-layers)
 - [Contribution workflow](#contribution-workflow)
 - [Commit and PR conventions](#commit-and-pr-conventions)
+- [Continuous integration](#continuous-integration)
 - [Versioning and release](#versioning-and-release)
 - [Gotchas](#gotchas)
 
@@ -30,22 +30,6 @@ Install these tools (a [`.devcontainer`](.devcontainer/) is provided that builds
 
 All task commands take the target chart via `APP=<chart>`, e.g. `task verify APP=bookstack`. Run `task` (or `task --list`) to see every target.
 
-## The toolchain — what each tool does
-
-**`helm lint` / `helm template`** — `lint` catches malformed `Chart.yaml`/`values.yaml` and obvious template errors; `template` renders a chart to raw Kubernetes YAML so you (and the tools below) can inspect exactly what gets applied.
-
-**`kubeconform`** — validates the *rendered* manifests against Kubernetes API schemas (checks kinds, required fields, field types). It runs with `-ignore-missing-schemas`, so **CRD-based resources (e.g. `ServiceMonitor`, `HTTPRoute`) are skipped, not validated** — a green kubeconform does not prove those render correctly. Cover CRD manifests with `helm template` + unit tests instead.
-
-**`helm-unittest`** — cluster-free unit tests for templates. Suites live in `charts/<chart>/tests/*_test.yaml` and assert on rendered output (a value renders, a Secret key exists, envFrom targets the right name, a manifest is/ isn't produced). This is where you test logic that `ct install` can't safely exercise (e.g. `existingSecret` paths that reference objects a fresh namespace won't have).
-
-**`chart-testing` (`ct install`)** — actually installs the chart into a throwaway namespace on a **real cluster** (kind) using each value file in `charts/<chart>/ci/*-values.yaml`, and waits for it to become Ready. This is the integration test: it proves the chart *runs*, not just that it renders. Each `ci/*-values.yaml` file is one install scenario and **must be self-contained** (see Gotchas).
-
-**`helm-docs` + `README.md.gotmpl`** — the chart `README.md` is **generated**, not hand-written. `README.md.gotmpl` is the source template; the value table in it (`{{ template "chart.valuesTable" . }}`) is built from the `# --` comments above each key in `values.yaml`. Run `task docs APP=<chart>` to regenerate. Charts *without* a `.gotmpl` keep a hand-written README and are intentionally skipped by `task docs` (helm-docs would clobber them).
-
-**Renovate** — automation (runs in CI, not locally) that bumps a chart's `appVersion` when its upstream image releases, then bumps the chart `version`. See [Versioning and release](#versioning-and-release).
-
-**`chart-releaser`** — the release tool (runs on merge to `main`) that packages and publishes any chart whose `version` changed to the GitHub Pages Helm repo. A second job pushes every chart to the `homeylabcharts` OCI registry on Docker Hub.
-
 ## The Taskfile — how it helps
 
 The [`Taskfile.yml`](Taskfile.yml) wraps every tool above behind one consistent, `APP=`-scoped interface so you never memorize raw flags. Targets, grouped by what they're for:
@@ -57,7 +41,7 @@ The [`Taskfile.yml`](Taskfile.yml) wraps every tool above behind one consistent,
 | `task lint APP=<chart>` | `helm lint` |
 | `task kubeconform APP=<chart>` | `helm template … \| kubeconform -strict -ignore-missing-schemas` (k8s `1.30.0`, override with `K8S_VERSION=`) |
 | `task unittest APP=<chart>` | `helm unittest` |
-| **`task verify APP=<chart>`** | **`lint` + `kubeconform` + `unittest` — the local gate.** Run this before every commit; it is the only gate before merge. |
+| **`task verify APP=<chart>`** | **`lint` + `kubeconform` + `unittest` — the local mirror of the CI gate's cluster-free layers ([Continuous integration](#continuous-integration)).** Run before every commit. |
 | `task template APP=<chart>` | `helm template … --debug` (eyeball the rendered output) |
 | `task docs APP=<chart>` | regenerate `README.md` via helm-docs |
 
@@ -72,6 +56,26 @@ The [`Taskfile.yml`](Taskfile.yml) wraps every tool above behind one consistent,
 | `task clean-local APP=<chart>` | delete the local release and its namespace |
 
 > **`deploy-local`/`dryrun-local` use your *current* kube-context** and your credentialed `.local/values/<chart>.yaml` (gitignored). They deploy to whatever cluster `kubectl` points at — confirm `kubectl config current-context` first. Use them to verify runtime behavior the static gate can't catch. Always `task clean-local` afterward.
+
+#### Spinning up a throwaway kind cluster (isolated kubeconfig)
+
+`task test` (`ct install`) needs a running cluster. Point `KUBECONFIG` at a dedicated file before creating the cluster: `kind create cluster` merges into whatever `KUBECONFIG` resolves to (default `~/.kube/config`) and sets its current-context, so an unqualified create can repoint `kubectl` away from a real cluster.
+
+```bash
+# 1. Create the cluster in a dedicated kubeconfig file (not your real one)
+export KUBECONFIG=/tmp/kind-ct.kubeconfig
+kind create cluster --name ct-test --kubeconfig "$KUBECONFIG"
+
+# 2. Run the integration layer against it (task test reads the current context)
+task test APP=<chart>
+
+# 3. Tear it down — removes the cluster AND its entries from the kubeconfig
+kind delete cluster --name ct-test
+rm -f "$KUBECONFIG"          # optional: drop the now-empty isolated kubeconfig
+unset KUBECONFIG             # back to your normal ~/.kube/config
+```
+
+Heavy charts (`bookstack`, `v-rising`) need a few minutes to reach Ready — add `--helm-extra-args "--timeout 600s"` if invoking `ct` directly.
 
 ### Package / release (mostly CI; available locally)
 
@@ -138,12 +142,22 @@ helm test <release> -n <namespace>
 6. **Optionally integration-test**: `task test APP=<chart>` (kind), and/or `task deploy-local APP=<chart>` against a real cluster for behavior the static gate can't prove. Clean up after (`task clean-local`).
 7. **Open a PR** against `main`.
 
-> **There is no PR-level CI.** `release.yml` runs on push to `main` only. `task verify` (plus any integration testing you do) is the real gate — run it yourself before requesting review.
+> **CI runs on your PR** — [`ci.yml`](.github/workflows/ci.yml) lints, unit-tests, and installs changed charts, and branch protection blocks merge until it passes ([Continuous integration](#continuous-integration)). Run `task verify` first.
 
 ## Commit and PR conventions
 
 - **Commits** follow [Conventional Commits](https://www.conventionalcommits.org/): `feat` (MINOR), `fix` (PATCH); also `refactor`, `chore`, `ci`, `docs`, `test`. Append `!` for breaking changes (e.g. `feat(pihole-exporter)!: …`). Scope commits to a single chart where possible.
 - **PR descriptions** should state *what* changed (facts), *why*, and a test plan / verification steps (e.g. the `task verify` result, any live-test output). Call out breaking changes explicitly.
+
+## Continuous integration
+
+[`ci.yml`](.github/workflows/ci.yml) runs on every PR to `main`, driven by `ct` (chart-testing) — [`.github/ct/ct.yaml`](.github/ct/ct.yaml) is the single source of truth, mirrored locally by `task verify`. For each chart changed vs `main` (so the gate scales with your diff):
+
+1. **`ct lint`** — `helm lint` + yamllint + yamale schema + **`--check-version-increment`**: fails unless `Chart.yaml` `version` exceeds `main`'s, so any change under `charts/<chart>/` (incl. `ci/` and `tests/`) needs a version bump.
+2. **`helm unittest` + `kubeconform`** (via `additional-commands`).
+3. **`ct install`** on kind — installs each changed chart and waits for Ready (`nut-exporter` excluded, deprecated), catching failures the render checks miss (probes, image pull, PVC provisioning).
+
+The **`Lint and unit-test changed charts`** check is required via branch protection — a red gate blocks merge.
 
 ## Versioning and release
 
