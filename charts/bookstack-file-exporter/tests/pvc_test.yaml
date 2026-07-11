@@ -1,0 +1,32 @@
+suite: bookstack-file-exporter PVC
+templates:
+  - templates/pvc.yaml
+release:
+  name: bookstack-file-exporter
+tests:
+  - it: does not render when persistence is disabled (default)
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: renders a PVC when persistence is enabled
+    set:
+      persistence.enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: spec.resources.requests.storage, value: 5Gi }
+  - it: omits storageClassName when storageClass is unset (default provisioner)
+    set:
+      persistence.enabled: true
+    asserts:
+      - notExists: { path: spec.storageClassName }
+  - it: disables dynamic provisioning when storageClass is "-"
+    set:
+      persistence.enabled: true
+      persistence.storageClass: "-"
+    asserts:
+      - equal: { path: spec.storageClassName, value: "" }
+  - it: sets storageClassName when storageClass is a class name
+    set:
+      persistence.enabled: true
+      persistence.storageClass: nfs-provisioner
+    asserts:
+      - equal: { path: spec.storageClassName, value: nfs-provisioner }

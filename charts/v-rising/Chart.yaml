@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.0.0
+version: 1.0.1
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=trueosiris/vrising versioning=regex:^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$
@@ -30,15 +30,5 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
   artifacthub.io/changes: |
-    - kind: changed
-      description: "BREAKING - image schema standardized: added image.registry (docker.io); image.repository unchanged (trueosiris/vrising)"
     - kind: fixed
-      description: "BREAKING - rcon Service renamed from the chart fullname to <fullname>-rcon, fixing a name collision with the main Service when service.rcon.enabled is true"
-    - kind: removed
-      description: "BREAKING - removed the dead/broken Ingress (referenced a nonexistent service.port, and the game protocol is UDP which L7 ingress cannot route); expose the server via the existing LoadBalancer/NodePort Service instead"
-    - kind: fixed
-      description: "config env vars no longer emit empty values (e.g. BRANCH=\"\") when left unset"
-    - kind: added
-      description: "updateStrategy value (default Recreate) to avoid a ReadWriteOnce PVC multi-attach deadlock on upgrade"
-    - kind: changed
-      description: "graduated to 1.0.0; chart is now enrolled in helm-docs and helm-unittest"
+      description: "PVC storageClassName is now omitted when persistence.*.storageClass is unset (the default) so the cluster's default StorageClass provisions; previously it rendered storageClassName: \"\", which disables dynamic provisioning and left the PVCs Pending"
