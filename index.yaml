@@ -2,6 +2,47 @@ apiVersion: v1
 entries:
   bookstack:
   - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "moved the external-database path from a ct-install scenario to a cluster-free unittest (it cannot reach Ready without a live database); no user-facing chart change"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-07-11T06:32:39.115508475Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.0
+    description: bookstack documentation platform
+    digest: d816d18c78469c5bb9bdd9634fc7a3f6fa35a781df1585876b4ef7c35238622b
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.1.1/bookstack-5.1.1.tgz
+    version: 5.1.1
+  - annotations:
       artifacthub.io/changes: |-
         - kind: changed
           description: "bumped the bookstack-file-exporter subchart dependency 0.0.2 -> 1.0.0 (exporter upgraded to upstream v3.0.0, a breaking config rewrite)"
@@ -1731,4 +1772,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-11T05:31:41.468462749Z"
+generated: "2026-07-11T06:32:39.11576964Z"
