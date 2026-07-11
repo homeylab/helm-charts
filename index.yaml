@@ -524,6 +524,38 @@ entries:
   bookstack-file-exporter:
   - annotations:
       artifacthub.io/changes: |
+        - kind: fixed
+          description: "PVC storageClassName is now omitted when persistence.storageClass is unset (the default) so the cluster's default StorageClass provisions; previously it rendered storageClassName: \"\", which disables dynamic provisioning and left the Deployment-mode PVC Pending"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-07-11T05:31:41.085429707Z"
+    description: A Helm chart to run scheduled exports/backups of a BookStack instance's
+      pages, images, and attachments.
+    digest: 390d774b76717ec233fc1bae4a62cef200c768025faab3562737ac230a95cf29
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - bookstack
+    - backup
+    - export
+    - wiki
+    - documentation
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack-file-exporter
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/homeylab/bookstack-file-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-1.0.1/bookstack-file-exporter-1.0.1.tgz
+    version: 1.0.1
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "BREAKING - appVersion bumped 2.1.0 -> 3.0.0 (current upstream homeylab/bookstack-file-exporter image); the v3 config schema is a breaking rewrite from v2"
         - kind: changed
@@ -1605,6 +1637,38 @@ entries:
   v-rising:
   - annotations:
       artifacthub.io/changes: |
+        - kind: fixed
+          description: "PVC storageClassName is now omitted when persistence.*.storageClass is unset (the default) so the cluster's default StorageClass provisions; previously it rendered storageClassName: \"\", which disables dynamic provisioning and left the PVCs Pending"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
+    apiVersion: v2
+    appVersion: "3.0"
+    created: "2026-07-11T05:31:41.468264308Z"
+    description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
+      server
+    digest: bee26f0a2ab0fcf5a7d6204385bd7c4188a6f18ed051ec32bd3a8453f5fb980f
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - v-rising
+    - vrising
+    - game-server
+    - gaming
+    - dedicated-server
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: v-rising
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/TrueOsiris/docker-vrising
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/v-rising-1.0.1/v-rising-1.0.1.tgz
+    version: 1.0.1
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "BREAKING - image schema standardized: added image.registry (docker.io); image.repository unchanged (trueosiris/vrising)"
         - kind: fixed
@@ -1667,4 +1731,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-09T06:32:17.490971262Z"
+generated: "2026-07-11T05:31:41.468462749Z"
