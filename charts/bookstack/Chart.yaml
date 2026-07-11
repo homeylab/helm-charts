@@ -30,7 +30,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 5.1.0
+version: 5.1.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -56,6 +56,4 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
     - kind: changed
-      description: "bumped the bookstack-file-exporter subchart dependency 0.0.2 -> 1.0.0 (exporter upgraded to upstream v3.0.0, a breaking config rewrite)"
-    - kind: changed
-      description: "POTENTIALLY BREAKING (only if bookstack-file-exporter.enabled: true) - the bookstack-file-exporter passthrough values block was rewritten for the v1.0.0 subchart's snake_case config schema and trimmed to a minimal override surface; the API token moved from config.credentials.tokenId/tokenSecret to top-level auth.tokenId/auth.tokenSecret (now injected as env from a chart-managed Secret, no longer written into the exporter's ConfigMap), and the config.minio / config.assets / config.httpConfig / top-level cron / persistence overrides (which had drifted out of sync with the subchart and were all redundant with its new defaults) were removed - see the bookstack-file-exporter chart's own values.yaml/README for the full schema and defaults"
+      description: "moved the external-database path from a ct-install scenario to a cluster-free unittest (it cannot reach Ready without a live database); no user-facing chart change"
