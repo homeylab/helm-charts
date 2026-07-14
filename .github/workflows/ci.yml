@@ -6,10 +6,17 @@ on:
     branches:
       - main
 
+concurrency:
+  # Cancel a superseded PR run when a new commit is pushed — skips a redundant
+  # kind install for the stale ref.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-test:
     name: Lint and unit-test changed charts
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

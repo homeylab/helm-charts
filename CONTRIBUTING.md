@@ -169,15 +169,17 @@ Two version fields in `Chart.yaml`, and they move differently:
 Pipeline:
 
 1. **Renovate** (CI) bumps `appVersion` when the upstream image releases, then bumps the chart `version` (upstream patch → chart patch; minor/major → chart minor), scoped so only the changed chart bumps. (The `helm-values` manager is disabled — image versions are tracked *only* via `appVersion`, never `values.yaml`.)
-2. On **merge to `main`**, [`release.yml`](.github/workflows/release.yml) runs:
-   - **`chart-releaser`** publishes any chart whose `Chart.yaml` `version` changed to the GitHub Pages Helm repo (`CR_SKIP_EXISTING` — unchanged versions are skipped).
-   - a second job packages **every** chart (with deps) and pushes it to the `homeylabcharts` OCI registry on Docker Hub.
+2. On **merge to `main`**, the single `release` job in [`release.yml`](.github/workflows/release.yml) runs:
+   - **`chart-releaser`** publishes any chart whose `Chart.yaml` `version` changed to the GitHub Pages Helm repo (`CR_SKIP_EXISTING` — unchanged versions are skipped), leaving the packaged `.tgz` (deps vendored) in `.cr-release-packages/`.
+   - a later step in the same job `helm push`es those same packages to the `homeylabcharts` OCI registry on Docker Hub — so OCI publishes **only** the charts Pages just did, and a failed release blocks the push (the two channels can't desync).
 
 **Consequence:** a templates-only change with an unchanged `version` ships **nothing** via chart-releaser. Always bump `version` when you want a release.
 
+**If the OCI push step fails after the release already published to Pages** (e.g. a Docker Hub auth/network blip), re-running the job won't republish it — `chart-releaser` now sees the version as already released and repackages nothing, leaving `.cr-release-packages/` empty. Recover manually for the affected chart: `task pkg-with-dep APP=<chart>` then `task oci-push FILE=<chart>-<version>.tgz`.
+
 ### Umbrella charts: release the subchart first
 
-Two charts bundle **first-party** subcharts from the OCI registry — `bookstack` (→ `bookstack-file-exporter`) and `exportarr` (→ `qbittorrent-exporter`, `tdarr-exporter`). At release, `release.yml` packages the parent by pulling those subcharts *from OCI*, but the job that pushes subcharts to OCI runs later in the same run. So bumping a subchart **and** the parent's dependency on it in one merge fails — the parent can't find the not-yet-published subchart version, and the **whole release aborts** (not just that chart).
+Two charts bundle **first-party** subcharts from the OCI registry — `bookstack` (→ `bookstack-file-exporter`) and `exportarr` (→ `qbittorrent-exporter`, `tdarr-exporter`). At release, `release.yml` packages the parent by pulling those subcharts *from OCI*, but the step that pushes subcharts to OCI runs later in the same job. So bumping a subchart **and** the parent's dependency on it in one merge fails — the parent can't find the not-yet-published subchart version, and the **whole release aborts** (not just that chart).
 
 **Rule:** ship the subchart bump in its own PR first (it lands in OCI + Pages), then bump the parent's `dependencies[].version` to match in a follow-up PR. `mariadb` is third-party and already published, so it needs no ordering.
 
