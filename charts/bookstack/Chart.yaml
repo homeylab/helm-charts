@@ -30,7 +30,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 5.1.1
+version: 5.1.2
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -38,6 +38,10 @@ version: 5.1.1
 # It is recommended to use it with quotes.
 # renovate: datasource=docker depName=linuxserver/bookstack versioning=regex:^version-v(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$
 appVersion: "version-v26.05.2"
+
+# Minimum supported Kubernetes version. The -0 suffix matches managed distros'
+# prerelease-style versions (e.g. v1.28.3-gke.x).
+kubeVersion: ">=1.19.0-0"
 
 dependencies:
 - name: mariadb
@@ -55,5 +59,5 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
-    - kind: changed
-      description: "moved the external-database path from a ct-install scenario to a cluster-free unittest (it cannot reach Ready without a live database); no user-facing chart change"
+    - kind: added
+      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"

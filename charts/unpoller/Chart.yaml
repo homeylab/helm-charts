@@ -31,7 +31,7 @@ maintainers:
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 ## Chart Version
-version: 4.0.0
+version: 4.0.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -41,23 +41,15 @@ version: 4.0.0
 # renovate: datasource=docker depName=ghcr.io/unpoller/unpoller
 appVersion: "v3.3.1"
 
+# Minimum supported Kubernetes version. The -0 suffix matches managed distros'
+# prerelease-style versions (e.g. v1.28.3-gke.x).
+kubeVersion: ">=1.19.0-0"
+
 annotations:
   artifacthub.io/license: MIT
   artifacthub.io/links: |
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
   artifacthub.io/changes: |
-    - kind: changed
-      description: "BREAKING - image schema standardized: image.name removed; use image.registry (was image.repository) + image.repository (the org/name path)"
-    - kind: changed
-      description: "BREAKING - helm test image schema: testCurlImage.* renamed to nested tests.image.* (registry/repository/tag/pullPolicy) + tests.path"
-    - kind: changed
-      description: "BREAKING - unifi/influxdb auth now renders into a chart-managed Secret wired via envFrom instead of plaintext Deployment env; existingSecret still takes precedence"
-    - kind: changed
-      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, UID/GID/fsGroup 65532, readOnlyRootFilesystem, drop ALL); distroless-static image runs nonroot"
     - kind: added
-      description: "ServiceAccount (serviceAccount.create), optional Ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled)"
-    - kind: added
-      description: "gated PrometheusRule template (metrics.prometheusRule.enabled) - previously the values block was a no-op"
-    - kind: changed
-      description: "appVersion bumped v3.2.0 -> v3.3.1 (current upstream); env schema, /health endpoint, and metric names verified unchanged against this chart"
+      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"

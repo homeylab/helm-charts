@@ -3,6 +3,8 @@
 {{ template "chart.badgesSection" . }}
 {{ template "chart.description" . }}
 
+{{ template "chart.requirementsSection" . }}
+
 A Helm Chart to deploy [exportarr](https://github.com/onedr0p/exportarr), an app that gathers Prometheus metrics from `Arr` instances. See the upstream repository for the full list of supported applications.
 
 This chart can optionally install a Prometheus exporter for the following, as subchart dependencies:

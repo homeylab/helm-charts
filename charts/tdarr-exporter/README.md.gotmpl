@@ -3,6 +3,8 @@
 {{ template "chart.badgesSection" . }}
 {{ template "chart.description" . }}
 
+{{ template "chart.requirementsSection" . }}
+
 A Helm Chart to deploy a Prometheus [exporter](https://github.com/homeylab/tdarr-exporter) for Tdarr. Based on the `homeylab/tdarr-exporter` image.
 
 This chart is also included as an optional deployment in the [exportarr](https://github.com/homeylab/helm-charts/tree/main/charts/exportarr) helm chart. You can use the `exportarr` chart and set `tdarr-exporter.enabled` if you prefer having all your `Arr` related exporters in one chart.

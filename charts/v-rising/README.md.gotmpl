@@ -3,6 +3,8 @@
 {{ template "chart.badgesSection" . }}
 {{ template "chart.description" . }}
 
+{{ template "chart.requirementsSection" . }}
+
 A Helm chart to deploy a [V Rising](https://www.stunlock.com/games/v-rising/) dedicated server, based on the [TrueOsiris/docker-vrising](https://github.com/TrueOsiris/docker-vrising) image.
 
 > **Note** - the upstream image used has limited ability to modify the server settings. Some settings are set in the image and can only be modified by editing the settings file in the persistent volume or copying one onto the volume/container.<br/><br/>

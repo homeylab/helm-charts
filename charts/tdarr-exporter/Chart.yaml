@@ -18,11 +18,15 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 2.0.0
+version: 2.0.1
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=homeylab/tdarr-exporter
 appVersion: "3.0.0"
+
+# Minimum supported Kubernetes version. The -0 suffix matches managed distros'
+# prerelease-style versions (e.g. v1.28.3-gke.x).
+kubeVersion: ">=1.19.0-0"
 
 annotations:
   artifacthub.io/license: MIT
@@ -30,15 +34,5 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
   artifacthub.io/changes: |
-    - kind: changed
-      description: "BREAKING - image schema standardized: image.name renamed to image.repository (image.repository, formerly the registry host, is now image.registry); no image change, this is a homeylab custom build"
-    - kind: changed
-      description: "BREAKING - image schema standardized for the helm test connection-check image: testCurlImage.* renamed to tests.image.* (registry/repository/tag/pullPolicy) and tests.path"
-    - kind: changed
-      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser/runAsGroup/fsGroup 65532, readOnlyRootFilesystem, drop ALL); the image runs as distroless nonroot (UID/GID 65532)"
-    - kind: changed
-      description: "inline settings.config.apiKey now renders into a chart-managed Secret and is wired via secretKeyRef instead of a plaintext env value; settings.config.existingSecret (object form, unchanged) still takes precedence"
     - kind: added
-      description: "optional ingress (networking.k8s.io/v1) and Gateway API HTTPRoute (httproute.enabled)"
-    - kind: changed
-      description: "appVersion bumped 2.1.0 -> 3.0.0 (current upstream homeylab/tdarr-exporter image); env schema, /healthz, and metric names verified unchanged against this chart"
+      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
