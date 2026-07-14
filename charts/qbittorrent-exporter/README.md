@@ -198,6 +198,7 @@ First major release. This version **swaps the backing exporter image** and harde
 | settings.features.enableLabelWithTags | bool | `false` | add a tags label to metrics. Maps to ENABLE_LABEL_WITH_TAGS |
 | settings.features.enableLabelWithTracker | bool | `false` | add a tracker label to metrics. Maps to ENABLE_LABEL_WITH_TRACKER |
 | settings.features.enableTracker | bool | `true` | expose tracker metrics. Maps to ENABLE_TRACKER |
+| tests.enabled | bool | `true` | run the `helm test` connection check (disable when there is no live qBittorrent to reach, e.g. in CI) |
 | tests.image.pullPolicy | string | `"IfNotPresent"` | pull policy for the `helm test` connection-check image |
 | tests.image.registry | string | `"docker.io"` | registry for the `helm test` connection-check image |
 | tests.image.repository | string | `"busybox"` | repository for the `helm test` connection-check image |

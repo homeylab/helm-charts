@@ -13,6 +13,8 @@ image:
 
 ## images for the `helm test` connection check
 tests:
+  # -- run the `helm test` connection check (disable when there is no live qBittorrent to reach, e.g. in CI)
+  enabled: true
   image:
     # -- registry for the `helm test` connection-check image
     registry: docker.io

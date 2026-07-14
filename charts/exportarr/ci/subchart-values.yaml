@@ -8,6 +8,11 @@
 # - tdarr-exporter uses httpGet /healthz on its own `metrics` port, independent of `config.url`.
 qbittorrent-exporter:
   enabled: true
+  # `helm test` disabled — martabal returns 503 until it can scrape a live qBittorrent,
+  # so the connection probe can't pass in this backend-free namespace (tdarr's /healthz
+  # is backend-independent, so its test stays on).
+  tests:
+    enabled: false
   settings:
     config:
       baseUrl: "http://localhost:8080"

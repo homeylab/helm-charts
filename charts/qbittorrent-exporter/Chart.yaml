@@ -36,3 +36,5 @@ annotations:
   artifacthub.io/changes: |
     - kind: added
       description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+    - kind: added
+      description: "added tests.enabled to toggle the helm test connection check (default true)"

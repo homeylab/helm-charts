@@ -7,13 +7,17 @@
 # livenessProbe/readinessProbe/startupProbe all target exportarr's own `metrics` port
 # (httpGet /healthz), not the upstream arr instance, so pod health is independent of
 # whether `url` can actually be reached.
+#
+# NOTE: exportarr validates the api-key format at startup (`api-key must be a 20-32
+# character alphanumeric string`) and exits if it fails — so the dummy key below must
+# satisfy that regex or the container CrashLoops before it can serve /healthz.
 exportarr:
   apps:
     radarr:
       - name: main
         enabled: true
         url: "http://localhost:7878"
-        apiKey: "ci-test-key"
+        apiKey: "citestapikey00000000000000000000"
   resources:
     requests:
       cpu: 10m

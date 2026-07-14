@@ -1,5 +1,8 @@
 # ct install permutation: inline creds + ingress enabled.
 # Self-contained. Reaches Ready under `ct install`.
+# `helm test` disabled — martabal returns 503 backend-free (see default-values.yaml).
+tests:
+  enabled: false
 settings:
   config:
     baseUrl: "http://localhost:8080"

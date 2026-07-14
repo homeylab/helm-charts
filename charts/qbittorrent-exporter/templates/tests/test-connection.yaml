@@ -1,3 +1,4 @@
+{{- if .Values.tests.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -14,3 +15,4 @@ spec:
       command: ['wget']
       args: ['{{ include "qbittorrent-exporter.fullname" . }}:{{ .Values.service.port }}{{ .Values.tests.path }}']
   restartPolicy: Never
+{{- end }}
