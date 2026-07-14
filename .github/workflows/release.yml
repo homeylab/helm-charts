@@ -45,22 +45,35 @@ jobs:
           CR_GENERATE_RELEASE_NOTES: true
 
       # chart-releaser leaves the charts it just released (changed versions only,
-      # deps vendored) in .cr-release-packages/. Push those same packages to OCI as
-      # a later step in this job so (a) OCI publishes only what Pages did, and (b) a
-      # failed release blocks the push — no channel desync. Mirrors the
-      # prometheus-community pattern.
-      - name: Helm Registry Login
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | helm registry login registry-1.docker.io --password-stdin -u "${{ secrets.DOCKERHUB_USERNAME }}"
-
-      - name: Push released charts to OCI
+      # deps vendored) in .cr-release-packages/. Push those same packages to OCI so
+      # (a) OCI publishes only what Pages did, and (b) a failed release blocks the
+      # push — no channel desync. Mirrors the prometheus-community pattern.
+      - name: Detect released charts
+        id: released
         run: |
           shopt -s nullglob
           pkgs=(.cr-release-packages/*.tgz)
-          if [ ${#pkgs[@]} -eq 0 ]; then
+          if [ ${#pkgs[@]} -gt 0 ]; then
+            echo "has=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has=false" >> "$GITHUB_OUTPUT"
             echo "No newly released charts to push to OCI."
-            exit 0
           fi
-          for pkg in "${pkgs[@]}"; do
+
+      # Log in / push only when there's something to publish, so doc- or
+      # workflow-only merges never touch Docker Hub.
+      - name: Helm Registry Login
+        if: steps.released.outputs.has == 'true'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: echo "$DOCKERHUB_TOKEN" | helm registry login registry-1.docker.io -u "$DOCKERHUB_USERNAME" --password-stdin
+
+      - name: Push released charts to OCI
+        if: steps.released.outputs.has == 'true'
+        run: |
+          shopt -s nullglob
+          for pkg in .cr-release-packages/*.tgz; do
             echo "Pushing $pkg"
             helm push "$pkg" oci://registry-1.docker.io/homeylabcharts
           done
