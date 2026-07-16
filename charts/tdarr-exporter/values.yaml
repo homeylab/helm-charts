@@ -84,7 +84,7 @@ metrics:
       # - alert: TdarrExporterTargetDown
       #   annotations:
       #     summary: tdarr-exporter metrics endpoint is down.
-      #     description: Prometheus cannot scrape tdarr-exporter ({{ "{{ $labels.instance }}" }}).
+      #     description: Prometheus cannot scrape tdarr-exporter ({{ $labels.instance }}).
       #   expr: up{job=~".*tdarr-exporter.*"} == 0
       #   for: 5m
       #   labels:

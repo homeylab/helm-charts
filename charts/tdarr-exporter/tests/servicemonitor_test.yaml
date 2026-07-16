@@ -35,7 +35,29 @@ tests:
       - equal:
           path: spec.selector.matchLabels["app.kubernetes.io/instance"]
           value: tdarr-exporter
-      - contains: { path: spec.namespaceSelector.matchNames, content: NAMESPACE }
+  - it: scopes the namespaceSelector to the release namespace
+    set:
+      metrics.enabled: true
+      metrics.serviceMonitor.enabled: true
+    release:
+      namespace: monitoring
+    asserts:
+      - contains: { path: spec.namespaceSelector.matchNames, content: monitoring }
+  - it: reads scrape config from values rather than hardcoding the defaults
+    set:
+      metrics.enabled: true
+      metrics.serviceMonitor.enabled: true
+      metrics.serviceMonitor.interval: 45s
+      metrics.serviceMonitor.path: /custom-metrics
+      metrics.serviceMonitor.scrapeTimeout: 9s
+      service.name: http-metrics
+    asserts:
+      - equal: { path: "spec.endpoints[0].interval", value: 45s }
+      - equal: { path: "spec.endpoints[0].path", value: /custom-metrics }
+      - equal: { path: "spec.endpoints[0].scrapeTimeout", value: 9s }
+      # the endpoint port is plumbed from service.name, not a serviceMonitor key;
+      # renaming the service port must follow through here or scraping silently breaks
+      - equal: { path: "spec.endpoints[0].port", value: http-metrics }
   - it: omits optional relabeling and targetLabels blocks by default
     set:
       metrics.enabled: true
