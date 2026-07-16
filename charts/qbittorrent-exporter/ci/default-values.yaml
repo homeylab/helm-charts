@@ -1,9 +1,10 @@
 # ct install permutation: chart-managed Secret (user+pass) path.
 # Self-contained — no existingSecret. Reaches Ready under `ct install`.
-# The `helm test` connection check is disabled: the martabal exporter returns HTTP 503
-# on every path until it can scrape a live qBittorrent, so the probe cannot pass in this
-# backend-free namespace. Deployment readiness (TCP on the metrics port) still verifies
-# the exporter is serving.
+# The `helm test` connection check is disabled: the martabal exporter serves HTTP 503 on
+# /metrics until it can scrape a live qBittorrent, and redirects every other path there, so
+# a wget probe follows the redirect into the 503 and cannot pass in this backend-free
+# namespace. Deployment readiness (TCP on the metrics port) still verifies the exporter is
+# serving.
 tests:
   enabled: false
 settings:

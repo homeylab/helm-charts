@@ -8,8 +8,9 @@
 qbittorrent-exporter:
   # Disabled until Chart.yaml pins qbittorrent-exporter >= 1.0.1.
   #
-  # martabal's exporter returns 503 on every path until it can scrape a live qBittorrent,
-  # so its `helm test` connection probe cannot pass in this backend-free namespace. The
+  # martabal's exporter serves 503 on /metrics until it can scrape a live qBittorrent, and
+  # redirects every other path to /metrics — so a wget probe follows the redirect into the
+  # 503 and cannot pass in this backend-free namespace, whatever path it targets. The
   # `tests.enabled` gate that skips that probe was added in qbittorrent-exporter 1.0.1,
   # but this chart still pins 1.0.0 from OCI — and per CONTRIBUTING ("Umbrella charts:
   # release the subchart first") the pin can only move once 1.0.0's successor is published.
