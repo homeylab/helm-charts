@@ -11,17 +11,21 @@ image:
   # -- overrides the image tag whose default is the chart appVersion
   tag: ""
 
-## set image for post install helm tests
-testConnImage:
-  # -- test image registry
-  registry: docker.io
-  # -- test image repository
-  repository: busybox
-  # -- test image tag
-  tag: "1.36.1"
-  # -- test image pull policy
-  pullPolicy: IfNotPresent
-  # -- the path for the post-install connection check
+## the `helm test` connection check, and the image it runs
+tests:
+  # -- run the `helm test` connection check (disable when there is no live Pi-hole to reach, e.g. in CI)
+  enabled: true
+  image:
+    # -- registry for the `helm test` connection-check image
+    registry: docker.io
+    # -- repository for the `helm test` connection-check image
+    repository: busybox
+    # -- tag for the `helm test` connection-check image
+    tag: "1.36.1"
+    # -- pull policy for the `helm test` connection-check image
+    pullPolicy: IfNotPresent
+  ## path the test requests and expects a 200 from
+  # -- path the `helm test` request calls and expects a 200 from
   path: /metrics
 
 updateStrategy:

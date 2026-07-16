@@ -12,6 +12,7 @@ A Helm Chart to deploy a Prometheus [exporter](https://github.com/eko/pihole-exp
 - [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Upgrade](#upgrade)
+  - [Migrating to 2.0.0](#migrating-to-200)
   - [Migrating to 1.0.0](#migrating-to-100)
 - [Configuration Options](#configuration-options)
 - [Grafana Dashboards](#grafana-dashboards)
@@ -101,7 +102,26 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `1.X.X` | `2.0.0` | The `helm test` image values moved from `testConnImage.*` to `tests.image.*`. Only affects you if you overrode those values. **Read the [Migrating to 2.0.0](#migrating-to-200) section before upgrading.** |
 | `0.1.X` | `1.0.0` | Hardened `securityContext` defaults and a standardized image schema now apply; credentials move into a chart-managed Secret (behavior-preserving). **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
+
+### Migrating to 2.0.0
+This release renames the `helm test` values to match the convention used by the other charts in this repo. **If you never overrode `testConnImage.*`, no action is needed** — the defaults are unchanged and the deployed exporter is unaffected.
+
+- **`testConnImage.*` renamed to `tests.image.*` (breaking).** Move any overrides:
+
+  | Old value | New value |
+  | --------- | --------- |
+  | `testConnImage.registry` | `tests.image.registry` |
+  | `testConnImage.repository` | `tests.image.repository` |
+  | `testConnImage.tag` | `tests.image.tag` |
+  | `testConnImage.pullPolicy` | `tests.image.pullPolicy` |
+  | `testConnImage.path` | `tests.path` |
+
+  The old keys are no longer read. Helm does not error on unknown values, so a stale `testConnImage:` block is silently ignored rather than rejected — remove it.
+- **New `tests.enabled` (default `true`).** Set it to `false` to skip rendering the `helm test` connection-check Pod when there is no live Pi-hole to reach (for example in CI).
+- **`tests.image.pullPolicy` is now honoured.** The value existed before but no template read it, so the Pod fell back to Kubernetes' default pull policy. It is now applied as `imagePullPolicy`.
+- **New `metrics.prometheusRule` support (additive).** The block previously configured nothing; see [Configuration Options](#configuration-options).
 
 ### Migrating to 1.0.0
 First major release. Most changes are transparent if you already set `settings.auth.password`/`token` — review the breaking items below before upgrading.

@@ -29,7 +29,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.0.1
+version: 2.0.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -48,5 +48,13 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
   artifacthub.io/changes: |
+    - kind: changed
+      description: "BREAKING: renamed the helm test values from testConnImage.* to tests.image.* (and testConnImage.path to tests.path); see the Migrating to 2.0.0 section"
     - kind: added
-      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      description: "implemented the metrics.prometheusRule block, which previously configured nothing; set metrics.prometheusRule.enabled to render a PrometheusRule"
+    - kind: added
+      description: "added tests.enabled to toggle the helm test connection check (default true)"
+    - kind: fixed
+      description: "the helm test image pull policy is now applied; tests.image.pullPolicy was previously ignored"
+    - kind: added
+      description: "added unit test coverage for the PrometheusRule, ServiceMonitor, HTTPRoute and helm test templates"
