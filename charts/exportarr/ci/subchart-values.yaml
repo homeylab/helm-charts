@@ -1,16 +1,23 @@
-# ct install permutation: subchart passthrough (qbittorrent-exporter + tdarr-exporter).
-# Exportarr's own arr instances stay disabled (defaults) to keep this install light —
-# the point of this scenario is verifying both dependency subcharts install cleanly
-# as deps in a fresh namespace.
+# ct install permutation: subchart passthrough (tdarr-exporter; qbittorrent-exporter
+# temporarily off, see below). Exportarr's own arr instances stay disabled (defaults)
+# to keep this install light — the point of this scenario is verifying dependency
+# subcharts install cleanly as deps in a fresh namespace.
 #
-# Both subcharts reach Ready without a reachable upstream:
-# - qbittorrent-exporter uses a TCP probe against its own `metrics` port (no health path).
-# - tdarr-exporter uses httpGet /healthz on its own `metrics` port, independent of `config.url`.
+# tdarr-exporter reaches Ready without a reachable upstream: it uses httpGet /healthz
+# on its own `metrics` port, independent of `config.url`.
 qbittorrent-exporter:
-  enabled: true
-  # `helm test` disabled — martabal returns 503 until it can scrape a live qBittorrent,
-  # so the connection probe can't pass in this backend-free namespace (tdarr's /healthz
-  # is backend-independent, so its test stays on).
+  # Disabled until Chart.yaml pins qbittorrent-exporter >= 1.0.1.
+  #
+  # martabal's exporter returns 503 on every path until it can scrape a live qBittorrent,
+  # so its `helm test` connection probe cannot pass in this backend-free namespace. The
+  # `tests.enabled` gate that skips that probe was added in qbittorrent-exporter 1.0.1,
+  # but this chart still pins 1.0.0 from OCI — and per CONTRIBUTING ("Umbrella charts:
+  # release the subchart first") the pin can only move once 1.0.0's successor is published.
+  # So the values below are inert against 1.0.0: the probe renders regardless and fails.
+  #
+  # Follow-up PR bumps the dependency to 1.0.1 and flips this back to `true`, at which
+  # point `tests.enabled: false` takes effect and this scenario covers both subcharts again.
+  enabled: false
   tests:
     enabled: false
   settings:
