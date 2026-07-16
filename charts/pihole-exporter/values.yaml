@@ -13,7 +13,7 @@ image:
 
 ## the `helm test` connection check, and the image it runs
 tests:
-  # -- run the `helm test` connection check (disable when there is no live Pi-hole to reach, e.g. in CI)
+  # -- run the `helm test` connection check (set false to skip rendering the check Pod)
   enabled: true
   image:
     # -- registry for the `helm test` connection-check image

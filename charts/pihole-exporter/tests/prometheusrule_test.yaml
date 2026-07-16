@@ -9,6 +9,12 @@ tests:
       metrics.prometheusRule.enabled: false
     asserts:
       - hasDocuments: { count: 0 }
+  - it: omits groups entirely when enabled with no rules
+    set:
+      metrics.prometheusRule.enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - notExists: { path: spec.groups }
   - it: renders with one rule when enabled
     set:
       metrics.prometheusRule.enabled: true

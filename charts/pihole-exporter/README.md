@@ -217,7 +217,7 @@ First major release. Most changes are transparent if you already set `settings.a
 | settings.config.hostname | string | `"pi-hole.localdomain"` | Set the pihole host or IP address |
 | settings.config.port | string | `nil` | Set the pihole port on the pihole host to use, default `80` set by container image |
 | settings.config.protocol | string | `""` | Set the pihole host protocol: `http` or `https`, default `http` set by container image |
-| tests.enabled | bool | `true` | run the `helm test` connection check (disable when there is no live Pi-hole to reach, e.g. in CI) |
+| tests.enabled | bool | `true` | run the `helm test` connection check (set false to skip rendering the check Pod) |
 | tests.image.pullPolicy | string | `"IfNotPresent"` | pull policy for the `helm test` connection-check image |
 | tests.image.registry | string | `"docker.io"` | registry for the `helm test` connection-check image |
 | tests.image.repository | string | `"busybox"` | repository for the `helm test` connection-check image |
