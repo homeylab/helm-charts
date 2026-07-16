@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 2.0.1
+version: 2.1.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=homeylab/tdarr-exporter
@@ -35,4 +35,6 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
   artifacthub.io/changes: |
     - kind: added
-      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      description: "implemented the metrics.prometheusRule block, which previously configured nothing; set metrics.prometheusRule.enabled to render a PrometheusRule"
+    - kind: added
+      description: "added unit test coverage for the PrometheusRule, ServiceMonitor and HTTPRoute templates"
