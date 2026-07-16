@@ -64,6 +64,20 @@ metrics:
   enabled: true
   serviceMonitor:
     enabled: true
+  ## Optional alerting rules (requires the Prometheus Operator CRD)
+  # prometheusRule:
+  #   enabled: true
+  #   ## labels your Prometheus ruleSelector matches on
+  #   labels:
+  #     release: kube-prometheus-stack
+  #   rules:
+  #     - alert: PiholeExporterTargetDown
+  #       annotations:
+  #         summary: pihole-exporter metrics endpoint is down.
+  #       expr: up{job=~".*pihole-exporter.*"} == 0
+  #       for: 5m
+  #       labels:
+  #         severity: warning
 
 ## Alternative to ingress - Gateway API HTTPRoute (chart does NOT create the Gateway)
 # httproute:
@@ -135,9 +149,9 @@ First major release. Most changes are transparent if you already set `settings.a
 | metrics.podAnnotations | object | `{"prometheus.io/path":"/metrics","prometheus.io/port":"9617","prometheus.io/scrape":"true"}` | Add podAnnotations for prometheus scraping |
 | metrics.podAnnotations."prometheus.io/path" | string | `"/metrics"` | set the path for prometheus scraping |
 | metrics.podAnnotations."prometheus.io/port" | string | `"9617"` | set the port for prometheus scraping, should match the service port |
-| metrics.prometheusRule.enabled | bool | `false` |  |
-| metrics.prometheusRule.labels | object | `{}` |  |
-| metrics.prometheusRule.rules | list | `[]` |  |
+| metrics.prometheusRule.enabled | bool | `false` | enable a PrometheusRule (requires the Prometheus Operator CRD) |
+| metrics.prometheusRule.labels | object | `{}` | additional labels for the PrometheusRule (e.g. to match your Prometheus ruleSelector) |
+| metrics.prometheusRule.rules | list | `[]` | alerting/recording rules rendered under a single group |
 | metrics.serviceMonitor.additionalLabels | object | `{}` | set additional labels for serviceMonitor |
 | metrics.serviceMonitor.enabled | bool | `false` | enable/disable serviceMonitor, if enabled podAnnotations will be ignored |
 | metrics.serviceMonitor.interval | string | `"2m"` | how often to scrape for serviceMonitor |

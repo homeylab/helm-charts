@@ -99,23 +99,21 @@ metrics:
     relabelings: []
     metricRelabelings: []
   ## Enable and configure Prometheus Rules for the chart under this key.
-  ## not yet implemented
   prometheusRule:
-    ### -- enable/disable prometheusRule
+    # -- enable a PrometheusRule (requires the Prometheus Operator CRD)
     enabled: false
-    ### -- set labels for prometheusRule
+    # -- additional labels for the PrometheusRule (e.g. to match your Prometheus ruleSelector)
     labels: {}
-    ### -- Configure prometheusRule rules for the chart
+    # -- alerting/recording rules rendered under a single group
     rules: []
-      # - alert: UpsStatusUnknown
+      # - alert: PiholeExporterTargetDown
       #   annotations:
-      #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
-      #     summary: UPS status unknown.
-      #   expr: |
-      #     nut_status == 0
-      #   for: 10s
+      #     summary: pihole-exporter metrics endpoint is down.
+      #     description: Prometheus cannot scrape pihole-exporter ({{ "{{ $labels.instance }}" }}).
+      #   expr: up{job=~".*pihole-exporter.*"} == 0
+      #   for: 5m
       #   labels:
-      #     severity: critical
+      #     severity: warning
 
 serviceAccount:
   # Specifies whether a service account should be created

@@ -1,0 +1,78 @@
+suite: pihole-exporter ServiceMonitor
+templates:
+  - templates/servicemonitor.yaml
+release:
+  name: pihole-exporter
+tests:
+  - it: does not render when metrics are disabled
+    set:
+      metrics.enabled: false
+      metrics.serviceMonitor.enabled: true
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: does not render when serviceMonitor is disabled
+    set:
+      metrics.enabled: true
+      metrics.serviceMonitor.enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: renders with scrape config from values when enabled
+    set:
+      metrics.enabled: true
+      metrics.serviceMonitor.enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: apiVersion, value: monitoring.coreos.com/v1 }
+      - equal: { path: kind, value: ServiceMonitor }
+      - equal: { path: metadata.name, value: pihole-exporter }
+      - equal: { path: "spec.endpoints[0].interval", value: 2m }
+      - equal: { path: "spec.endpoints[0].path", value: /metrics }
+      - equal: { path: "spec.endpoints[0].port", value: metrics }
+      - equal: { path: "spec.endpoints[0].scrapeTimeout", value: 15s }
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: pihole-exporter
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: pihole-exporter
+      - contains: { path: spec.namespaceSelector.matchNames, content: NAMESPACE }
+  - it: omits optional relabeling and targetLabels blocks by default
+    set:
+      metrics.enabled: true
+      metrics.serviceMonitor.enabled: true
+    asserts:
+      - notExists: { path: "spec.endpoints[0].relabelings" }
+      - notExists: { path: "spec.endpoints[0].metricRelabelings" }
+      - notExists: { path: spec.targetLabels }
+  - it: renders relabelings, metricRelabelings and targetLabels when set
+    set:
+      metrics.enabled: true
+      metrics.serviceMonitor.enabled: true
+      metrics.serviceMonitor.relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+      metrics.serviceMonitor.metricRelabelings:
+        - action: drop
+          regex: go_.*
+          sourceLabels: [__name__]
+      metrics.serviceMonitor.targetLabels:
+        - app.kubernetes.io/instance
+    asserts:
+      - equal: { path: "spec.endpoints[0].relabelings[0].targetLabel", value: node }
+      - equal: { path: "spec.endpoints[0].metricRelabelings[0].action", value: drop }
+      - contains:
+          path: spec.targetLabels
+          content: app.kubernetes.io/instance
+  - it: merges additionalLabels into metadata labels
+    set:
+      metrics.enabled: true
+      metrics.serviceMonitor.enabled: true
+      metrics.serviceMonitor.additionalLabels:
+        release: kube-prometheus-stack
+    asserts:
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus-stack
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: pihole-exporter
