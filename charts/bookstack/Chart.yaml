@@ -41,7 +41,11 @@ appVersion: "version-v26.05.2"
 
 # Minimum supported Kubernetes version. The -0 suffix matches managed distros'
 # prerelease-style versions (e.g. v1.28.3-gke.x).
-kubeVersion: ">=1.19.0-0"
+# 1.21, not the fleet's 1.19: this chart's own manifests are 1.19-clean, but the
+# bookstack-file-exporter subchart renders a batch/v1 CronJob (GA in 1.21) and
+# Helm does not enforce a subchart's own kubeVersion — so the floor has to cover
+# every path this chart can enable, not just the default one.
+kubeVersion: ">=1.21.0-0"
 
 dependencies:
 - name: mariadb
@@ -60,4 +64,4 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
     - kind: added
-      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.21.0-0, the floor required by the optional bookstack-file-exporter subchart's batch/v1 CronJob)"

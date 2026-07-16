@@ -227,7 +227,7 @@ BookStack has no built-in full export/import — a migration is done via a datab
 
 ## Requirements
 
-Kubernetes: `>=1.19.0-0`
+Kubernetes: `>=1.21.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|

@@ -6,7 +6,7 @@ A Helm chart to run scheduled exports/backups of a BookStack instance's pages, i
 
 ## Requirements
 
-Kubernetes: `>=1.19.0-0`
+Kubernetes: `>=1.21.0-0`
 
 A Helm chart to run scheduled exports/backups of a [BookStack](https://www.bookstackapp.com/) instance's pages, images, and attachments, based on the [homeylab/bookstack-file-exporter](https://github.com/homeylab/bookstack-file-exporter) image.
 
