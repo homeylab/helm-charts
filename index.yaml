@@ -761,6 +761,52 @@ entries:
   exportarr:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: "qbittorrent-exporter subchart dependency bumped 1.0.0 -> 1.0.1"
+        - kind: changed
+          description: "tdarr-exporter subchart dependency bumped 2.0.0 -> 2.0.1"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-07-16T05:07:16.786921595Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.1
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 2.0.1
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 6304be4b674fe6a0575f90f24a646111ad74fc440d7f2f6850fa206a9fc87655
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-3.1.2/exportarr-3.1.2.tgz
+    version: 3.1.2
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
       artifacthub.io/images: |
@@ -2056,4 +2102,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-16T04:21:08.817633489Z"
+generated: "2026-07-16T05:07:16.787147722Z"
