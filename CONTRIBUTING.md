@@ -116,21 +116,23 @@ The chart has four independent test layers, cheapest and fastest first. Use the 
 | --- | --- | --- | --- |
 | **Unit** | `task unittest APP=<chart>` (helm-unittest, `tests/*_test.yaml`) | No | Templates render the right output for given values — Secret keys, env wiring, conditionals, which manifests appear. Best place for `existingSecret`/edge-case paths. |
 | **Static** | `task lint` + `task kubeconform APP=<chart>` | No | Chart is well-formed and rendered manifests are schema-valid (CRDs skipped — see Gotchas). |
-| **Integration** | `task test APP=<chart>` (chart-testing `ct install`) | Yes (kind) | Chart *installs and becomes Ready* on a real cluster for each `ci/*-values.yaml` scenario — and the `helm test` hooks below run automatically at the end. |
+| **Integration** | `task test APP=<chart>` (chart-testing `ct install`) | Yes (kind) | Chart *installs and becomes Ready* on a real cluster for each `ci/*-values.yaml` scenario — and the `helm test` hooks below run automatically at the end, unless the scenario disables them (see [`helm test`](#helm-test-connection-probes)). |
 | **Live behavior** | `task deploy-local APP=<chart>` → inspect → `task clean-local` | Yes (your context) | Runtime behavior the static layers can't catch — real backend connectivity, env-var semantics, probes under load — using your credentialed `.local/values/<chart>.yaml`. |
 
 **`task verify`** bundles the two cluster-free layers (unit + static) and is the pre-commit gate.
 
 ### `helm test` (connection probes)
 
-Each chart ships a `templates/tests/test-connection.yaml` — a Pod annotated `helm.sh/hook: test` that curls/wgets the service and expects a 200. It is **not** a unit test; it runs against a live release:
+Most charts ship a `templates/tests/test-connection.yaml` — a Pod annotated `helm.sh/hook: test` that curls/wgets the service and expects a 200. It is **not** a unit test; it runs against a live release. (`bookstack-file-exporter` and `v-rising` ship no probe: neither serves an HTTP endpoint to probe.)
 
 ```bash
 # after installing (e.g. task deploy-local APP=<chart>)
 helm test <release> -n <namespace>
 ```
 
-`ct install` (`task test`) runs these hooks **automatically** after the chart reaches Ready, so the connection probe is exercised as part of the integration layer — you rarely need to invoke `helm test` by hand unless you're debugging a `deploy-local` release.
+`ct install` (`task test`) runs these hooks **automatically** after the chart reaches Ready, so the connection probe is normally exercised as part of the integration layer — you rarely need to invoke `helm test` by hand unless you're debugging a `deploy-local` release.
+
+**Exception — a probe that cannot pass without a live backend.** Some exporters serve an error until they can scrape their upstream, so their probe can never go green in a `ct install` namespace (which has no backend). Those charts gate the hook behind `tests.enabled` (default `true`) and their `ci/*-values.yaml` set it to `false`, so `ct install` verifies Deployment readiness only. `qbittorrent-exporter` is the current case: martabal's exporter serves 503 on `/metrics` until it reaches a live qBittorrent and redirects other paths there, so a wget probe follows the redirect into the 503. Prefer a backend-independent readiness probe where the upstream offers one (`tdarr-exporter` keeps its probe on because `/healthz` is independent of `config.url`). Reach for the gate only when the upstream gives you nothing probeable.
 
 ## Contribution workflow
 
@@ -153,11 +155,20 @@ helm test <release> -n <namespace>
 
 [`ci.yml`](.github/workflows/ci.yml) runs on every PR to `main`, driven by `ct` (chart-testing) — [`.github/ct/ct.yaml`](.github/ct/ct.yaml) is the single source of truth, mirrored locally by `task verify`. For each chart changed vs `main` (so the gate scales with your diff):
 
-1. **`ct lint`** — `helm lint` + yamllint + yamale schema + **`--check-version-increment`**: fails unless `Chart.yaml` `version` exceeds `main`'s, so any change under `charts/<chart>/` (incl. `ci/` and `tests/`) needs a version bump.
+1. **`ct lint`** — `helm lint` + yamllint + yamale schema + **`--check-version-increment`**: fails unless `Chart.yaml` `version` exceeds `main`'s, so a change under `charts/<chart>/` — outside `ci/` and `tests/`, see [below](#what-counts-as-changed-use-helmignore) — needs a version bump.
 2. **`helm unittest` + `kubeconform`** (via `additional-commands`).
 3. **`ct install`** on kind — installs each changed chart and waits for Ready (`nut-exporter` excluded, deprecated), catching failures the render checks miss (probes, image pull, PVC provisioning).
 
 The **`Lint and unit-test changed charts`** check is required via branch protection — a red gate blocks merge.
+
+### What counts as "changed" (`use-helmignore`)
+
+`ct.yaml` sets `use-helmignore: true`, and each active chart's `.helmignore` excludes `/ci/` and `/tests/` (`nut-exporter` is deprecated and has neither directory). Those paths are test scaffolding: they are run *from the repo* and are not shipped to chart consumers. Two consequences:
+
+- **A test-only edit is not a chart change.** Touch only `ci/*-values.yaml` or `tests/*_test.yaml` and the chart drops out of `ct list-changed` — no version bump is demanded, and no release is published for scaffolding that consumers never receive.
+- **The flip side: that edit also gets no CI run.** No lint, no unittest, no `ct install` until the chart itself changes. A broken scenario can sit unnoticed. If you edit a scenario on its own and want it exercised now, run `task verify APP=<chart>` / `task test APP=<chart>` locally.
+
+Both patterns are anchored (`/ci/`, not `ci/`) on purpose: an unanchored `tests/` also matches `templates/tests/` and would strip the `helm test` hooks out of the published package.
 
 ## Versioning and release
 

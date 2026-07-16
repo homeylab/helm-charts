@@ -1,0 +1,25 @@
+suite: qbittorrent-exporter helm test connection check
+templates:
+  - templates/tests/test-connection.yaml
+release:
+  name: qbittorrent-exporter
+tests:
+  - it: renders the test-connection pod by default
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: Pod
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: test
+      - equal:
+          path: spec.containers[0].args[0]
+          value: "qbittorrent-exporter:8090/metrics"
+  - it: renders nothing when tests.enabled is false
+    set:
+      tests.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

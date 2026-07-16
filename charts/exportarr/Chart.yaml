@@ -29,7 +29,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 3.1.0
+version: 3.1.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -37,6 +37,10 @@ version: 3.1.0
 # It is recommended to use it with quotes.
 # renovate: datasource=docker depName=ghcr.io/onedr0p/exportarr
 appVersion: "v2.3.0"
+
+# Minimum supported Kubernetes version. The -0 suffix matches managed distros'
+# prerelease-style versions (e.g. v1.28.3-gke.x).
+kubeVersion: ">=1.19.0-0"
 
 # optional: include qbittorrent-exporter for prometheus
 # ref: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
@@ -59,13 +63,5 @@ annotations:
     - name: exportarr
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
-    - kind: changed
-      description: "BREAKING - qbittorrent-exporter subchart dependency bumped 0.1.0 -> 1.0.0, swapping the unmaintained caseyscarborough image for martabal/qbittorrent-exporter; passthrough value keys renamed accordingly: settings.config.base_url -> baseUrl, settings.auth.username/password -> auth.user/pass"
-    - kind: changed
-      description: "hardened pod/container securityContext defaults (runAsNonRoot, runAsUser 65532, readOnlyRootFilesystem, drop ALL)"
-    - kind: changed
-      description: "inline arr-instance apiKey now renders into a chart-managed Secret instead of being set as a plaintext environment variable"
     - kind: added
-      description: "helm-docs README, helm-unittest test suites, and ci install values"
-    - kind: changed
-      description: "optional tdarr-exporter subchart dependency bumped 1.2.0 -> 2.0.0 (schema-normalized, hardened securityContext, appVersion 2.1.0 -> 3.0.0); passthrough value keys are unchanged, so only installs with tdarr-exporter.enabled that customize the image are affected"
+      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"

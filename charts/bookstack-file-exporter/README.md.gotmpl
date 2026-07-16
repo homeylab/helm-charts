@@ -3,6 +3,8 @@
 {{ template "chart.badgesSection" . }}
 {{ template "chart.description" . }}
 
+{{ template "chart.requirementsSection" . }}
+
 A Helm chart to run scheduled exports/backups of a [BookStack](https://www.bookstackapp.com/) instance's pages, images, and attachments, based on the [homeylab/bookstack-file-exporter](https://github.com/homeylab/bookstack-file-exporter) image.
 
 This chart is also included as an optional subchart dependency of the [bookstack](https://github.com/homeylab/helm-charts/tree/main/charts/bookstack) helm chart. You can use the `bookstack` chart and set `bookstack-file-exporter.enabled` if you prefer having your BookStack instance and its exporter managed together.

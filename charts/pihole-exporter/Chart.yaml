@@ -29,7 +29,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.0.0
+version: 1.0.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -38,19 +38,15 @@ version: 1.0.0
 # renovate: datasource=docker depName=ekofr/pihole-exporter
 appVersion: "v1.2.0"
 
+# Minimum supported Kubernetes version. The -0 suffix matches managed distros'
+# prerelease-style versions (e.g. v1.28.3-gke.x).
+kubeVersion: ">=1.19.0-0"
+
 annotations:
   artifacthub.io/license: MIT
   artifacthub.io/links: |
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
   artifacthub.io/changes: |
-    - kind: changed
-      description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL); override if you run a customized image"
-    - kind: changed
-      description: "credentials now render into a chart-managed Secret and wire via envFrom (behavior-preserving; container still receives PIHOLE_PASSWORD; existingSecret still supported)"
-    - kind: changed
-      description: "BREAKING - image schema standardized to registry/repository/tag; testConnImage.name renamed to testConnImage.repository and a testConnImage.registry field added (default docker.io, no image change)"
     - kind: added
-      description: "Gateway API HTTPRoute as an alternative to ingress (httproute.enabled)"
-    - kind: changed
-      description: "ingress template collapsed to networking.k8s.io/v1 (drops the removed v1beta1/extensions fallbacks; requires Kubernetes 1.19+)"
+      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"

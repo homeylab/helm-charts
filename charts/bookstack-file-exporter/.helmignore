@@ -21,3 +21,15 @@
 .idea/
 *.tmproj
 .vscode/
+
+# Not shipped to chart consumers — these are repo-side inputs, not part of the chart:
+#   ci/, tests/       test scaffolding, exercised from the repo (see CONTRIBUTING)
+#   README.md.gotmpl  helm-docs input; the generated README.md itself does ship
+# Anchored with a leading slash: an unanchored `tests/` matches on basename alone,
+# so it would also match templates/tests/ and strip the `helm test` hooks.
+# `ct.yaml` sets use-helmignore, so edits to these paths also don't count as a chart
+# change — no version bump or release for a test-only edit, and no CI run for it
+# either until the chart itself changes.
+/ci/
+/tests/
+/README.md.gotmpl

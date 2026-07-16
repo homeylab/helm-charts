@@ -18,11 +18,17 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.0.1
+version: 1.0.2
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=homeylab/bookstack-file-exporter
 appVersion: "3.0.0"
+
+# Minimum supported Kubernetes version. The -0 suffix matches managed distros'
+# prerelease-style versions (e.g. v1.28.3-gke.x).
+# 1.21, not the fleet's 1.19: the default path renders a batch/v1 CronJob, which
+# is only GA from 1.21 (batch/v1beta1 before that).
+kubeVersion: ">=1.21.0-0"
 
 annotations:
   artifacthub.io/license: MIT
@@ -30,5 +36,5 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "PVC storageClassName is now omitted when persistence.storageClass is unset (the default) so the cluster's default StorageClass provisions; previously it rendered storageClassName: \"\", which disables dynamic provisioning and left the Deployment-mode PVC Pending"
+    - kind: added
+      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.21.0-0, the floor for the batch/v1 CronJob this chart renders by default)"
