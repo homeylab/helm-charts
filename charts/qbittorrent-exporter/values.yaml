@@ -11,7 +11,7 @@ image:
   # -- overrides the image tag whose default is the chart appVersion
   tag: ""
 
-## images for the `helm test` connection check
+## the `helm test` connection check, and the image it runs
 tests:
   # -- run the `helm test` connection check (disable when there is no live qBittorrent to reach, e.g. in CI)
   enabled: true
