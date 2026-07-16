@@ -2,7 +2,7 @@ suite: pihole-exporter PrometheusRule
 templates:
   - templates/prometheusrule.yaml
 release:
-  name: pihole-exporter
+  name: rel
 tests:
   - it: does not render when disabled
     set:
@@ -24,7 +24,9 @@ tests:
       - hasDocuments: { count: 1 }
       - equal: { path: apiVersion, value: monitoring.coreos.com/v1 }
       - equal: { path: kind, value: PrometheusRule }
-      - equal: { path: metadata.name, value: pihole-exporter }
+      # release name deliberately does not contain the chart name, so fullname
+      # (metadata.name) and name (the group) render differently and cannot be swapped
+      - equal: { path: metadata.name, value: rel-pihole-exporter }
       - equal:
           path: spec.groups[0].name
           value: pihole-exporter

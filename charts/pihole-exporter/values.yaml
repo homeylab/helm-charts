@@ -113,7 +113,7 @@ metrics:
       # - alert: PiholeExporterTargetDown
       #   annotations:
       #     summary: pihole-exporter metrics endpoint is down.
-      #     description: Prometheus cannot scrape pihole-exporter ({{ "{{ $labels.instance }}" }}).
+      #     description: Prometheus cannot scrape pihole-exporter ({{ $labels.instance }}).
       #   expr: up{job=~".*pihole-exporter.*"} == 0
       #   for: 5m
       #   labels:
