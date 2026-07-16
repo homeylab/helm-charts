@@ -3,6 +3,48 @@ entries:
   bookstack:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.21.0-0, the floor required by the optional bookstack-file-exporter subchart's batch/v1 CronJob)"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-07-16T04:21:08.04480002Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.0
+    description: bookstack documentation platform
+    digest: f209ce9f39b82fda6e44aa39ba32439bf56d9984a9f44df21a6bf366332fba41
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.1.2/bookstack-5.1.2.tgz
+    version: 5.1.2
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "moved the external-database path from a ct-install scenario to a cluster-free unittest (it cannot reach Ready without a live database); no user-facing chart change"
       artifacthub.io/license: MIT
@@ -565,6 +607,39 @@ entries:
   bookstack-file-exporter:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.21.0-0, the floor for the batch/v1 CronJob this chart renders by default)"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-07-16T04:21:08.146071579Z"
+    description: A Helm chart to run scheduled exports/backups of a BookStack instance's
+      pages, images, and attachments.
+    digest: f9a0045680485cea581979d1117061d3b81dd78c763737925a91682f575d7e0a
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - bookstack
+    - backup
+    - export
+    - wiki
+    - documentation
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack-file-exporter
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/homeylab/bookstack-file-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-1.0.2/bookstack-file-exporter-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      artifacthub.io/changes: |
         - kind: fixed
           description: "PVC storageClassName is now omitted when persistence.storageClass is unset (the default) so the cluster's default StorageClass provisions; previously it rendered storageClassName: \"\", which disables dynamic provisioning and left the Deployment-mode PVC Pending"
       artifacthub.io/license: MIT
@@ -684,6 +759,50 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-0.0.1/bookstack-file-exporter-0.0.1.tgz
     version: 0.0.1
   exportarr:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-07-16T04:21:08.26843598Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 2.0.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 6c7e0d5ea4d8aa6c65e6af87fa8efed0b450097c0bfec6167a10a01f086a212c
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-3.1.1/exportarr-3.1.1.tgz
+    version: 3.1.1
   - annotations:
       artifacthub.io/changes: |-
         - kind: changed
@@ -1240,6 +1359,38 @@ entries:
   pihole-exporter:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
+    apiVersion: v2
+    appVersion: v1.2.0
+    created: "2026-07-16T04:21:08.376739092Z"
+    description: A Helm Chart to deploy a Prometheus exporter for Pi-hole
+    digest: b7ff8b20366ce6a16f31c943d79c510f45e6705f02ba83ab907b9b4e95a19bf7
+    home: https://github.com/eko/pihole-exporter
+    keywords:
+    - pihole
+    - pi-hole
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: pihole-exporter
+    sources:
+    - https://github.com/eko/pihole-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/pihole-exporter-1.0.1/pihole-exporter-1.0.1.tgz
+    version: 1.0.1
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "POTENTIALLY BREAKING - hardened securityContext defaults now apply (runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem, drop ALL); override if you run a customized image"
         - kind: changed
@@ -1310,6 +1461,40 @@ entries:
   qbittorrent-exporter:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+        - kind: added
+          description: "added tests.enabled to toggle the helm test connection check (default true)"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
+    apiVersion: v2
+    appVersion: v2.0.1
+    created: "2026-07-16T04:21:08.471459534Z"
+    description: A Helm chart to export Prometheus metrics for qbittorrent.
+    digest: a36eee04dcadfcad9cbe888221f63eb70f2c73f5d6494188b4fd7a3974047626
+    home: https://github.com/martabal/qbittorrent-exporter
+    keywords:
+    - qbittorrent
+    - torrent
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: qbittorrent-exporter
+    sources:
+    - https://github.com/martabal/qbittorrent-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/qbittorrent-exporter-1.0.1/qbittorrent-exporter-1.0.1.tgz
+    version: 1.0.1
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "BREAKING - backing exporter swapped to martabal/qbittorrent-exporter (ghcr.io/martabal/qbittorrent-exporter, Go, the unmaintained caseyscarborough image is replaced); metric names/labels and the values schema change accordingly"
         - kind: changed
@@ -1368,6 +1553,38 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/qbittorrent-exporter-0.0.1/qbittorrent-exporter-0.0.1.tgz
     version: 0.0.1
   tdarr-exporter:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-07-16T04:21:08.595709084Z"
+    description: A Helm chart to export Prometheus metrics for Tdarr.
+    digest: 33804162770dd0768cc4a21df79ffe99c740effa685bebe03b0d2dbb305d6e70
+    home: https://github.com/homeylab/tdarr-exporter
+    keywords:
+    - tdarr
+    - transcode
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: tdarr-exporter
+    sources:
+    - https://github.com/homeylab/tdarr-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/tdarr-exporter-2.0.1/tdarr-exporter-2.0.1.tgz
+    version: 2.0.1
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
@@ -1520,6 +1737,40 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/tdarr-exporter-0.0.1/tdarr-exporter-0.0.1.tgz
     version: 0.0.1
   unpoller:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
+    apiVersion: v2
+    appVersion: v3.3.1
+    created: "2026-07-16T04:21:08.709401704Z"
+    description: unpoller for unifi controller metrics
+    digest: 22e57424c5811e41f4d5ea1f4f9813c72bcf88cb67708ab3f17f5ef5a8f49f80
+    home: https://unpoller.com
+    icon: https://unpoller.com/img/logo.png
+    keywords:
+    - unpoller
+    - unifi
+    - ubiquiti
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: unpoller
+    sources:
+    - https://github.com/unpoller/unpoller
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-4.0.1/unpoller-4.0.1.tgz
+    version: 4.0.1
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
@@ -1678,6 +1929,39 @@ entries:
   v-rising:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
+    apiVersion: v2
+    appVersion: "3.0"
+    created: "2026-07-16T04:21:08.817120516Z"
+    description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
+      server
+    digest: e830182cc566baa4f4842c89056e4ee6100b69e2e47d106df0737c0509e2765d
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - v-rising
+    - vrising
+    - game-server
+    - gaming
+    - dedicated-server
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: v-rising
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/TrueOsiris/docker-vrising
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/v-rising-1.0.2/v-rising-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      artifacthub.io/changes: |
         - kind: fixed
           description: "PVC storageClassName is now omitted when persistence.*.storageClass is unset (the default) so the cluster's default StorageClass provisions; previously it rendered storageClassName: \"\", which disables dynamic provisioning and left the PVCs Pending"
       artifacthub.io/license: MIT
@@ -1772,4 +2056,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-11T06:32:39.11576964Z"
+generated: "2026-07-16T04:21:08.817633489Z"
