@@ -1,0 +1,75 @@
+suite: qbittorrent-exporter HTTPRoute
+templates:
+  - templates/httproute.yaml
+release:
+  name: qbittorrent-exporter
+tests:
+  - it: does not render when disabled
+    set:
+      httproute.enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: generates a default backendRef rule to the Service when no rules are given
+    set:
+      httproute.enabled: true
+      httproute.parentRefs:
+        - name: traefik-gateway
+          namespace: traefik
+          sectionName: websecure
+      httproute.hostnames:
+        - qbittorrent-exporter.example.org
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: apiVersion, value: gateway.networking.k8s.io/v1 }
+      - equal: { path: kind, value: HTTPRoute }
+      - equal: { path: metadata.name, value: qbittorrent-exporter }
+      - equal: { path: "spec.parentRefs[0].name", value: traefik-gateway }
+      - equal: { path: "spec.parentRefs[0].sectionName", value: websecure }
+      - contains:
+          path: spec.hostnames
+          content: qbittorrent-exporter.example.org
+      - equal:
+          path: spec.rules[0].backendRefs[0].name
+          value: qbittorrent-exporter
+      - equal:
+          path: spec.rules[0].backendRefs[0].port
+          value: 8090
+  - it: uses explicit rules verbatim when provided
+    set:
+      httproute.enabled: true
+      httproute.parentRefs:
+        - name: traefik-gateway
+      httproute.rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /metrics
+          backendRefs:
+            - name: custom-backend
+              port: 9999
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].path.value
+          value: /metrics
+      - equal:
+          path: spec.rules[0].backendRefs[0].name
+          value: custom-backend
+      - equal:
+          path: spec.rules[0].backendRefs[0].port
+          value: 9999
+  - it: omits optional blocks when unset
+    set:
+      httproute.enabled: true
+    asserts:
+      - notExists: { path: metadata.annotations }
+      - notExists: { path: spec.parentRefs }
+      - notExists: { path: spec.hostnames }
+  - it: renders annotations when set
+    set:
+      httproute.enabled: true
+      httproute.annotations:
+        example.com/owner: platform
+    asserts:
+      - equal:
+          path: metadata.annotations["example.com/owner"]
+          value: platform
