@@ -21,3 +21,12 @@
 .idea/
 *.tmproj
 .vscode/
+
+# Test scaffolding — exercised from the repo, not shipped to chart consumers.
+# Anchored with a leading slash: a bare `tests/` would also match templates/tests/
+# and strip the `helm test` hooks out of the package.
+# `ct.yaml` sets use-helmignore, so edits here also don't count as a chart change
+# (no version bump / release for test-only edits). They are covered on the next
+# change to the chart itself.
+/ci/
+/tests/

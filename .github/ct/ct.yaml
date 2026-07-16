@@ -10,6 +10,11 @@ validate-maintainers: false
 # Fail a PR that changes a chart without bumping Chart.yaml version (chart-releaser
 # silently skips unbumped charts, so this gate prevents "shipped nothing" merges).
 check-version-increment: true
+# Respect each chart's .helmignore when deciding which charts changed. The .helmignore
+# files exclude ci/ and tests/, so test-only edits neither ship in the package nor force
+# a version bump + release. Tradeoff: a test-only edit gets no lint/unittest/install run
+# until the chart itself changes. Matches prometheus-community/helm-charts.
+use-helmignore: true
 # ct runs these as bare argv per changed chart (NO shell — no pipes). {{ .Path }} = chart dir.
 additional-commands:
   - "helm unittest {{ .Path }}"

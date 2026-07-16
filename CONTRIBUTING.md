@@ -153,11 +153,20 @@ helm test <release> -n <namespace>
 
 [`ci.yml`](.github/workflows/ci.yml) runs on every PR to `main`, driven by `ct` (chart-testing) — [`.github/ct/ct.yaml`](.github/ct/ct.yaml) is the single source of truth, mirrored locally by `task verify`. For each chart changed vs `main` (so the gate scales with your diff):
 
-1. **`ct lint`** — `helm lint` + yamllint + yamale schema + **`--check-version-increment`**: fails unless `Chart.yaml` `version` exceeds `main`'s, so any change under `charts/<chart>/` (incl. `ci/` and `tests/`) needs a version bump.
+1. **`ct lint`** — `helm lint` + yamllint + yamale schema + **`--check-version-increment`**: fails unless `Chart.yaml` `version` exceeds `main`'s, so a change under `charts/<chart>/` needs a version bump.
 2. **`helm unittest` + `kubeconform`** (via `additional-commands`).
 3. **`ct install`** on kind — installs each changed chart and waits for Ready (`nut-exporter` excluded, deprecated), catching failures the render checks miss (probes, image pull, PVC provisioning).
 
 The **`Lint and unit-test changed charts`** check is required via branch protection — a red gate blocks merge.
+
+### What counts as "changed" (`use-helmignore`)
+
+`ct.yaml` sets `use-helmignore: true`, and every chart's `.helmignore` excludes `/ci/` and `/tests/`. Those paths are test scaffolding: they are run *from the repo* and are not shipped to chart consumers. Two consequences:
+
+- **A test-only edit is not a chart change.** Touch only `ci/*-values.yaml` or `tests/*_test.yaml` and the chart drops out of `ct list-changed` — no version bump is demanded, and no release is published for scaffolding that consumers never receive.
+- **The flip side: that edit also gets no CI run.** No lint, no unittest, no `ct install` until the chart itself changes. A broken scenario can sit unnoticed. If you edit a scenario on its own and want it exercised now, run `task verify APP=<chart>` / `task test APP=<chart>` locally.
+
+Both patterns are anchored (`/ci/`, not `ci/`) on purpose: an unanchored `tests/` also matches `templates/tests/` and would strip the `helm test` hooks out of the published package.
 
 ## Versioning and release
 
