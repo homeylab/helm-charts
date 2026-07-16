@@ -29,7 +29,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 3.1.1
+version: 3.1.2
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -46,11 +46,11 @@ kubeVersion: ">=1.19.0-0"
 # ref: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
 dependencies:
 - name: qbittorrent-exporter
-  version: "1.0.0"
+  version: "1.0.1"
   condition: qbittorrent-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
 - name: tdarr-exporter
-  version: "2.0.0"
+  version: "2.0.1"
   condition: tdarr-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
 
@@ -63,5 +63,7 @@ annotations:
     - name: exportarr
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
-    - kind: added
-      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+    - kind: changed
+      description: "qbittorrent-exporter subchart dependency bumped 1.0.0 -> 1.0.1"
+    - kind: changed
+      description: "tdarr-exporter subchart dependency bumped 2.0.0 -> 2.0.1"
