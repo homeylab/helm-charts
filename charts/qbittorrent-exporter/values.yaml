@@ -83,7 +83,7 @@ metrics:
       # - alert: QbittorrentExporterTargetDown
       #   annotations:
       #     summary: qbittorrent-exporter metrics endpoint is down.
-      #     description: Prometheus cannot scrape qbittorrent-exporter ({{ "{{ $labels.instance }}" }}).
+      #     description: Prometheus cannot scrape qbittorrent-exporter ({{ $labels.instance }}).
       #   expr: up{job=~".*qbittorrent-exporter.*"} == 0
       #   for: 5m
       #   labels:

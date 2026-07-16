@@ -34,6 +34,19 @@ tests:
       - equal:
           path: spec.rules[0].backendRefs[0].port
           value: 8090
+  - it: points the generated backendRef at the Service, reading name and port from values
+    set:
+      httproute.enabled: true
+      fullnameOverride: my-exporter
+      service.port: 9999
+    asserts:
+      - equal: { path: metadata.name, value: my-exporter }
+      - equal:
+          path: spec.rules[0].backendRefs[0].name
+          value: my-exporter
+      - equal:
+          path: spec.rules[0].backendRefs[0].port
+          value: 9999
   - it: uses explicit rules verbatim when provided
     set:
       httproute.enabled: true
