@@ -208,6 +208,7 @@ This version hardens the chart and standardizes its schema to match the other ho
 | startupProbe.periodSeconds | int | `5` |  |
 | startupProbe.successThreshold | int | `1` |  |
 | startupProbe.timeoutSeconds | int | `2` |  |
+| tests.enabled | bool | `true` | run the `helm test` connection check (set false to skip rendering the check Pod) |
 | tests.image.pullPolicy | string | `"IfNotPresent"` | pull policy for the `helm test` connection-check image |
 | tests.image.registry | string | `"docker.io"` | registry for the `helm test` connection-check image |
 | tests.image.repository | string | `"busybox"` | repository for the `helm test` connection-check image |

@@ -11,8 +11,10 @@ image:
   # -- overrides the image tag whose default is the chart appVersion
   tag: ""
 
-## images for the `helm test` connection check
+## the `helm test` connection check, and the image it runs
 tests:
+  # -- run the `helm test` connection check (set false to skip rendering the check Pod)
+  enabled: true
   image:
     # -- registry for the `helm test` connection-check image
     registry: docker.io
