@@ -2,7 +2,7 @@ suite: pihole-exporter helm test connection check
 templates:
   - templates/tests/test-connection.yaml
 release:
-  name: pihole-exporter
+  name: rel
 tests:
   - it: renders the test-connection pod by default
     asserts:
@@ -22,7 +22,7 @@ tests:
           value: IfNotPresent
       - equal:
           path: spec.containers[0].args[0]
-          value: "pihole-exporter:9617/metrics"
+          value: "rel-pihole-exporter:9617/metrics"
   - it: renders nothing when tests.enabled is false
     set:
       tests.enabled: false
@@ -45,4 +45,4 @@ tests:
           value: Always
       - equal:
           path: spec.containers[0].args[0]
-          value: "pihole-exporter:9617/healthz"
+          value: "rel-pihole-exporter:9617/healthz"
