@@ -1951,6 +1951,48 @@ entries:
   unpoller:
   - annotations:
       artifacthub.io/changes: |
+        - kind: fixed
+          description: "the PrometheusRule now omits the empty group entirely when metrics.prometheusRule.rules is unset, instead of rendering an always-present group with no rules"
+        - kind: fixed
+          description: "un-escaped the example alert in metrics.prometheusRule.rules; values.yaml is never Go-templated so the literal {{ $labels.instance }} form is required for the commented example to be usable as-is"
+        - kind: added
+          description: "added tests.enabled to toggle the helm test connection check (default true)"
+        - kind: added
+          description: "added podLabels to set extra labels on the pod template"
+        - kind: added
+          description: "added unit test coverage for the PrometheusRule, ServiceMonitor, HTTPRoute and helm test templates"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
+    apiVersion: v2
+    appVersion: v3.3.1
+    created: "2026-07-20T06:06:18.205325607Z"
+    description: unpoller for unifi controller metrics
+    digest: 12399f2f2ca5faa7e95718ca893c5e603e001e3af2753aa58a90b8cc0c8a9768
+    home: https://unpoller.com
+    icon: https://unpoller.com/img/logo.png
+    keywords:
+    - unpoller
+    - unifi
+    - ubiquiti
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: unpoller
+    sources:
+    - https://github.com/unpoller/unpoller
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-4.1.0/unpoller-4.1.0.tgz
+    version: 4.1.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
       artifacthub.io/license: MIT
@@ -2268,4 +2310,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-20T05:51:39.694430172Z"
+generated: "2026-07-20T06:06:18.205529518Z"
