@@ -4,6 +4,56 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: added
+          description: "tests.enabled to toggle the helm test connection-check Pod"
+        - kind: added
+          description: "podLabels for the Deployment pod template"
+        - kind: changed
+          description: "harmonized persistence.storageClass to the \"-\" sentinel (disables dynamic provisioning); default behavior unchanged, an unset storageClass still omits storageClassName entirely"
+        - kind: changed
+          description: "re-pinned the bookstack-file-exporter subchart dependency from 1.0.0 to 1.0.2"
+        - kind: added
+          description: "unit test coverage for HTTPRoute, the helm test connection-check Pod, and PVC storageClass rendering"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-07-20T06:18:16.665852139Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.2
+    description: bookstack documentation platform
+    digest: c8f5ae1b612f46c06312613d4e1aa6089dba7edb986b08472fde7787d4e7704b
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.2.0/bookstack-5.2.0.tgz
+    version: 5.2.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
           description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.21.0-0, the floor required by the optional bookstack-file-exporter subchart's batch/v1 CronJob)"
       artifacthub.io/license: MIT
       artifacthub.io/links: |
@@ -2310,4 +2360,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-20T06:06:18.205529518Z"
+generated: "2026-07-20T06:18:16.666402199Z"
