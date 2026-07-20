@@ -21,6 +21,9 @@ spec:
       {{- end }}
       labels:
         {{- include "bookstack.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

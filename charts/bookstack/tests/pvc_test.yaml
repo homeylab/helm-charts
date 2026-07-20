@@ -1,0 +1,26 @@
+suite: bookstack PVC storageClass harmonization
+templates:
+  - templates/pvc.yaml
+release:
+  name: rel
+tests:
+  - it: omits storageClassName when storageClass is unset (uses cluster default)
+    set:
+      persistence.storageClass: ""
+    asserts:
+      - notExists:
+          path: spec.storageClassName
+  - it: sets storageClassName to empty string when storageClass is "-" (disables dynamic provisioning)
+    set:
+      persistence.storageClass: "-"
+    asserts:
+      - equal:
+          path: spec.storageClassName
+          value: ""
+  - it: sets storageClassName to the named class
+    set:
+      persistence.storageClass: nfs-provisioner
+    asserts:
+      - equal:
+          path: spec.storageClassName
+          value: nfs-provisioner
