@@ -15,6 +15,8 @@ image:
 
 ## images for the `helm test` connection check
 tests:
+  # -- enable/disable the `helm test` connection-check Pod
+  enabled: true
   image:
     # -- registry for the `helm test` connection-check image
     registry: docker.io
@@ -40,6 +42,8 @@ fullnameOverride: ""
 
 # -- extra pod annotations
 podAnnotations: {}
+# -- extra pod labels
+podLabels: {}
 
 service:
   # -- set the service type
@@ -90,7 +94,7 @@ metrics:
       # - alert: UnpollerTargetDown
       #   annotations:
       #     summary: unpoller metrics endpoint is down.
-      #     description: Prometheus cannot scrape unpoller ({{ "{{ $labels.instance }}" }}).
+      #     description: Prometheus cannot scrape unpoller ({{ $labels.instance }}).
       #   expr: up{job=~".*unpoller.*"} == 0
       #   for: 5m
       #   labels:

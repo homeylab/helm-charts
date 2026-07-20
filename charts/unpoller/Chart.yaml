@@ -31,7 +31,7 @@ maintainers:
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 ## Chart Version
-version: 4.0.1
+version: 4.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -51,5 +51,13 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
   artifacthub.io/changes: |
+    - kind: fixed
+      description: "the PrometheusRule now omits the empty group entirely when metrics.prometheusRule.rules is unset, instead of rendering an always-present group with no rules"
+    - kind: fixed
+      description: "un-escaped the example alert in metrics.prometheusRule.rules; values.yaml is never Go-templated so the literal {{ $labels.instance }} form is required for the commented example to be usable as-is"
     - kind: added
-      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+      description: "added tests.enabled to toggle the helm test connection check (default true)"
+    - kind: added
+      description: "added podLabels to set extra labels on the pod template"
+    - kind: added
+      description: "added unit test coverage for the PrometheusRule, ServiceMonitor, HTTPRoute and helm test templates"
