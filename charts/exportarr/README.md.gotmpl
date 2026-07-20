@@ -18,6 +18,7 @@ This allows you to consolidate different `Arr`-related exporters into a single h
 - [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Upgrade](#upgrade)
+  - [Migrating to 4.0.0](#migrating-to-400)
   - [Migrating to 3.0.0](#migrating-to-300)
 - [Configuration Options](#configuration-options)
 - [Additional Exporters](#additional-exporters)
@@ -67,6 +68,18 @@ exportarr:
       enabled: true
       additionalLabels:
         app: exportarr
+    # optional: render a single umbrella-wide PrometheusRule (requires the Prometheus Operator CRD)
+    prometheusRule:
+      enabled: true
+      rules:
+        - alert: ExportarrTargetDown
+          annotations:
+            summary: exportarr metrics endpoint is down.
+            description: Prometheus cannot scrape exportarr ({{ "{{ $labels.instance }}" }}).
+          expr: up{job=~".*exportarr.*"} == 0
+          for: 5m
+          labels:
+            severity: warning
   apps:
     radarr:
     - name: main
@@ -122,9 +135,36 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `3.1.X` | `4.0.0` | BREAKING: `exportarr.image` schema renamed (`repository` -> `registry`, `name` -> `repository`) and the `helm test` values moved from `exportarr.testImage.*` to `exportarr.tests.image.*` (and `testImage.path` -> `tests.path`). Also implements the previously-inert PrometheusRule and adds `exportarr.tests.enabled` + `exportarr.podLabels`; optional subcharts bumped (qbittorrent-exporter `1.0.1` -> `1.1.0`, tdarr-exporter `2.0.1` -> `2.1.0`). **Read the [Migrating to 4.0.0](#migrating-to-400) section before upgrading.** |
 | `3.0.X` | `3.1.0` | Optional `tdarr-exporter` subchart bumped `1.2.0` -> `2.0.0` (hardened `securityContext`, standardized image schema, `appVersion` -> upstream `v3.0.0`); passthrough value keys are unchanged. **Only affects installs with `tdarr-exporter.enabled`** — see the subchart's [Migrating to 2.0.0](https://github.com/homeylab/helm-charts/blob/main/charts/tdarr-exporter/README.md#migrating-to-200) notes. |
 | `2.1.X` | `3.0.0` | Backing `qbittorrent-exporter` subchart swapped image/schema, hardened `securityContext` on all exportarr instances, inline `apiKey` now renders into a chart-managed Secret. **Read the [Migrating to 3.0.0](#migrating-to-300) section in full before upgrading.** |
 | `1.X.X` | `2.0.0` | `exportarr.apps.<app>` (radarr/sonarr/etc.) changed from an object to a list, allowing multiple instances of the same `Arr` app (e.g. `radarr1`, `radarr2`). `exportarr.testCurlImage` was renamed to `exportarr.testImage`. |
+
+### Migrating to 4.0.0
+This release standardizes the image schema and the `helm test` values to match the other charts in this repo, and implements the previously-inert `prometheusRule` block. Only the value renames are breaking — if you never overrode the image or test-image values, the defaults are unchanged and no action is needed.
+
+- **`exportarr.image` schema renamed (breaking).** The old block stored the registry in `repository` and the image path in `name`; both are renamed to the standard scheme. Move any overrides:
+
+  | Old | New |
+  | --- | --- |
+  | `exportarr.image.repository` (held the registry, e.g. `ghcr.io`) | `exportarr.image.registry` |
+  | `exportarr.image.name` (held the repository, e.g. `onedr0p/exportarr`) | `exportarr.image.repository` |
+
+- **`exportarr.testImage.*` moved to `exportarr.tests.image.*` (breaking).** Move any overrides:
+
+  | Old | New |
+  | --- | --- |
+  | `exportarr.testImage.repository` | `exportarr.tests.image.registry` |
+  | `exportarr.testImage.name` | `exportarr.tests.image.repository` |
+  | `exportarr.testImage.tag` | `exportarr.tests.image.tag` |
+  | `exportarr.testImage.pullPolicy` | `exportarr.tests.image.pullPolicy` |
+  | `exportarr.testImage.path` | `exportarr.tests.path` |
+
+  The old `testImage:` keys are no longer read. Helm does not reject unknown values, so a stale block is silently ignored rather than erroring — remove it.
+- **PrometheusRule now implemented (additive).** `exportarr.metrics.prometheusRule` (`enabled`/`labels`/`rules`) previously rendered nothing; it now renders a single umbrella-wide `PrometheusRule`. Default `enabled: false` — no change unless you opt in.
+- **`exportarr.tests.enabled` added (additive).** Toggles the `helm test` connection-check Pod (default `true`). `exportarr.tests.image.pullPolicy` is now honoured (it was previously ignored, so the Pod fell back to Kubernetes' default pull policy).
+- **`exportarr.podLabels` added (additive).** Optional labels applied to all exportarr pods (default `{}`).
+- **Optional subcharts bumped (only if enabled).** `qbittorrent-exporter` `1.0.1` -> `1.1.0` and `tdarr-exporter` `2.0.1` -> `2.1.0`, both adding their own PrometheusRule support. See each subchart's README.
 
 ### Migrating to 3.0.0
 This version hardens the umbrella chart and swaps the backing image for the optional `qbittorrent-exporter` subchart. Review all items before upgrading.

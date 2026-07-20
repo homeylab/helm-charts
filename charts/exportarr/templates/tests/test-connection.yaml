@@ -1,6 +1,6 @@
 {{- range $instance_key, $instance_val := .Values.exportarr.apps }}
 {{- range $app := $instance_val }}
-{{- if $app.enabled }}
+{{- if and $app.enabled $.Values.exportarr.tests.enabled }}
 {{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}
 apiVersion: v1
 kind: Pod
@@ -14,9 +14,10 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: "{{ $.Values.exportarr.testImage.repository }}/{{ $.Values.exportarr.testImage.name }}:{{ $.Values.exportarr.testImage.tag }}"
+      image: "{{ $.Values.exportarr.tests.image.registry }}/{{ $.Values.exportarr.tests.image.repository }}:{{ $.Values.exportarr.tests.image.tag }}"
+      imagePullPolicy: {{ $.Values.exportarr.tests.image.pullPolicy }}
       command: ['wget']
-      args: ['{{ $appName }}:{{ $.Values.exportarr.service.port }}{{ $.Values.exportarr.testImage.path}}']
+      args: ['{{ $appName }}:{{ $.Values.exportarr.service.port }}{{ $.Values.exportarr.tests.path }}']
   restartPolicy: Never
 ---
 {{- end }}

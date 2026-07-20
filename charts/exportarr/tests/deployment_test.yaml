@@ -4,7 +4,7 @@ templates:
 release:
   name: ex
 tests:
-  - it: renders the container image as registry/name:tag and metrics containerPort
+  - it: renders the container image as registry/repository:tag and metrics containerPort
     set:
       exportarr.apps.radarr[0]:
         name: main
@@ -17,6 +17,20 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].ports[0].containerPort
           value: 9707
+
+  - it: composes the image from the renamed registry/repository/tag keys
+    set:
+      exportarr.image.registry: quay.io
+      exportarr.image.repository: acme/exportarr
+      exportarr.image.tag: "v9.9.9"
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/acme/exportarr:v9.9.9
 
   - it: applies hardened pod and container securityContext defaults
     set:

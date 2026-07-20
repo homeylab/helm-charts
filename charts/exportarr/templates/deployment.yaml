@@ -55,6 +55,9 @@ spec:
       labels:
         {{- include "exportarr.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $appName }}
+        {{- with $.Values.exportarr.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with $.Values.exportarr.imagePullSecrets }}
       imagePullSecrets:
@@ -67,7 +70,7 @@ spec:
         - name: {{ $appName }}
           securityContext:
             {{- toYaml $.Values.exportarr.securityContext | nindent 12 }}
-          image: "{{ $.Values.exportarr.image.repository }}/{{ $.Values.exportarr.image.name }}:{{ $.Values.exportarr.image.tag | default $.Chart.AppVersion }}"
+          image: "{{ $.Values.exportarr.image.registry }}/{{ $.Values.exportarr.image.repository }}:{{ $.Values.exportarr.image.tag | default $.Chart.AppVersion }}"
           imagePullPolicy: {{ $.Values.exportarr.image.pullPolicy }}
           ports:
             - name: {{ $.Values.exportarr.service.name }}

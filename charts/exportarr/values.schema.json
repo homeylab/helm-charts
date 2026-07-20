@@ -323,7 +323,7 @@
                 "image": {
                     "type": "object",
                     "properties": {
-                        "name": {
+                        "registry": {
                             "type": "string"
                         },
                         "pullPolicy": {
@@ -445,6 +445,9 @@
                 "podAnnotations": {
                     "type": "object"
                 },
+                "podLabels": {
+                    "type": "object"
+                },
                 "podSecurityContext": {
                     "type": "object"
                 },
@@ -547,23 +550,31 @@
                         }
                     }
                 },
-                "testImage": {
+                "tests": {
                     "type": "object",
                     "properties": {
-                        "name": {
-                            "type": "string"
+                        "enabled": {
+                            "type": "boolean"
                         },
                         "path": {
                             "type": "string"
                         },
-                        "pullPolicy": {
-                            "type": "string"
-                        },
-                        "repository": {
-                            "type": "string"
-                        },
-                        "tag": {
-                            "type": "string"
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                },
+                                "pullPolicy": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 },
