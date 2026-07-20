@@ -2,7 +2,7 @@ suite: unpoller deployment wiring
 templates:
   - templates/deployment.yaml
 release:
-  name: unpoller
+  name: rel
 tests:
   - it: renders the container image as registry/repository:tag
     asserts:
@@ -15,7 +15,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
-          value: unpoller
+          value: rel-unpoller
   - it: applies hardened pod and container securityContext defaults (UID 65532)
     asserts:
       - equal: { path: "spec.template.spec.securityContext.runAsNonRoot", value: true }
@@ -33,7 +33,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
-          value: unpoller
+          value: rel-unpoller
   - it: wires envFrom to existingSecret when set, taking precedence over the chart Secret
     set:
       settings.unifi.auth.user: admin
@@ -86,7 +86,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
-          value: unpoller
+          value: rel-unpoller
       - equal:
           path: spec.template.spec.containers[0].envFrom[1].secretRef.name
           value: unpoller-controller-1
@@ -111,7 +111,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
-          value: unpoller
+          value: rel-unpoller
   - it: never renders UP_UNIFI_CONTROLLER_0_PASS as a plaintext env value
     set:
       settings.unifi.auth.user: admin

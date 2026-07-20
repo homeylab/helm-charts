@@ -2,13 +2,19 @@ suite: unpoller PrometheusRule
 templates:
   - templates/prometheusrule.yaml
 release:
-  name: unpoller
+  name: rel
 tests:
   - it: does not render when disabled
     set:
       metrics.prometheusRule.enabled: false
     asserts:
       - hasDocuments: { count: 0 }
+  - it: omits groups entirely when enabled with no rules
+    set:
+      metrics.prometheusRule.enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - notExists: { path: spec.groups }
   - it: renders with one rule when enabled
     set:
       metrics.prometheusRule.enabled: true
@@ -24,6 +30,12 @@ tests:
       - hasDocuments: { count: 1 }
       - equal: { path: apiVersion, value: monitoring.coreos.com/v1 }
       - equal: { path: kind, value: PrometheusRule }
+      # release name deliberately does not contain the chart name, so fullname
+      # (metadata.name) and name (the group) render differently and cannot be swapped
+      - equal: { path: metadata.name, value: rel-unpoller }
+      - equal:
+          path: spec.groups[0].name
+          value: unpoller
       - equal:
           path: spec.groups[0].rules[0].alert
           value: UnpollerTargetDown
@@ -42,3 +54,6 @@ tests:
       - equal:
           path: metadata.labels.release
           value: kube-prometheus-stack
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: unpoller
