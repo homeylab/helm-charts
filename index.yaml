@@ -761,6 +761,62 @@ entries:
   exportarr:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "PrometheusRule support via exportarr.metrics.prometheusRule (enabled/labels/rules); previously a dead values block"
+        - kind: changed
+          description: "BREAKING: image schema renamed - exportarr.image.repository -> exportarr.image.registry and exportarr.image.name -> exportarr.image.repository; see the Migrating to 4.0.0 section"
+        - kind: changed
+          description: "BREAKING: helm test values moved from exportarr.testImage.* to exportarr.tests.image.* (and testImage.path to exportarr.tests.path); see the Migrating to 4.0.0 section"
+        - kind: added
+          description: "exportarr.tests.enabled to toggle the helm test connection check, and exportarr.tests.image.pullPolicy is now honoured"
+        - kind: added
+          description: "exportarr.podLabels to add labels to all exportarr pods"
+        - kind: changed
+          description: "qbittorrent-exporter subchart dependency bumped 1.0.1 -> 1.1.0"
+        - kind: changed
+          description: "tdarr-exporter subchart dependency bumped 2.0.1 -> 2.1.0"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-07-20T05:51:39.693975151Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.1.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 2.1.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 4b608bae0ddb80690ff6cbe9a3fddd8cf55a0880e967bf49b380a7e503a87ffc
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-4.0.0/exportarr-4.0.0.tgz
+    version: 4.0.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "qbittorrent-exporter subchart dependency bumped 1.0.0 -> 1.0.1"
         - kind: changed
@@ -2212,4 +2268,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-20T05:28:03.939798117Z"
+generated: "2026-07-20T05:51:39.694430172Z"
