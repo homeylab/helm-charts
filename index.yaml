@@ -1405,6 +1405,46 @@ entries:
   pihole-exporter:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: "BREAKING: renamed the helm test values from testConnImage.* to tests.image.* (and testConnImage.path to tests.path); see the Migrating to 2.0.0 section"
+        - kind: added
+          description: "implemented the metrics.prometheusRule block, which previously configured nothing; set metrics.prometheusRule.enabled to render a PrometheusRule"
+        - kind: added
+          description: "added tests.enabled to toggle the helm test connection check (default true)"
+        - kind: fixed
+          description: "the helm test image pull policy is now applied; tests.image.pullPolicy was previously ignored"
+        - kind: added
+          description: "added unit test coverage for the PrometheusRule, ServiceMonitor, HTTPRoute and helm test templates"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
+    apiVersion: v2
+    appVersion: v1.2.0
+    created: "2026-07-20T05:28:03.939257323Z"
+    description: A Helm Chart to deploy a Prometheus exporter for Pi-hole
+    digest: ec0e79489da9e4bf4a16b15d425f8c568a19738561b84f0968c11e894861830b
+    home: https://github.com/eko/pihole-exporter
+    keywords:
+    - pihole
+    - pi-hole
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: pihole-exporter
+    sources:
+    - https://github.com/eko/pihole-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/pihole-exporter-2.0.0/pihole-exporter-2.0.0.tgz
+    version: 2.0.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
       artifacthub.io/license: MIT
@@ -2172,4 +2212,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-20T05:22:32.249721071Z"
+generated: "2026-07-20T05:28:03.939798117Z"
