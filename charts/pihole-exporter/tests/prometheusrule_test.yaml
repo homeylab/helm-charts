@@ -1,0 +1,59 @@
+suite: pihole-exporter PrometheusRule
+templates:
+  - templates/prometheusrule.yaml
+release:
+  name: rel
+tests:
+  - it: does not render when disabled
+    set:
+      metrics.prometheusRule.enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
+  - it: omits groups entirely when enabled with no rules
+    set:
+      metrics.prometheusRule.enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - notExists: { path: spec.groups }
+  - it: renders with one rule when enabled
+    set:
+      metrics.prometheusRule.enabled: true
+      metrics.prometheusRule.rules:
+        - alert: PiholeExporterTargetDown
+          annotations:
+            summary: pihole-exporter metrics endpoint is down.
+          expr: up{job=~".*pihole-exporter.*"} == 0
+          for: 5m
+          labels:
+            severity: warning
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: apiVersion, value: monitoring.coreos.com/v1 }
+      - equal: { path: kind, value: PrometheusRule }
+      # release name deliberately does not contain the chart name, so fullname
+      # (metadata.name) and name (the group) render differently and cannot be swapped
+      - equal: { path: metadata.name, value: rel-pihole-exporter }
+      - equal:
+          path: spec.groups[0].name
+          value: pihole-exporter
+      - equal:
+          path: spec.groups[0].rules[0].alert
+          value: PiholeExporterTargetDown
+      - equal:
+          path: spec.groups[0].rules[0].expr
+          value: up{job=~".*pihole-exporter.*"} == 0
+  - it: merges custom labels into metadata labels
+    set:
+      metrics.prometheusRule.enabled: true
+      metrics.prometheusRule.labels:
+        release: kube-prometheus-stack
+      metrics.prometheusRule.rules:
+        - alert: PiholeExporterTargetDown
+          expr: up{job=~".*pihole-exporter.*"} == 0
+    asserts:
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus-stack
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: pihole-exporter

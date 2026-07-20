@@ -1,0 +1,48 @@
+suite: pihole-exporter helm test connection check
+templates:
+  - templates/tests/test-connection.yaml
+release:
+  name: rel
+tests:
+  - it: renders the test-connection pod by default
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: Pod
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: test
+      - equal:
+          path: spec.containers[0].image
+          value: "docker.io/busybox:1.36.1"
+      - equal:
+          path: spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: spec.containers[0].args[0]
+          value: "rel-pihole-exporter:9617/metrics"
+  - it: renders nothing when tests.enabled is false
+    set:
+      tests.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: honours overrides of the test image and path
+    set:
+      tests.image.registry: ghcr.io
+      tests.image.repository: custom/wget
+      tests.image.tag: "2.0"
+      tests.image.pullPolicy: Always
+      tests.path: /healthz
+    asserts:
+      - equal:
+          path: spec.containers[0].image
+          value: "ghcr.io/custom/wget:2.0"
+      - equal:
+          path: spec.containers[0].imagePullPolicy
+          value: Always
+      - equal:
+          path: spec.containers[0].args[0]
+          value: "rel-pihole-exporter:9617/healthz"
