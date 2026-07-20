@@ -1,0 +1,18 @@
+{{- if .Values.metrics.prometheusRule.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "tdarr-exporter.fullname" . }}
+  labels:
+    {{- include "tdarr-exporter.labels" . | nindent 4 }}
+    {{- with .Values.metrics.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with .Values.metrics.prometheusRule.rules }}
+  groups:
+    - name: {{ include "tdarr-exporter.name" $ }}
+      rules:
+        {{- toYaml . | nindent 8 }}
+  {{- end }}
+{{- end }}

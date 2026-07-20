@@ -66,6 +66,20 @@ metrics:
   enabled: true
   serviceMonitor:
     enabled: true
+  ## Optional alerting rules (requires the Prometheus Operator CRD)
+  # prometheusRule:
+  #   enabled: true
+  #   ## labels your Prometheus ruleSelector matches on
+  #   labels:
+  #     release: kube-prometheus-stack
+  #   rules:
+  #     - alert: QbittorrentExporterTargetDown
+  #       annotations:
+  #         summary: qbittorrent-exporter metrics endpoint is down.
+  #       expr: up{job=~".*qbittorrent-exporter.*"} == 0
+  #       for: 5m
+  #       labels:
+  #         severity: warning
 
 ## Alternative to ingress - Gateway API HTTPRoute (chart does NOT create the Gateway)
 # httproute:
