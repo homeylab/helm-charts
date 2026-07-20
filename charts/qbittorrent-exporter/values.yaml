@@ -73,14 +73,21 @@ metrics:
     relabelings: []
     metricRelabelings: []
   ## Enable and configure Prometheus Rules for the chart under this key.
-  ## not yet implemented
   prometheusRule:
-    # -- enable/disable prometheusRule
+    # -- enable a PrometheusRule (requires the Prometheus Operator CRD)
     enabled: false
-    # -- set labels for prometheusRule
+    # -- additional labels for the PrometheusRule (e.g. to match your Prometheus ruleSelector)
     labels: {}
-    # -- Configure prometheusRule rules for the chart
+    # -- alerting/recording rules rendered under a single group
     rules: []
+      # - alert: QbittorrentExporterTargetDown
+      #   annotations:
+      #     summary: qbittorrent-exporter metrics endpoint is down.
+      #     description: Prometheus cannot scrape qbittorrent-exporter ({{ $labels.instance }}).
+      #   expr: up{job=~".*qbittorrent-exporter.*"} == 0
+      #   for: 5m
+      #   labels:
+      #     severity: warning
 
 ## provide settings for exporter
 ## ref: https://github.com/martabal/qbittorrent-exporter#parameters
