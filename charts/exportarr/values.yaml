@@ -4,22 +4,30 @@
 exportarr:
   ## base image used for all exportarr instances
   image:
-    # -- image repository registry
-    repository: ghcr.io
-    # -- image repository name
-    name: onedr0p/exportarr
+    # -- image registry
+    registry: ghcr.io
+    # -- image repository
+    repository: onedr0p/exportarr
     # -- image pull policy
     pullPolicy: IfNotPresent
     # -- overrides the image tag whose default is the chart appVersion
     tag: ""
 
-  ## set image for post install helm tests
-  testImage:
-    repository: docker.io
-    name: busybox
-    tag: "1.36.1"
-    pullPolicy: IfNotPresent
+  ## post-install `helm test` connection check
+  tests:
+    # -- enable/disable the `helm test` connection-check Pod
+    enabled: true
+    # -- path probed on each exportarr instance during the connection check
     path: /healthz
+    image:
+      # -- registry for the `helm test` connection-check image
+      registry: docker.io
+      # -- repository for the `helm test` connection-check image
+      repository: busybox
+      # -- tag for the `helm test` connection-check image
+      tag: "1.36.1"
+      # -- pull policy for the `helm test` connection-check image
+      pullPolicy: IfNotPresent
 
   ## update strategy for newer versions
   updateStrategy:
@@ -70,24 +78,22 @@ exportarr:
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
       relabelings: []
       metricRelabelings: []
-    ## Enable and configure Prometheus Rules for the chart under this key.
-    ## not yet implemented
+    ## Enable and configure a PrometheusRule for the whole umbrella under this key.
     prometheusRule:
-      # -- enable/disable prometheusRule
+      # -- enable a PrometheusRule (requires the Prometheus Operator CRD)
       enabled: false
-      # -- set labels for prometheusRule
+      # -- additional labels for the PrometheusRule (e.g. to match your Prometheus ruleSelector)
       labels: {}
-      # -- Configure additionial rules for the chart under this key.
+      # -- alerting/recording rules rendered under a single group
       rules: []
-        # - alert: UpsStatusUnknown
+        # - alert: ExportarrTargetDown
         #   annotations:
-        #     description: UPS {{ "{{ $labels.ups }}" }} is reporting a status of unknown.
-        #     summary: UPS status unknown.
-        #   expr: |
-        #     nut_status == 0
-        #   for: 10s
+        #     summary: exportarr metrics endpoint is down.
+        #     description: Prometheus cannot scrape exportarr ({{ $labels.instance }}).
+        #   expr: up{job=~".*exportarr.*"} == 0
+        #   for: 5m
         #   labels:
-        #     severity: critical
+        #     severity: warning
 
   ### exportarr configuration per instance/app ###
   # Use list format within keys for instances of each type, keep keys static for runtime args
@@ -260,7 +266,11 @@ exportarr:
   #   readOnly: true
 
 
+  # -- annotations added to all exportarr pods
   podAnnotations: {}
+
+  # -- labels added to all exportarr pods
+  podLabels: {}
 
   # -- pod-level security context applied to all exportarr instances
   podSecurityContext:
