@@ -30,7 +30,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 5.1.2
+version: 5.2.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -53,7 +53,7 @@ dependencies:
   condition: mariadb.enabled
   repository: "oci://registry-1.docker.io/cloudpirates"
 - name: bookstack-file-exporter
-  version: "1.0.0"
+  version: "1.0.2"
   condition: bookstack-file-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
 
@@ -64,4 +64,12 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
     - kind: added
-      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.21.0-0, the floor required by the optional bookstack-file-exporter subchart's batch/v1 CronJob)"
+      description: "tests.enabled to toggle the helm test connection-check Pod"
+    - kind: added
+      description: "podLabels for the Deployment pod template"
+    - kind: changed
+      description: "harmonized persistence.storageClass to the \"-\" sentinel (disables dynamic provisioning); default behavior unchanged, an unset storageClass still omits storageClassName entirely"
+    - kind: changed
+      description: "re-pinned the bookstack-file-exporter subchart dependency from 1.0.0 to 1.0.2"
+    - kind: added
+      description: "unit test coverage for HTTPRoute, the helm test connection-check Pod, and PVC storageClass rendering"

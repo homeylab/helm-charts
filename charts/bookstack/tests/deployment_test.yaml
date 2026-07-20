@@ -2,7 +2,7 @@ suite: deployment wiring
 templates:
   - templates/deployment.yaml
 release:
-  name: bookstack
+  name: rel
 tests:
   - it: uses the lscr.io image ref
     asserts:
@@ -13,7 +13,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].secretRef.name
-          value: bookstack
+          value: rel-bookstack
   - it: envFrom targets existingSecret when set
     set:
       existingSecret: my-secret
@@ -39,10 +39,10 @@ tests:
       - contains: { path: "spec.template.spec.containers[0].env", content: { name: DB_HOST, value: "mariadb.example.svc.cluster.local" } }
   - it: DB_HOST falls back to the release-derived mariadb host when config.dbHost is unset
     release:
-      name: bookstack
-      namespace: bookstack-ns
+      name: rel
+      namespace: rel-ns
     asserts:
-      - contains: { path: "spec.template.spec.containers[0].env", content: { name: DB_HOST, value: "bookstack-mariadb.bookstack-ns.svc.cluster.local" } }
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: DB_HOST, value: "rel-mariadb.rel-ns.svc.cluster.local" } }
   - it: omits linuxserver env when linuxserver.enabled is false
     set:
       linuxserver.enabled: false

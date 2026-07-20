@@ -19,6 +19,8 @@ image:
 ## @section Testing
 ## post-install `helm test` connection check
 tests:
+  # -- enable/disable the `helm test` connection-check Pod
+  enabled: true
   image:
     # -- registry for the `helm test` connection-check image
     registry: docker.io
@@ -51,6 +53,8 @@ serviceAccount:
   name: ""
 
 podAnnotations: {}
+# -- extra pod labels
+podLabels: {}
 
 ## Pod-level security context.
 ## NOTE: the default linuxserver.io image boots as root (s6-overlay init chowns
@@ -208,7 +212,13 @@ httproute:
 persistence:
   # -- enable a PVC for bookstack application data
   enabled: true
-  # -- storage class for the PVC; empty uses the cluster default
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # -- storage class for the PVC; empty uses the cluster default, `-` disables dynamic provisioning
   storageClass: ""
   # -- size of the PVC
   size: 5Gi
