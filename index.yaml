@@ -1508,6 +1508,40 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: added
+          description: "implemented the metrics.prometheusRule block, which previously configured nothing; set metrics.prometheusRule.enabled to render a PrometheusRule"
+        - kind: added
+          description: "added unit test coverage for the PrometheusRule, ServiceMonitor and HTTPRoute templates"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
+    apiVersion: v2
+    appVersion: v2.0.1
+    created: "2026-07-20T05:19:19.549934343Z"
+    description: A Helm chart to export Prometheus metrics for qbittorrent.
+    digest: 9f3f7669056b0beb947c715201eca0fc5a5fdc47251b2135f001137c830dcb7a
+    home: https://github.com/martabal/qbittorrent-exporter
+    keywords:
+    - qbittorrent
+    - torrent
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: qbittorrent-exporter
+    sources:
+    - https://github.com/martabal/qbittorrent-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/qbittorrent-exporter-1.1.0/qbittorrent-exporter-1.1.0.tgz
+    version: 1.1.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
           description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
         - kind: added
           description: "added tests.enabled to toggle the helm test connection check (default true)"
@@ -2102,4 +2136,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-16T05:07:16.787147722Z"
+generated: "2026-07-20T05:19:19.550123285Z"
