@@ -30,7 +30,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 5.2.0
+version: 5.2.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -49,7 +49,7 @@ kubeVersion: ">=1.21.0-0"
 
 dependencies:
 - name: mariadb
-  version: "0.16.5"
+  version: "0.16.6"
   condition: mariadb.enabled
   repository: "oci://registry-1.docker.io/cloudpirates"
 - name: bookstack-file-exporter
