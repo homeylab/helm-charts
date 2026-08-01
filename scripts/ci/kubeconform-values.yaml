@@ -1,0 +1,70 @@
+# Values overlay for the kubeconform tier.
+#
+# Its only job is to force every CRD-backed feature ON so the rendered manifests
+# actually contain ServiceMonitor / PrometheusRule / HTTPRoute. With default
+# values all three are disabled, so the schema gate would validate nothing.
+#
+# Scope: the chart-authored structure of those manifests. Passthrough fields
+# that are pure user data (relabelings, extra labels/annotations, httproute
+# rules) are left empty on purpose — they carry no chart logic to regress, and
+# filling them would only validate this file.
+#
+# Lives OUTSIDE charts/ on purpose: it is not a `ci/*-values.yaml` scenario, so
+# `ct install` never installs it and kind needs no CRDs. It ships to nobody.
+#
+# Applied to every chart. Charts that don't define these keys ignore them
+# (no chart in this repo sets `additionalProperties: false`), so one file covers
+# the whole fleet.
+#
+# Payloads must stay REAL, not bare toggles: the PrometheusRule templates wrap
+# their body in `{{- with ...rules }}` under a bare `spec:`, so an empty list
+# renders `spec: null` and fails validation. Same for HTTPRoute parentRefs.
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+    rules:
+      - alert: TargetDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Exporter target is down.
+
+httproute:
+  enabled: true
+  parentRefs:
+    - name: kubeconform-gateway
+      namespace: default
+      sectionName: websecure
+  hostnames:
+    - kubeconform.example.org
+
+# exportarr nests its own config one level down, and its ServiceMonitor is
+# emitted per enabled app — with every app disabled (the default) the chart
+# renders zero resources.
+exportarr:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+    prometheusRule:
+      enabled: true
+      rules:
+        - alert: TargetDown
+          expr: up == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Exporter target is down.
+  apps:
+    radarr:
+      - name: main
+        enabled: true
+        url: "http://radarr:7878"
+        apiKey: "0123456789abcdef0123456789abcdef"
