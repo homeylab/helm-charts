@@ -39,7 +39,7 @@ The [`Taskfile.yml`](Taskfile.yml) wraps every tool above behind one consistent,
 | Task | Runs |
 | --- | --- |
 | `task lint APP=<chart>` | `helm lint` |
-| `task kubeconform APP=<chart>` | `helm template … \| kubeconform -strict -ignore-missing-schemas` (k8s `1.30.0`, override with `K8S_VERSION=`) |
+| `task kubeconform APP=<chart>` | `scripts/ci/kubeconform.sh` — validates rendered manifests against k8s + CRD schemas (k8s `1.30.0`, override with `K8S_VERSION=`) |
 | `task unittest APP=<chart>` | `helm unittest` |
 | **`task verify APP=<chart>`** | **`lint` + `kubeconform` + `unittest` — the local mirror of the CI gate's cluster-free layers ([Continuous integration](#continuous-integration)).** Run before every commit. |
 | `task template APP=<chart>` | `helm template … --debug` (eyeball the rendered output) |
@@ -115,7 +115,7 @@ The chart has four independent test layers, cheapest and fastest first. Use the 
 | Layer | Tool / command | Needs a cluster? | What it proves |
 | --- | --- | --- | --- |
 | **Unit** | `task unittest APP=<chart>` (helm-unittest, `tests/*_test.yaml`) | No | Templates render the right output for given values — Secret keys, env wiring, conditionals, which manifests appear. Best place for `existingSecret`/edge-case paths. |
-| **Static** | `task lint` + `task kubeconform APP=<chart>` | No | Chart is well-formed and rendered manifests are schema-valid (CRDs skipped — see Gotchas). |
+| **Static** | `task lint` + `task kubeconform APP=<chart>` | No | Chart is well-formed and rendered manifests are schema-valid, CRD kinds included. Catches what unittest can't: wrong field names and wrong types. |
 | **Integration** | `task test APP=<chart>` (chart-testing `ct install`) | Yes (kind) | Chart *installs and becomes Ready* on a real cluster for each `ci/*-values.yaml` scenario — and the `helm test` hooks below run automatically at the end, unless the scenario disables them (see [`helm test`](#helm-test-connection-probes)). |
 | **Live behavior** | `task deploy-local APP=<chart>` → inspect → `task clean-local` | Yes (your context) | Runtime behavior the static layers can't catch — real backend connectivity, env-var semantics, probes under load — using your credentialed `.local/values/<chart>.yaml`. |
 
@@ -201,5 +201,6 @@ Two charts bundle **first-party** subcharts from the OCI registry — `bookstack
 - **`README.md` is generated — never hand-edit it.** Edit `README.md.gotmpl` and run `task docs APP=<chart>`. Value-table rows come from the `# --` comments in `values.yaml`.
 - **Chart `version` must bump or the release is silently skipped.** chart-releaser only publishes a chart whose `version` changed.
 - **`ci/*-values.yaml` must be self-contained.** `ct install` runs in a fresh namespace, so values referencing pre-existing cluster objects (`existingSecret`, an external PVC/secret) fail with `CreateContainerConfigError`. Test those paths with helm-unittest (cluster-free) instead. Keep memory limits generous for JVM/heavy images or `ct install` OOMs before Ready.
-- **`kubeconform` runs with `-ignore-missing-schemas`**, so CRD-based manifests (HTTPRoute, ServiceMonitor) are skipped, not validated. A green kubeconform does not prove those render correctly — cover them with `helm template` + unittest.
+- **Adding a CRD-backed feature? Add its toggle to `scripts/ci/kubeconform-values.yaml`.** These features all default to off, so that overlay is what makes them render for validation — miss it and nothing tests your manifest. Give it a real payload: a `prometheusRule` with an empty `rules` list renders `spec: null` and fails. The script fails loudly if a chart ships a CRD template that the overlay didn't reach, so you'll know.
+- **`kubeconform` deliberately runs *without* `-ignore-missing-schemas`.** A missing schema is a hard failure, not a silent skip. Schemas come from the network (kubeconform's default location plus the [datree CRDs-catalog](https://github.com/datreeio/CRDs-catalog)), so upstream breakage can red the gate with no local change. Cached under `.cache/` with no expiry — `rm -rf .cache/` if local disagrees with CI.
 - **Clean up local resources** — `task clean-local APP=<chart>` removes the `local-<chart>` namespace and release after `deploy-local`.

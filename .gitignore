@@ -12,3 +12,6 @@ kube_config
 
 # Locally packaged charts (task pkg / pkg-with-dep)
 /*.tgz
+
+# Downloaded schemas (scripts/ci/kubeconform.sh)
+.cache/

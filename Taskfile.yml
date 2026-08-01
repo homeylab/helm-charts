@@ -55,7 +55,7 @@ tasks:
     requires:
       vars: [APP]
     cmds:
-      - ct install --chart-dirs {{.CHART_DIR}} --charts {{.CHART_DIR}}/{{.APP}}
+      - ct install --config .github/ct/ct.yaml --charts {{.CHART_DIR}}/{{.APP}}
 
   template:
     desc: Render a chart's templates (APP=<chart>)
@@ -65,11 +65,13 @@ tasks:
       - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} --debug
 
   kubeconform:
-    desc: Validate rendered manifests against k8s schemas (APP=<chart>)
+    desc: Validate rendered manifests against k8s + CRD schemas (APP=<chart>)
     requires:
       vars: [APP]
+    # Delegates to the same script CI runs (ct.yaml additional-commands) so the
+    # two cannot drift. Override the target version with K8S_VERSION=.
     cmds:
-      - helm template {{.APP}} {{.CHART_DIR}}/{{.APP}} | kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version {{.K8S_VERSION | default "1.30.0"}}
+      - K8S_VERSION={{.K8S_VERSION | default "1.30.0"}} scripts/ci/kubeconform.sh {{.CHART_DIR}}/{{.APP}}
 
   unittest:
     desc: Run helm unittest for a chart (APP=<chart>)
