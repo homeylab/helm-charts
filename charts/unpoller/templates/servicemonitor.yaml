@@ -12,7 +12,7 @@ metadata:
 spec:
   endpoints:
   - interval: {{ .Values.metrics.serviceMonitor.interval }}
-    path: /metrics
+    path: {{ .Values.metrics.serviceMonitor.path }}
     port: {{ .Values.service.name }}
     scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
 {{- if .Values.metrics.serviceMonitor.relabelings }}
@@ -21,7 +21,7 @@ spec:
 {{- end }}
 {{- if .Values.metrics.serviceMonitor.metricRelabelings }}
     metricRelabelings:
-    {{- toYaml .Values.metrics.serviceMonitor.metricRelabelings | nindent 6 }}
+      {{- toYaml .Values.metrics.serviceMonitor.metricRelabelings | nindent 6 }}
 {{- end }}
   namespaceSelector:
     matchNames:

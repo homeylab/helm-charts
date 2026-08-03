@@ -70,6 +70,8 @@ metrics:
   serviceMonitor:
     # -- enable/disable serviceMonitor, if enabled podAnnotations will be ignored
     enabled: false
+    # -- set the path for prometheus scraping for serviceMonitor
+    path: /metrics
     # -- how often to scrape for serviceMonitor
     interval: 30s
     # -- scrapeTimeout for serviceMonitor
