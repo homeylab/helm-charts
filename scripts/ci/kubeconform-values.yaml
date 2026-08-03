@@ -26,6 +26,15 @@
 #      is where `range`/`nindent` bugs actually live. Same reasoning as Apache
 #      Pulsar's `.ci/templates-all-values.yaml`.
 #
+# Rule 2 trades rather than adds where the two branches are mutually exclusive:
+# filling `httproute.rules` renders the `toYaml | nindent` branch *instead of*
+# the default-backendRefs `{{- else }}` fallback, and pass 1 has httproute off,
+# so that fallback is now schema-validated nowhere. Accepted: all 5 charts
+# shipping the template cover it in `tests/httproute_test.yaml` ("generates a
+# default backendRef rule..."). Coverage here is per-template, not per-branch —
+# Pulsar's second `-patch1.yaml` overlay is what closes that, and it is not
+# worth a second render pass while the unit-test tier holds.
+#
 # New off-by-default feature ⇒ add its toggle here, or the gate never sees it.
 
 metrics:

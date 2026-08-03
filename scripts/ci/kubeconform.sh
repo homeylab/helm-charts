@@ -28,7 +28,8 @@ validate() {
 # Pass 1 — default values, what users actually install.
 render | validate
 
-# Pass 2 — every CRD-backed feature forced on; nothing else renders the CRD kinds.
+# Pass 2 — every off-by-default feature forced on. Without it the CRD kinds and a
+# dozen core-kind templates (ServiceAccount, Ingress, …) render in no pass at all.
 crd_render="$(render --values "$root/scripts/ci/kubeconform-values.yaml")"
 
 # A renamed values key would make pass 2 render nothing and still report
