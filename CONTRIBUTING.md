@@ -161,6 +161,12 @@ helm test <release> -n <namespace>
 
 The **`Lint and unit-test changed charts`** check is required via branch protection — a red gate blocks merge.
 
+### When the tooling itself changes
+
+`ct` only ever looks under `chart-dirs: [charts]`, so a PR that edits the validation tier — `scripts/ci/**` or `.github/ct/**` — changes no chart, and every step above skips. `ct lint` is no safety net either: with nothing changed it prints `All charts linted successfully` and exits 0 on zero work.
+
+[`ci-tooling.yml`](.github/workflows/ci-tooling.yml) covers that case. It triggers on those paths only, and runs `helm unittest` + `scripts/ci/kubeconform.sh` against **every** chart — no `ct`, no kind, a handful of seconds. Editing the gate proves the gate still works fleet-wide.
+
 ### What counts as "changed" (`use-helmignore`)
 
 `ct.yaml` sets `use-helmignore: true`, and each active chart's `.helmignore` excludes `/ci/` and `/tests/` (`nut-exporter` is deprecated and has neither directory). Those paths are test scaffolding: they are run *from the repo* and are not shipped to chart consumers. Two consequences:
@@ -201,6 +207,6 @@ Two charts bundle **first-party** subcharts from the OCI registry — `bookstack
 - **`README.md` is generated — never hand-edit it.** Edit `README.md.gotmpl` and run `task docs APP=<chart>`. Value-table rows come from the `# --` comments in `values.yaml`.
 - **Chart `version` must bump or the release is silently skipped.** chart-releaser only publishes a chart whose `version` changed.
 - **`ci/*-values.yaml` must be self-contained.** `ct install` runs in a fresh namespace, so values referencing pre-existing cluster objects (`existingSecret`, an external PVC/secret) fail with `CreateContainerConfigError`. Test those paths with helm-unittest (cluster-free) instead. Keep memory limits generous for JVM/heavy images or `ct install` OOMs before Ready.
-- **Adding a CRD-backed feature? Add its toggle to `scripts/ci/kubeconform-values.yaml`.** These features all default to off, so that overlay is what makes them render for validation — miss it and nothing tests your manifest. Give it a real payload: a `prometheusRule` with an empty `rules` list renders `spec: null` and fails. The script fails loudly if a chart ships a CRD template that the overlay didn't reach, so you'll know.
+- **Adding an off-by-default feature? Add its toggle to `scripts/ci/kubeconform-values.yaml`.** Anything gated behind an `enabled`/`create` flag — the CRD kinds, but also `serviceAccount.create`, `ingress.enabled` and friends — renders in no default pass, so that overlay is what makes it render for validation. Miss it and nothing tests your manifest. Two rules: give it a **real payload** (a `prometheusRule` with an empty `rules` list renders `spec: null` and fails), and give every list and map **at least two entries** (an empty passthrough takes the `{{- else }}` branch and never exercises the `toYaml | nindent` path, which is where indent bugs live). The script fails loudly if a chart ships a CRD template the overlay didn't reach — but that guard matches on *kind*, so it does not extend to core kinds.
 - **`kubeconform` deliberately runs *without* `-ignore-missing-schemas`.** A missing schema is a hard failure, not a silent skip. Schemas come from the network (kubeconform's default location plus the [datree CRDs-catalog](https://github.com/datreeio/CRDs-catalog)), so upstream breakage can red the gate with no local change. Cached under `.cache/` with no expiry — `rm -rf .cache/` if local disagrees with CI.
 - **Clean up local resources** — `task clean-local APP=<chart>` removes the `local-<chart>` namespace and release after `deploy-local`.
