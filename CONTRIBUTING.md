@@ -27,6 +27,7 @@ Install these tools (a [`.devcontainer`](.devcontainer/) is provided that builds
 | [kubeconform](https://github.com/yannh/kubeconform) | validate rendered manifests | `kubeconform` |
 | [chart-testing](https://github.com/helm/chart-testing) (`ct`) | install charts on a real cluster | `ct` |
 | [kind](https://kind.sigs.k8s.io/) + `kubectl` | local cluster for `ct` / `deploy-local` | `kind`, `kubectl` |
+| [actionlint](https://github.com/rhysd/actionlint) (+ [shellcheck](https://www.shellcheck.net/)) | lint the GitHub Actions workflows | `actionlint`, `shellcheck` |
 
 All task commands take the target chart via `APP=<chart>`, e.g. `task verify APP=bookstack`. Run `task` (or `task --list`) to see every target.
 
@@ -44,6 +45,7 @@ The [`Taskfile.yml`](Taskfile.yml) wraps every tool above behind one consistent,
 | **`task verify APP=<chart>`** | **`lint` + `kubeconform` + `unittest` — the local mirror of the CI gate's cluster-free layers ([Continuous integration](#continuous-integration)).** Run before every commit. |
 | `task template APP=<chart>` | `helm template … --debug` (eyeball the rendered output) |
 | `task docs APP=<chart>` | regenerate `README.md` via helm-docs |
+| `task actionlint` | `actionlint` over `.github/workflows/` — repo-wide, no `APP=`. Only needed when you touch a workflow. |
 
 ### Local cluster (needs a running cluster / current kube-context)
 
@@ -166,6 +168,10 @@ The **`Lint and unit-test changed charts`** check is required via branch protect
 `ct` only ever looks under `chart-dirs: [charts]`, so a PR that edits the validation tier — `scripts/ci/**` or `.github/ct/**` — changes no chart, and every step above skips. `ct lint` is no safety net either: with nothing changed it prints `All charts linted successfully` and exits 0 on zero work.
 
 [`ci-tooling.yml`](.github/workflows/ci-tooling.yml) covers that case. It triggers on those paths only, and runs `helm unittest` + `scripts/ci/kubeconform.sh` against **every** chart — no `ct`, no kind, a handful of seconds. Editing the gate proves the gate still works fleet-wide.
+
+The workflows themselves are the other half: nothing validated *them*, so a typo'd `uses:`, an undefined context property or a bad `if:` expression would merge silently and surface when a release failed. [`actionlint.yml`](.github/workflows/actionlint.yml) type-checks the lot. It runs on **every** PR rather than filtering on `.github/workflows/**`: it costs seconds, and a path-filtered check can never be required by branch protection — PRs that miss the filter never report it, so the merge blocks forever waiting on a status that will never arrive.
+
+Mirrored locally by `task actionlint`. Install `shellcheck` alongside actionlint: it gets picked up automatically to lint `run:` blocks, and CI's pinned image bundles it, so without it locally you get a weaker check than the gate.
 
 ### What counts as "changed" (`use-helmignore`)
 

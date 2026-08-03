@@ -1,0 +1,42 @@
+name: actionlint
+permissions: {}
+
+# ci.yml and release.yml gate the charts; nothing gated them. A typo'd `uses:`, an
+# undefined context property or a bad `if:` expression merges silently and surfaces
+# when a release fails. actionlint type-checks all of that statically.
+#
+# Runs on every PR rather than filtering on `.github/workflows/**`. It costs seconds,
+# and a path-filtered check can never be required by branch protection: PRs that miss
+# the filter never report it, so the merge blocks forever on a status that will not
+# arrive. No filter means it always reports.
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: actionlint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actionlint:
+    name: Lint workflow files
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      # Digest-pinned image, not the `bash <(curl .../download-actionlint.bash)` form the
+      # upstream docs lead with, and not a curl'd release tarball: both fetch by tag with
+      # no content verification, and this repo SHA-pins every action precisely to avoid
+      # that. The image also carries its own shellcheck, so `run:` blocks are linted with
+      # a pinned version rather than whatever the runner image happens to ship.
+      - name: Run actionlint
+        uses: docker://docker.io/rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          args: -color
