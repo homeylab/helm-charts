@@ -4,6 +4,50 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: added
+          description: "serviceAccount.automount to control automountServiceAccountToken on the chart-managed ServiceAccount. The field was previously omitted entirely; the new default of true is what Kubernetes already applied, so effective behaviour is unchanged. Brings the chart in line with the rest of the fleet"
+        - kind: added
+          description: "unit test coverage for the ServiceAccount template"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-08-03T06:02:34.37928519Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.2
+    description: bookstack documentation platform
+    digest: adcd503b56d0f3e64455ab71a969f80fde0df186cd74e0a39e0b68200192e51a
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.3.0/bookstack-5.3.0.tgz
+    version: 5.3.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
           description: "tests.enabled to toggle the helm test connection-check Pod"
         - kind: added
           description: "podLabels for the Deployment pod template"
@@ -809,6 +853,52 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-0.0.1/bookstack-file-exporter-0.0.1.tgz
     version: 0.0.1
   exportarr:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: "exportarr.serviceAccount.automount to control automountServiceAccountToken on the chart-managed ServiceAccount. The field was previously omitted entirely; the new default of true is what Kubernetes already applied, so effective behaviour is unchanged. Brings the chart in line with the rest of the fleet"
+        - kind: added
+          description: "unit test coverage for the ServiceAccount template"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-08-03T06:02:34.573546929Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.1.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 2.1.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: f3df03b881b8deba638e97c733df583e7e87e656a448bf4d9b8df66008f72b0c
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-4.1.0/exportarr-4.1.0.tgz
+    version: 4.1.0
   - annotations:
       artifacthub.io/changes: |
         - kind: added
@@ -2001,6 +2091,40 @@ entries:
   unpoller:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "metrics.serviceMonitor.path to set the scrape path; the ServiceMonitor previously hardcoded /metrics, which stays the default so rendered output is unchanged"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
+    apiVersion: v2
+    appVersion: v3.3.1
+    created: "2026-08-03T06:02:34.731737993Z"
+    description: unpoller for unifi controller metrics
+    digest: 6076ed1ebb21198741d98000078232298021cfeae2aec47a2002a579d6a22d29
+    home: https://unpoller.com
+    icon: https://unpoller.com/img/logo.png
+    keywords:
+    - unpoller
+    - unifi
+    - ubiquiti
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: unpoller
+    sources:
+    - https://github.com/unpoller/unpoller
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-4.2.0/unpoller-4.2.0.tgz
+    version: 4.2.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: fixed
           description: "the PrometheusRule now omits the empty group entirely when metrics.prometheusRule.rules is unset, instead of rendering an always-present group with no rules"
         - kind: fixed
@@ -2360,4 +2484,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-20T06:18:16.666402199Z"
+generated: "2026-08-03T06:02:34.732399284Z"
