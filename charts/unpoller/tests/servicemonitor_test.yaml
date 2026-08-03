@@ -43,14 +43,18 @@ tests:
       namespace: monitoring
     asserts:
       - contains: { path: spec.namespaceSelector.matchNames, content: monitoring }
-  - it: reads interval, scrapeTimeout and port from values rather than hardcoding the defaults
+  - it: reads path, interval, scrapeTimeout and port from values rather than hardcoding the defaults
     set:
       metrics.enabled: true
       metrics.serviceMonitor.enabled: true
+      metrics.serviceMonitor.path: /custom-metrics
       metrics.serviceMonitor.interval: 45s
       metrics.serviceMonitor.scrapeTimeout: 9s
       service.name: http-metrics
     asserts:
+      # path was hardcoded to /metrics until 4.2.0; the default-value assertion above
+      # passed either way, so only a non-default value proves it is plumbed
+      - equal: { path: "spec.endpoints[0].path", value: /custom-metrics }
       - equal: { path: "spec.endpoints[0].interval", value: 45s }
       - equal: { path: "spec.endpoints[0].scrapeTimeout", value: 9s }
       # the endpoint port is plumbed from service.name, not a serviceMonitor key;

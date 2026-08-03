@@ -29,7 +29,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 4.0.0
+version: 4.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -64,16 +64,6 @@ annotations:
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
     - kind: added
-      description: "PrometheusRule support via exportarr.metrics.prometheusRule (enabled/labels/rules); previously a dead values block"
-    - kind: changed
-      description: "BREAKING: image schema renamed - exportarr.image.repository -> exportarr.image.registry and exportarr.image.name -> exportarr.image.repository; see the Migrating to 4.0.0 section"
-    - kind: changed
-      description: "BREAKING: helm test values moved from exportarr.testImage.* to exportarr.tests.image.* (and testImage.path to exportarr.tests.path); see the Migrating to 4.0.0 section"
+      description: "exportarr.serviceAccount.automount to control automountServiceAccountToken on the chart-managed ServiceAccount. The field was previously omitted entirely; the new default of true is what Kubernetes already applied, so effective behaviour is unchanged. Brings the chart in line with the rest of the fleet"
     - kind: added
-      description: "exportarr.tests.enabled to toggle the helm test connection check, and exportarr.tests.image.pullPolicy is now honoured"
-    - kind: added
-      description: "exportarr.podLabels to add labels to all exportarr pods"
-    - kind: changed
-      description: "qbittorrent-exporter subchart dependency bumped 1.0.1 -> 1.1.0"
-    - kind: changed
-      description: "tdarr-exporter subchart dependency bumped 2.0.1 -> 2.1.0"
+      description: "unit test coverage for the ServiceAccount template"
