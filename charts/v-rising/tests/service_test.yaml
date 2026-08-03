@@ -23,3 +23,13 @@ tests:
       service.server.type: LoadBalancer
     asserts:
       - equal: { path: spec.type, value: LoadBalancer }
+  - it: renders every loadBalancerSourceRange
+    # two ranges on purpose: the previous `indent` form aborted the render outright
+    set:
+      service.server.type: LoadBalancer
+      service.server.loadBalancerSourceRanges:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+    asserts:
+      - equal: { path: "spec.loadBalancerSourceRanges[0]", value: 10.0.0.0/8 }
+      - equal: { path: "spec.loadBalancerSourceRanges[1]", value: 192.168.0.0/16 }

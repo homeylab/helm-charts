@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.0.2
+version: 1.0.3
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=homeylab/bookstack-file-exporter
@@ -36,5 +36,7 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
   artifacthub.io/changes: |
-    - kind: added
-      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.21.0-0, the floor for the batch/v1 CronJob this chart renders by default)"
+    - kind: fixed
+      description: "no longer provisions an orphan PersistentVolumeClaim when persistence.existingClaim is set. The PVC gated on persistence.enabled alone, so it created a second claim that nothing mounted. NOTE: upgrading with existingClaim set will DELETE that redundant PVC, and its PersistentVolume under the default Delete reclaim policy - see the Potential Breaking Updates table in the README before upgrading"
+    - kind: fixed
+      description: "imagePullSecrets are now applied to the CronJob pod template. Only the Deployment path honoured them, and the CronJob is the default mode (config.run_interval == 0), so private-registry users hit ImagePullBackOff"

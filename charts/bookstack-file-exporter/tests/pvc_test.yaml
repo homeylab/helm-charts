@@ -30,3 +30,11 @@ tests:
       persistence.storageClass: nfs-provisioner
     asserts:
       - equal: { path: spec.storageClassName, value: nfs-provisioner }
+  - it: does not render when persistence.existingClaim is set
+    # previously gated on `enabled` alone, so it provisioned an orphan claim
+    # alongside the existing one the pod actually mounts
+    set:
+      persistence.enabled: true
+      persistence.existingClaim: my-existing-pvc
+    asserts:
+      - hasDocuments: { count: 0 }

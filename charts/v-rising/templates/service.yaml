@@ -11,9 +11,9 @@ spec:
   {{- if .Values.service.server.loadBalancerIP }}
   loadBalancerIP: {{ .Values.service.server.loadBalancerIP }}
   {{- end }}
-  {{- if .Values.service.server.loadBalancerSourceRanges }}
+  {{- with .Values.service.server.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
-  {{ toYaml .Values.service.server.loadBalancerSourceRanges | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
 {{- if .Values.service.server.clusterIP }}

@@ -5,10 +5,10 @@ apiVersion: v1
 metadata:
   name: {{ include "v-rising.fullname" . }}-steam-server-files
   namespace: {{ .Release.Namespace }}
+  {{- with .Values.persistence.steamServer.annotations }}
   annotations:
-  {{- if .Values.persistence.steamServer.annotations }}
-    {{ toYaml .Values.persistence.steamServer.annotations | indent 2 }}  
-  {{ end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "v-rising.labels" . | nindent 4 }}
 spec:
@@ -24,8 +24,8 @@ spec:
 {{- else if .Values.persistence.steamServer.storageClass }}
   storageClassName: "{{ .Values.persistence.steamServer.storageClass }}"
 {{- end }}
-  {{- if .Values.persistence.steamServer.selector }}
+  {{- with .Values.persistence.steamServer.selector }}
   selector:
-    {{ toYaml .Values.persistence.steamServer.selector | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}

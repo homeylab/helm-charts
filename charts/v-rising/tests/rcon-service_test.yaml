@@ -25,3 +25,14 @@ tests:
       - contains:
           path: spec.ports
           content: { name: rconport, port: 25575, targetPort: 25575, protocol: TCP }
+  - it: renders every loadBalancerSourceRange
+    # two ranges on purpose: the previous `indent` form aborted the render outright
+    set:
+      service.rcon.enabled: true
+      service.rcon.type: LoadBalancer
+      service.rcon.loadBalancerSourceRanges:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+    asserts:
+      - equal: { path: "spec.loadBalancerSourceRanges[0]", value: 10.0.0.0/8 }
+      - equal: { path: "spec.loadBalancerSourceRanges[1]", value: 192.168.0.0/16 }

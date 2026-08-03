@@ -224,6 +224,10 @@ persistence:
   storageClass: ""
   # -- size of the PVC
   size: 5Gi
+  # -- annotations to add to the PVC
+  annotations: {}
+  # -- label selector to bind the PVC to a specific PersistentVolume
+  selector: {}
   ## NOTE: When existingClaim is set the rest of persistence parameters are ignored
   # -- use an existing PVC instead of creating one; if set, the rest of the persistence options are ignored
   existingClaim: ""
