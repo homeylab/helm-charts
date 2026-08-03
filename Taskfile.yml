@@ -50,6 +50,14 @@ tasks:
     cmds:
       - helm lint {{.CHART_DIR}}/{{.APP}}
 
+  actionlint:
+    desc: Lint the GitHub Actions workflows (repo-wide, no APP)
+    # Mirrors .github/workflows/actionlint.yml. Install shellcheck too — actionlint
+    # picks it up automatically and lints `run:` blocks; CI's pinned image bundles
+    # it, so without it locally you get a weaker check than the gate.
+    cmds:
+      - actionlint -color
+
   test:
     desc: Run chart-testing install for a chart (APP=<chart>)
     requires:
