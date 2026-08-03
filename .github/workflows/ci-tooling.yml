@@ -1,0 +1,75 @@
+name: CI tooling
+permissions: {}
+
+# The static validation tier lives outside `chart-dirs: [charts]`, so `ct list-changed`
+# returns nothing for a PR that only edits it and every step in ci.yml skips. `ct lint`
+# is no help either — with no changed charts it prints "All charts linted successfully"
+# and exits 0 on zero work. A typo in kubeconform.sh would merge green.
+#
+# So: run the tier against the whole fleet whenever the tier itself changes. Path filters
+# are workflow-level in Actions, which is why this is a separate file rather than a job
+# in ci.yml. No ct and no kind here — this tier is cluster-free and takes seconds.
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/ci/**
+      - .github/ct/**
+      - .github/workflows/ci-tooling.yml
+
+concurrency:
+  group: ci-tooling-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-tier:
+    name: Validate the static tier against every chart
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          # renovate: datasource=github-releases depName=helm/helm
+          version: v4.2.3
+
+      - name: Install helm-unittest plugin
+        env:
+          # renovate: datasource=github-releases depName=helm-unittest/helm-unittest
+          UNITTEST_VERSION: v1.1.1
+        # Helm 4 verifies plugin sources by default; unsigned git installs need --verify=false
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest --version "${UNITTEST_VERSION#v}" --verify=false
+
+      - name: Install kubeconform
+        env:
+          # renovate: datasource=github-releases depName=yannh/kubeconform
+          KUBECONFORM_VERSION: v0.8.0
+        run: |
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin kubeconform
+
+      # Both commands ct runs via `additional-commands`, over every chart including the two
+      # ct.yaml excludes from install. Chart.lock is gitignored, so umbrellas need
+      # `dependency update` (build has no lock to read).
+      - name: Run unittest + kubeconform on every chart
+        run: |
+          fail=0
+          for chart in charts/*/; do
+            name="$(basename "$chart")"
+            echo "::group::${name}"
+            if grep -q '^dependencies:' "${chart}Chart.yaml"; then
+              helm dependency update "$chart" || { fail=1; echo "::endgroup::"; continue; }
+            fi
+            helm unittest "$chart" || fail=1
+            bash scripts/ci/kubeconform.sh "$chart" || fail=1
+            echo "::endgroup::"
+          done
+          exit "$fail"
