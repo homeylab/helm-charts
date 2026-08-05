@@ -11,7 +11,10 @@ webconfig_file: |
     cert_file: /etc/nut-exporter/tls.crt
     key_file: /etc/nut-exporter/tls.key
 
-# A map of flag/value pairs, not a list, and empty by default.
+# A map of flag/value pairs, not a list, and empty by default. One entry is left
+# valueless on purpose: `deployment.yaml:44-49` branches on truthiness and emits a
+# bare `- --{{ $key }}` for a falsy value, and that arm renders in no other pass.
+# This chart has no unit-test suite, so the arm would otherwise be covered nowhere.
 extraRunFlags:
   log.level: debug
-  log.format: json
+  nut.vars: ""

@@ -127,3 +127,19 @@ exportarr:
         enabled: true
         url: "http://radarr-second:7878"
         apiKey: "89abcdef0123456789abcdef01234567"
+        # Per-app passthroughs, two levels below anything the coverage guard walks.
+        # deployment.yaml ranges `$app.extraEnv` and nindents `$app.volumeMounts`
+        # and `$app.volumes`; without a payload here those three render in no pass.
+        extraEnv:
+          KUBECONFORM_APP_FIRST: "1"
+          KUBECONFORM_APP_SECOND: "2"
+        volumes:
+          - name: kubeconform-app-first
+            emptyDir: {}
+          - name: kubeconform-app-second
+            emptyDir: {}
+        volumeMounts:
+          - name: kubeconform-app-first
+            mountPath: /tmp/kubeconform-app-first
+          - name: kubeconform-app-second
+            mountPath: /tmp/kubeconform-app-second

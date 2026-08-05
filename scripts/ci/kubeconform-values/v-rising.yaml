@@ -34,10 +34,16 @@ service:
     loadBalancerSourceRanges: &sourceRanges
       - 10.0.0.0/8
       - 192.168.0.0/16
+    # Its own `range` block in both Service templates, nested two levels down where
+    # the coverage guard cannot see it.
+    externalIPs: &externalIPs
+      - 203.0.113.10
+      - 203.0.113.11
   rcon:
     enabled: true
     type: LoadBalancer
     loadBalancerSourceRanges: *sourceRanges
+    externalIPs: *externalIPs
 
 # The only chart shipping empty probes — the other eight carry real defaults that
 # pass 1 already exercises. Kept out of the shared file on purpose: overlaying a

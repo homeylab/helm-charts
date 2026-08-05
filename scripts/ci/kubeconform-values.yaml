@@ -163,6 +163,10 @@ persistence:
 
 metrics:
   enabled: true
+  # Dead in this pass by construction, and kept only as documentation: the
+  # templates gate it on `and metrics.enabled (not serviceMonitor.enabled)`, and
+  # serviceMonitor is forced on below. Pass 1 covers the branch with each chart's
+  # own non-empty default, so the coverage exists — it is just not from here.
   podAnnotations:
     kubeconform.example.org/first: "1"
     kubeconform.example.org/second: "2"
@@ -266,8 +270,11 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
+        # No pathType on purpose: the templates render
+        # `{{ .pathType | default "Prefix" }}`, and with every entry setting it
+        # explicitly that fallback executes in no pass. No chart has an ingress
+        # unit test, so this is its only coverage.
         - path: /metrics
-          pathType: Prefix
   tls:
     - secretName: kubeconform-tls-first
       hosts:

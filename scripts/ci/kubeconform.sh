@@ -40,31 +40,69 @@ if [[ -f "$chart_overlay" ]]; then overlay_args+=(--values "$chart_overlay"); fi
 
 # Coverage guard. A passthrough the overlay never populates renders nothing, so
 # its `toYaml | nindent` path is executed by no pass and validated by nothing —
-# the blind spot all six #172 defects shipped through. A chart default of `{}` or
-# `[]` marks exactly those keys, so this needs no hand-maintained list: it stays
-# correct as charts gain values. Top level only, plus one level under
-# `exportarr:`, which nests its whole config; deeper passthroughs
-# (metrics.serviceMonitor.*) are not walked and still rely on review.
+# the blind spot all six #172 defects shipped through.
+#
+# SCOPE, because the error text below reads more absolute than the check is: this
+# walks ONE level. Top-level keys, plus one level under `exportarr:`, which nests
+# its whole config. Nested passthroughs — `metrics.serviceMonitor.relabelings`,
+# `service.rcon.externalIPs`, `exportarr.apps.<app>[].volumes` — are NOT walked and
+# are the larger half of the surface (roughly 13 nested vs 10 top-level per chart,
+# and 47 vs 0 for exportarr). Review still owns those. Do not read a green guard as
+# "every passthrough is covered".
+#
+# A default of `{}`, `[]`, or a bare key with no children marks a passthrough, so
+# no hand-maintained list is needed at this level. A default of `""` does not —
+# credential-gated templates like `secret.yaml` stay invisible here by design.
 if [[ "$name" == exportarr ]]; then parent="exportarr" indent="  "; else parent="" indent=""; fi
 section() { # <file> — whole file, or just the `$parent:` block when set
   if [[ -z "$parent" ]]; then cat "$1"
-  else awk -v k="$parent:" '$0==k{f=1;next} /^[a-zA-Z0-9_-]+:/{f=0} f' "$1"
+  else awk -v k="$parent" '$0 ~ "^"k": *$"{f=1;next} /^[^ #]/{f=0} f' "$1"
   fi
+}
+# Keys whose value is empty: `{}`, `[]`, or nothing at all (a bare `key:` whose
+# next line is not a child). Tolerates trailing comments, CRLF and quoted keys.
+empty_keys() {
+  awk -v ind="${#indent}" '
+    { sub(/\r$/, "") }
+    /^[[:space:]]*$/ || /^[[:space:]]*#/ { next }
+    {
+      pad = match($0, /[^ ]/) - 1
+      # A bare key held from the previous line is empty only if this line is not
+      # its child.
+      if (pending != "" && pad <= ind) print pending
+      pending = ""
+      if (pad == ind && match($0, /^ *"?[A-Za-z0-9_.-]+"?:/)) {
+        key = substr($0, RSTART, RLENGTH); gsub(/^ *"?|"?:$/, "", key)
+        rest = substr($0, RSTART + RLENGTH)
+        sub(/#.*$/, "", rest); gsub(/^[ \t]+|[ \t]+$/, "", rest)
+        if (rest == "{}" || rest == "[]") print key
+        else if (rest == "") pending = key
+      }
+    }
+    END { if (pending != "") print pending }
+  '
 }
 merged_overlay="$(section "$overlay"; if [[ -f "$chart_overlay" ]]; then section "$chart_overlay"; fi)"
 missing=()
 while read -r key; do
   [[ -n "$key" ]] || continue
-  grep -qE "^${indent}${key}:" <<<"$merged_overlay" || missing+=("$key")
-done < <(section "$chart/values.yaml" \
-  | grep -E "^${indent}[a-zA-Z0-9_-]+: *(\{\}|\[\]) *$" \
-  | sed -E "s/^${indent}([a-zA-Z0-9_-]+):.*/\1/")
+  # Literal match: chart keys may contain `.`, which is a regex metacharacter.
+  esc="$(printf '%s' "$key" | sed -E 's/[][\.^$*+?(){}|\\\/]/\\&/g')"
+  # A hit only counts when it carries a payload — `key: {}` in the overlay is the
+  # same non-coverage as no key at all, and is what the error below forbids.
+  if grep -qE -- "^${indent}${esc}:" <<<"$merged_overlay" \
+     && ! grep -qE -- "^${indent}${esc}: *(\{\}|\[\]) *$" <<<"$merged_overlay"; then
+    continue
+  fi
+  missing+=("$key")
+done < <(section "$chart/values.yaml" | empty_keys | sort -u)
 if (( ${#missing[@]} > 0 )); then
-  echo "ERROR: $name declares passthrough(s) the kubeconform overlay never sets:" >&2
+  echo "ERROR: $name declares passthrough(s) the kubeconform overlay never populates:" >&2
   printf '         %s\n' "${missing[@]}" >&2
-  echo "       They default to empty, so their toYaml/nindent path renders in no pass." >&2
+  echo "       They render empty, so their toYaml/nindent path executes in no pass." >&2
   echo "       Add a real payload (>=2 entries) to $(basename "$overlay"), or to" >&2
   echo "       scripts/ci/kubeconform-values/$name.yaml if the shape is chart-specific." >&2
+  echo "       An empty \`key: {}\` in the overlay does NOT count as covered." >&2
   exit 1
 fi
 
@@ -72,9 +110,20 @@ fi
 # dozen core-kind templates (ServiceAccount, Ingress, …) render in no pass at all.
 crd_render="$(render "${overlay_args[@]}")"
 
-# A renamed values key would make pass 2 render nothing and still report
-# `Skipped: 0`. Green on an empty document is the failure this gate exists to
-# catch, so check the CRD templates on disk against what actually came out.
+# Green on an empty document is the failure mode this gate exists to catch, and
+# kubeconform reports `Valid: 0, Invalid: 0, Errors: 0` for no input at all. Pass 1
+# can legitimately be empty — exportarr renders nothing on defaults, since every app
+# is disabled — but pass 2 forces every feature on, so an empty render there means
+# the overlay missed the chart entirely.
+if ! grep -q '^kind: ' <<<"$crd_render"; then
+  echo "ERROR: $name rendered no resources with the overlay applied." >&2
+  echo "       kubeconform reports Valid: 0 / Errors: 0 on an empty document, so this" >&2
+  echo "       would otherwise pass while validating nothing." >&2
+  exit 1
+fi
+
+# A renamed values key would make pass 2 render a subset and still report
+# `Skipped: 0`, so check the CRD templates on disk against what actually came out.
 # Kinds are read from the templates, so only the filenames are listed here.
 for f in "$chart"/templates/{servicemonitor,prometheusrule,httproute}.yaml; do
   [[ -f "$f" ]] || continue
