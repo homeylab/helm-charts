@@ -1,0 +1,124 @@
+suite: pihole-exporter Ingress
+templates:
+  - templates/ingress.yaml
+release:
+  name: rel
+tests:
+  - it: does not render when disabled
+    asserts:
+      - hasDocuments: { count: 0 }
+
+  - it: renders the shipped defaults when enabled
+    set:
+      ingress.enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: apiVersion, value: networking.k8s.io/v1 }
+      - equal: { path: kind, value: Ingress }
+      - equal: { path: metadata.name, value: rel-pihole-exporter }
+      - equal: { path: "metadata.labels[\"app.kubernetes.io/name\"]", value: pihole-exporter }
+      - equal: { path: "spec.rules[0].host", value: chart-example.local }
+      - equal: { path: "spec.rules[0].http.paths[0].path", value: / }
+      - equal: { path: "spec.rules[0].http.paths[0].pathType", value: ImplementationSpecific }
+
+  - it: omits every optional block when unset
+    set:
+      ingress.enabled: true
+    asserts:
+      - notExists: { path: metadata.annotations }
+      - notExists: { path: spec.ingressClassName }
+      - notExists: { path: spec.tls }
+
+  - it: renders annotations and the class name when set
+    set:
+      ingress.enabled: true
+      ingress.className: nginx
+      ingress.annotations:
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+        example.com/owner: platform
+    asserts:
+      - equal: { path: spec.ingressClassName, value: nginx }
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy-read-timeout"]
+          value: "3600"
+      - equal:
+          path: metadata.annotations["example.com/owner"]
+          value: platform
+
+  # Two entries with two hosts each: a single entry cannot catch a range that
+  # only ever emits its first item.
+  - it: renders every tls entry and every host inside it
+    set:
+      ingress.enabled: true
+      ingress.tls:
+        - secretName: first-tls
+          hosts:
+            - a.example.org
+            - b.example.org
+        - secretName: second-tls
+          hosts:
+            - c.example.org
+            - d.example.org
+    asserts:
+      - lengthEqual: { path: spec.tls, count: 2 }
+      - equal: { path: "spec.tls[0].secretName", value: first-tls }
+      - equal: { path: "spec.tls[0].hosts[1]", value: b.example.org }
+      - equal: { path: "spec.tls[1].secretName", value: second-tls }
+      - equal: { path: "spec.tls[1].hosts[1]", value: d.example.org }
+
+  - it: renders every host and every path within each host
+    set:
+      ingress.enabled: true
+      ingress.hosts:
+        - host: first.example.org
+          paths:
+            - path: /
+              pathType: Prefix
+            - path: /metrics
+              pathType: Exact
+        - host: second.example.org
+          paths:
+            - path: /health
+              pathType: Exact
+    asserts:
+      - lengthEqual: { path: spec.rules, count: 2 }
+      - lengthEqual: { path: "spec.rules[0].http.paths", count: 2 }
+      - equal: { path: "spec.rules[0].host", value: first.example.org }
+      - equal: { path: "spec.rules[0].http.paths[1].path", value: /metrics }
+      - equal: { path: "spec.rules[0].http.paths[1].pathType", value: Exact }
+      - equal: { path: "spec.rules[1].host", value: second.example.org }
+      - equal: { path: "spec.rules[1].http.paths[0].path", value: /health }
+
+  # The `| default "Prefix"` arm is unreachable from this chart's own defaults,
+  # which ship an explicit pathType on every path.
+  - it: falls back to Prefix when a path omits pathType
+    set:
+      ingress.enabled: true
+      ingress.hosts:
+        - host: first.example.org
+          paths:
+            - path: /
+    asserts:
+      - equal: { path: "spec.rules[0].http.paths[0].pathType", value: Prefix }
+
+  - it: points the backend at the Service, reading name and port from values
+    set:
+      ingress.enabled: true
+      fullnameOverride: my-exporter
+      service.port: 9999
+    asserts:
+      - equal: { path: metadata.name, value: my-exporter }
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.name
+          value: my-exporter
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.number
+          value: 9999
+
+  - it: defaults the backend port to the chart's Service port
+    set:
+      ingress.enabled: true
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.number
+          value: 9617
