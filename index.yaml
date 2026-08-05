@@ -3,6 +3,50 @@ entries:
   bookstack:
   - annotations:
       artifacthub.io/changes: |
+        - kind: fixed
+          description: "persistence.selector now works at all. The PVC template used `indent` where the fleet uses `nindent`, so any valid LabelSelector - matchLabels alone included, since it is itself a nested map - aborted the render with a YAML parse error"
+        - kind: added
+          description: "persistence.annotations and persistence.selector are now declared in values.yaml; the PVC template already read them but they were undocumented and absent from the README value table"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-08-05T01:31:35.238231991Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.2
+    description: bookstack documentation platform
+    digest: 5161e73b112b28f116373557e42e6d06b07130328872f935ea716e1c076017f2
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.3.1/bookstack-5.3.1.tgz
+    version: 5.3.1
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: "serviceAccount.automount to control automountServiceAccountToken on the chart-managed ServiceAccount. The field was previously omitted entirely; the new default of true is what Kubernetes already applied, so effective behaviour is unchanged. Brings the chart in line with the rest of the fleet"
         - kind: added
@@ -699,6 +743,41 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-0.1.2/bookstack-0.1.2.tgz
     version: 0.1.2
   bookstack-file-exporter:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: fixed
+          description: "no longer provisions an orphan PersistentVolumeClaim when persistence.existingClaim is set. The PVC gated on persistence.enabled alone, so it created a second claim that nothing mounted. NOTE: upgrading with existingClaim set will DELETE that redundant PVC, and its PersistentVolume under the default Delete reclaim policy - see the Potential Breaking Updates table in the README before upgrading"
+        - kind: fixed
+          description: "imagePullSecrets are now applied to the CronJob pod template. Only the Deployment path honoured them, and the CronJob is the default mode (config.run_interval == 0), so private-registry users hit ImagePullBackOff"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-08-05T01:31:35.424024233Z"
+    description: A Helm chart to run scheduled exports/backups of a BookStack instance's
+      pages, images, and attachments.
+    digest: 7070a3cd7b7fc9a7eefaf9374109329d07e5c89774ac5aeff80727a7d13d6270
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - bookstack
+    - backup
+    - export
+    - wiki
+    - documentation
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack-file-exporter
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/homeylab/bookstack-file-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-1.0.3/bookstack-file-exporter-1.0.3.tgz
+    version: 1.0.3
   - annotations:
       artifacthub.io/changes: |
         - kind: added
@@ -2357,6 +2436,45 @@ entries:
   v-rising:
   - annotations:
       artifacthub.io/changes: |
+        - kind: fixed
+          description: "PVC annotations are no longer silently dropped. Both PVC templates used `indent` where the fleet uses `nindent`, so with more than one annotation only the first landed under metadata.annotations and the rest escaped to sibling keys under metadata. helm rendered this without error, so it shipped and the API server discarded the stray keys"
+        - kind: fixed
+          description: "a multi-key persistence selector (matchLabels plus matchExpressions) no longer fails the render with a YAML parse error; same indent vs nindent cause"
+        - kind: fixed
+          description: "the PVCs no longer emit a bare, null annotations key when no annotations are set"
+        - kind: fixed
+          description: "service.server.loadBalancerSourceRanges and service.rcon.loadBalancerSourceRanges no longer abort the render with a YAML parse error; same indent vs nindent cause as the PVC fixes, and neither had ever worked with more than one range"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
+    apiVersion: v2
+    appVersion: "3.0"
+    created: "2026-08-05T01:31:35.583793977Z"
+    description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
+      server
+    digest: 30b8b585d40d11697d6d026f47a4b175c3531ff0cf616ba389424c94e9985cd5
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - v-rising
+    - vrising
+    - game-server
+    - gaming
+    - dedicated-server
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: v-rising
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/TrueOsiris/docker-vrising
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/v-rising-1.0.3/v-rising-1.0.3.tgz
+    version: 1.0.3
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
       artifacthub.io/license: MIT
@@ -2484,4 +2602,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-08-03T06:02:34.732399284Z"
+generated: "2026-08-05T01:31:35.584328366Z"
