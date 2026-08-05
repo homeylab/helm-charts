@@ -100,3 +100,17 @@ tests:
     asserts:
       - notExists:
           path: spec.template.spec.volumes
+
+  - it: defaults automountServiceAccountToken to true on the pod spec
+    asserts:
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: true }
+
+  - it: honours serviceAccount.automount when pointing at an external ServiceAccount
+    # the knob used to be wired only into the chart-managed ServiceAccount, so with
+    # create false it was silently dropped - assert the pod spec, not the SA object
+    set:
+      serviceAccount.create: false
+      serviceAccount.automount: false
+    asserts:
+      - equal: { path: spec.template.spec.serviceAccountName, value: default }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }

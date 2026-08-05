@@ -49,3 +49,17 @@ tests:
     asserts:
       - notContains: { path: "spec.template.spec.containers[0].env", content: { name: PUID, value: "1000" } }
       - notContains: { path: "spec.template.spec.containers[0].env", content: { name: TZ, value: "Etc/UTC" } }
+
+  - it: defaults automountServiceAccountToken to true on the pod spec
+    asserts:
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: true }
+
+  - it: honours serviceAccount.automount when pointing at an external ServiceAccount
+    # the knob used to be wired only into the chart-managed ServiceAccount, so with
+    # create false it was silently dropped - assert the pod spec, not the SA object
+    set:
+      serviceAccount.create: false
+      serviceAccount.automount: false
+    asserts:
+      - equal: { path: spec.template.spec.serviceAccountName, value: default }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }

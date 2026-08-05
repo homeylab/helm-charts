@@ -168,3 +168,22 @@ tests:
       - contains:
           path: "spec.template.spec.containers[0].securityContext.capabilities.drop"
           content: ALL
+
+  - it: defaults automountServiceAccountToken to true on the pod spec
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: true }
+
+  - it: honours serviceAccount.automount when pointing at an external ServiceAccount
+    # the knob used to be wired only into the chart-managed ServiceAccount, so with
+    # create false it was silently dropped - assert the pod spec, not the SA object
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      serviceAccount.create: false
+      serviceAccount.automount: false
+    asserts:
+      - equal: { path: spec.template.spec.serviceAccountName, value: default }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }

@@ -120,14 +120,13 @@ metrics:
       #     severity: warning
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- specifies whether a service account should be created
   create: false
-  # Automatically mount a ServiceAccount's API credentials?
+  # -- automatically mount a ServiceAccount's API credentials; also set on the pod spec, so it is honoured when pointing at an external ServiceAccount (create false)
   automount: true
-  # Annotations to add to the service account
+  # -- annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- the name of the service account to use; if not set and create is true, a name is generated using the fullname template
   name: ""
 
 podAnnotations: {}

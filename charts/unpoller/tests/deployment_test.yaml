@@ -139,3 +139,15 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content: { name: UP_PROMETHEUS_NAMESPACE, value: "unpoller" }
+
+  - it: defaults automountServiceAccountToken to true on the pod spec
+    asserts:
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: true }
+
+  - it: honours serviceAccount.automount when pointing at an external ServiceAccount
+    set:
+      serviceAccount.create: false
+      serviceAccount.automount: false
+    asserts:
+      - equal: { path: spec.template.spec.serviceAccountName, value: default }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }

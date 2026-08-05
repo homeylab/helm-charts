@@ -64,6 +64,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: "{{ include "exportarr.serviceAccountName" $ }}"
+      automountServiceAccountToken: {{ $.Values.exportarr.serviceAccount.automount }}
       securityContext:
         {{- toYaml $.Values.exportarr.podSecurityContext | nindent 8 }}
       containers:
