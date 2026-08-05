@@ -1,0 +1,56 @@
+# v-rising's slice of the kubeconform overlay, applied on top of the fleet-wide
+# scripts/ci/kubeconform-values.yaml. Everything here is a key whose NAME matches
+# the fleet but whose SHAPE does not, so it cannot live in the shared file.
+#
+# The two rules from the base file apply unchanged: real payloads, >=2 entries.
+
+# Two PVCs under one key instead of the fleet's flat `persistence`. Both take the
+# annotations and selector whose indent bugs #172 fixed, so both need populating
+# or the fixed path renders in no pass.
+persistence:
+  steamServer:
+    enabled: true
+    annotations: &pvcAnnotations
+      kubeconform.example.org/first: "1"
+      kubeconform.example.org/second: "2"
+    selector: &pvcSelector
+      matchLabels:
+        kubeconform-disk: ssd
+      matchExpressions:
+        - key: kubeconform-zone
+          operator: In
+          values: [first, second]
+  world:
+    enabled: true
+    annotations: *pvcAnnotations
+    selector: *pvcSelector
+
+# Two Services — the game server and RCON, the latter off by default and not
+# covered by ci/ct-values.yaml either. loadBalancerSourceRanges was the third
+# field the indent bug had broken, and it exists nowhere else in the fleet.
+service:
+  server:
+    type: LoadBalancer
+    loadBalancerSourceRanges: &sourceRanges
+      - 10.0.0.0/8
+      - 192.168.0.0/16
+  rcon:
+    enabled: true
+    type: LoadBalancer
+    loadBalancerSourceRanges: *sourceRanges
+
+# The only chart shipping empty probes — the other eight carry real defaults that
+# pass 1 already exercises. Kept out of the shared file on purpose: overlaying a
+# handler there would deep-merge into those defaults and produce probes with two
+# handlers, which is a worse signal than no coverage. exec, because this is a
+# UDP game server with no HTTP endpoint to hit.
+livenessProbe:
+  exec:
+    command: [/bin/sh, -c, "pgrep VRisingServer"]
+  initialDelaySeconds: 60
+  periodSeconds: 30
+readinessProbe:
+  exec:
+    command: [/bin/sh, -c, "pgrep VRisingServer"]
+  initialDelaySeconds: 30
+  periodSeconds: 15

@@ -13,6 +13,18 @@
 # (no chart in this repo sets `additionalProperties: false`), so one file covers
 # the whole fleet.
 #
+# This file holds only keys whose NAME AND SHAPE are the same fleet-wide. Anything
+# chart-specific lives in `scripts/ci/kubeconform-values/<chart>.yaml`, applied on
+# top when present — v-rising's nested persistence/service and its empty probes,
+# nut-exporter's webconfig_file and extraRunFlags, exportarr's whole nested
+# subtree. Keeping those out of here is what lets this file stay readable, and it
+# stops a shape that suits one chart from being forced on the other eight.
+#
+# `kubeconform.sh` enforces coverage: it fails when a chart declares a passthrough
+# (a key defaulting to `{}` or `[]`) that neither file populates. That check is
+# what makes an unset key an error rather than a silent hole — do not work around
+# it by deleting a payload.
+#
 # Two rules for anything added here, both learned the hard way:
 #
 #   1. Payloads must be REAL, not bare toggles. The PrometheusRule templates
@@ -26,6 +38,12 @@
 #      is where `range`/`nindent` bugs actually live. Same reasoning as Apache
 #      Pulsar's `.ci/templates-all-values.yaml`.
 #
+#   3. Match the key's SHAPE per chart, not just its name. `extraEnv` is a map in
+#      all nine charts but `extraEnvFrom` is a list. Where the shape itself
+#      diverges — `persistence` flat here but nested under `steamServer`/`world`
+#      in v-rising — the divergent spelling belongs in that chart's own file, not
+#      alongside the flat one here.
+#
 # Rule 2 trades rather than adds where the two branches are mutually exclusive:
 # filling `httproute.rules` renders the `toYaml | nindent` branch *instead of*
 # the default-backendRefs `{{- else }}` fallback, and pass 1 has httproute off,
@@ -34,13 +52,6 @@
 # default backendRef rule..."). Coverage here is per-template, not per-branch —
 # Pulsar's second `-patch1.yaml` overlay is what closes that, and it is not
 # worth a second render pass while the unit-test tier holds.
-#
-#   3. Match the key's SHAPE per chart, not just its name. `extraEnv` is a map
-#      in all nine charts but `extraEnvFrom` is a list; `persistence` is flat in
-#      bookstack and bookstack-file-exporter but nests under `steamServer`/`world`
-#      in v-rising, and `service` nests under `server`/`rcon` there. Flat and
-#      nested spellings coexist below — each chart ignores the one it does not
-#      define.
 #
 # New off-by-default feature ⇒ add its toggle here, or the gate never sees it.
 
@@ -116,30 +127,39 @@ volumeMounts:
   - name: kubeconform-second
     mountPath: /tmp/kubeconform-second
 
+# Pod and container security contexts. Empty by default in bookstack, nut-exporter
+# and v-rising, non-empty in the other six — where these merge with the chart's own
+# values, which is harmless: this tier renders, it never installs.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
 # PVCs. `enabled` is off by default in bookstack-file-exporter, and `annotations`
 # and `selector` were the two fields whose `indent`-vs-`nindent` bugs this overlay
 # could not see. `existingClaim` is deliberately NOT set — it suppresses the PVC.
-# The steamServer/world nesting is v-rising's; the flat keys are the other charts'.
+# v-rising's two-PVC nesting lives in its own file.
 persistence:
   enabled: true
-  annotations: &pvcAnnotations
+  annotations:
     kubeconform.example.org/first: "1"
     kubeconform.example.org/second: "2"
-  selector: &pvcSelector
+  selector:
     matchLabels:
       kubeconform-disk: ssd
     matchExpressions:
       - key: kubeconform-zone
         operator: In
         values: [first, second]
-  steamServer:
-    enabled: true
-    annotations: *pvcAnnotations
-    selector: *pvcSelector
-  world:
-    enabled: true
-    annotations: *pvcAnnotations
-    selector: *pvcSelector
 
 metrics:
   enabled: true
@@ -256,143 +276,7 @@ ingress:
       hosts:
         - second.kubeconform.example.org
 
-# nut-exporter only. It is also the one chart `ct install` never touches
-# (excluded in .github/workflows/ci.yml), so this overlay is its only coverage.
-webconfig_file: |
-  tls_server_config:
-    cert_file: /etc/nut-exporter/tls.crt
-    key_file: /etc/nut-exporter/tls.key
-
-# v-rising ships a second Service for RCON, off by default and not enabled by
-# its ci/ scenario. Both of its Services take loadBalancerSourceRanges, which is
-# the third field the `indent` bug had broken; the flat spelling is every other
-# chart's Service, which has no such field but does take `type`.
+# Every chart's Service takes `type`; v-rising's two nested Services and their
+# loadBalancerSourceRanges live in its own file.
 service:
   type: LoadBalancer
-  rcon:
-    enabled: true
-    type: LoadBalancer
-    loadBalancerSourceRanges: &sourceRanges
-      - 10.0.0.0/8
-      - 192.168.0.0/16
-  server:
-    type: LoadBalancer
-    loadBalancerSourceRanges: *sourceRanges
-
-# exportarr nests its own config one level down, so every block above needs a
-# copy here. Its ServiceMonitor is emitted per enabled app — with every app
-# disabled (the default) the chart renders zero resources.
-exportarr:
-  podAnnotations:
-    kubeconform.example.org/first: "1"
-    kubeconform.example.org/second: "2"
-  podLabels:
-    kubeconform-first: "1"
-    kubeconform-second: "2"
-  nodeSelector:
-    kubernetes.io/os: linux
-    kubeconform.example.org/pool: validation
-  tolerations:
-    - key: kubeconform.example.org/first
-      operator: Exists
-      effect: NoSchedule
-    - key: kubeconform.example.org/second
-      operator: Exists
-      effect: NoExecute
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: kubernetes.io/os
-                operator: In
-                values: [linux]
-              - key: kubernetes.io/arch
-                operator: In
-                values: [amd64, arm64]
-  imagePullSecrets:
-    - name: kubeconform-registry-first
-    - name: kubeconform-registry-second
-  resources:
-    requests:
-      cpu: 10m
-      memory: 32Mi
-    limits:
-      cpu: 100m
-      memory: 128Mi
-  extraEnv:
-    KUBECONFORM_FIRST: "1"
-    KUBECONFORM_SECOND: "2"
-  volumes:
-    - name: kubeconform-first
-      emptyDir: {}
-    - name: kubeconform-second
-      emptyDir: {}
-  volumeMounts:
-    - name: kubeconform-first
-      mountPath: /tmp/kubeconform-first
-    - name: kubeconform-second
-      mountPath: /tmp/kubeconform-second
-  metrics:
-    enabled: true
-    podAnnotations:
-      kubeconform.example.org/first: "1"
-      kubeconform.example.org/second: "2"
-    serviceMonitor:
-      enabled: true
-      additionalLabels:
-        kubeconform-first: "1"
-        kubeconform-second: "2"
-      targetLabels:
-        - kubeconform-first
-        - kubeconform-second
-      relabelings:
-        - sourceLabels: [__meta_kubernetes_pod_node_name]
-          targetLabel: node
-        - sourceLabels: [__meta_kubernetes_namespace]
-          targetLabel: ns
-      metricRelabelings:
-        - sourceLabels: [__name__]
-          regex: go_.*
-          action: drop
-        - sourceLabels: [__name__]
-          regex: promhttp_.*
-          action: drop
-    prometheusRule:
-      enabled: true
-      labels:
-        kubeconform-first: "1"
-        kubeconform-second: "2"
-      rules:
-        - alert: TargetDown
-          expr: up == 0
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: Exporter target is down.
-        - alert: TargetFlapping
-          expr: changes(up[15m]) > 3
-          for: 10m
-          labels:
-            severity: info
-          annotations:
-            summary: Exporter target is flapping.
-  serviceAccount:
-    create: true
-    automount: true
-    annotations:
-      kubeconform.example.org/first: "1"
-      kubeconform.example.org/second: "2"
-  # Two instances of one app, not one: the templates `range` over each app's list,
-  # so a single entry leaves every fencepost in that loop unreachable.
-  apps:
-    radarr:
-      - name: main
-        enabled: true
-        url: "http://radarr:7878"
-        apiKey: "0123456789abcdef0123456789abcdef"
-      - name: second
-        enabled: true
-        url: "http://radarr-second:7878"
-        apiKey: "89abcdef0123456789abcdef01234567"

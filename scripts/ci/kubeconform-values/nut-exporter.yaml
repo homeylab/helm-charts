@@ -1,0 +1,17 @@
+# nut-exporter's slice of the kubeconform overlay, applied on top of the
+# fleet-wide scripts/ci/kubeconform-values.yaml. Both keys are unique to this
+# chart. It is also the one chart `ct install` never touches (excluded in
+# .github/workflows/ci.yml), so this tier is its only coverage.
+
+# Renders a ConfigMap plus a volume, a volumeMount and an extra run flag. Setting
+# it together with the fleet-wide volumes/volumeMounts is what surfaced the
+# indent mismatch fixed in 1.1.1 — either alone rendered fine.
+webconfig_file: |
+  tls_server_config:
+    cert_file: /etc/nut-exporter/tls.crt
+    key_file: /etc/nut-exporter/tls.key
+
+# A map of flag/value pairs, not a list, and empty by default.
+extraRunFlags:
+  log.level: debug
+  log.format: json
