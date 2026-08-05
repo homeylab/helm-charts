@@ -108,12 +108,12 @@ tasks:
     # invocation still clobbers — so refuse outright when the chart has no template.
     requires:
       vars: [APP]
+    # Also catches an APP set to the empty string, which `requires` lets through
+    # and which would point helm-docs at charts/ and regenerate the whole fleet.
+    preconditions:
+      - sh: test -f "{{.CHART_DIR}}/{{.APP}}/README.md.gotmpl"
+        msg: "no README.md.gotmpl at {{.CHART_DIR}}/{{.APP}} - either no such chart, or its README is hand-written and must not be overwritten"
     cmds:
-      - |
-        if [ ! -f "{{.CHART_DIR}}/{{.APP}}/README.md.gotmpl" ]; then
-          echo "{{.APP}} has no README.md.gotmpl - its README is hand-written, refusing to overwrite it" >&2
-          exit 1
-        fi
       - helm-docs --chart-search-root {{.CHART_DIR}}/{{.APP}}
 
   local-template:
