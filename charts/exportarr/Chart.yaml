@@ -29,7 +29,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 4.1.0
+version: 4.2.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -63,7 +63,11 @@ annotations:
     - name: exportarr
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
+    - kind: security
+      description: "exportarr.serviceAccount.automount is now applied to the pod spec, not only to the chart-managed ServiceAccount. With exportarr.serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Defaults are unchanged (automount true, which is also the Kubernetes default)"
+    - kind: fixed
+      description: "the PrometheusRule is now gated on exportarr.metrics.enabled as well as exportarr.metrics.prometheusRule.enabled. It previously rendered for a chart exporting no metrics at all. NOTE: if you run with exportarr.metrics.enabled false and exportarr.metrics.prometheusRule.enabled true, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
+    - kind: changed
+      description: "the exportarr.serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
     - kind: added
-      description: "exportarr.serviceAccount.automount to control automountServiceAccountToken on the chart-managed ServiceAccount. The field was previously omitted entirely; the new default of true is what Kubernetes already applied, so effective behaviour is unchanged. Brings the chart in line with the rest of the fleet"
-    - kind: added
-      description: "unit test coverage for the ServiceAccount template"
+      description: "unit test coverage pinning both the default and the mutated value of exportarr.serviceAccount.automount on the pod spec, and that the PrometheusRule stays unrendered with metrics disabled"

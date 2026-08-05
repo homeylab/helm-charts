@@ -31,7 +31,7 @@ maintainers:
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 ## Chart Version
-version: 4.2.0
+version: 4.3.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -51,5 +51,7 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
   artifacthub.io/changes: |
+    - kind: fixed
+      description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. It previously rendered for a chart exporting no metrics at all. NOTE: if you run with metrics.enabled false and metrics.prometheusRule.enabled true, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
     - kind: added
-      description: "metrics.serviceMonitor.path to set the scrape path; the ServiceMonitor previously hardcoded /metrics, which stays the default so rendered output is unchanged"
+      description: "unit test coverage pinning both the default and the mutated value of serviceAccount.automount on the pod spec, and that the PrometheusRule stays unrendered with metrics disabled"

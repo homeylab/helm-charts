@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.0.3
+version: 1.1.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=homeylab/bookstack-file-exporter
@@ -36,7 +36,7 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "no longer provisions an orphan PersistentVolumeClaim when persistence.existingClaim is set. The PVC gated on persistence.enabled alone, so it created a second claim that nothing mounted. NOTE: upgrading with existingClaim set will DELETE that redundant PVC, and its PersistentVolume under the default Delete reclaim policy - see the Potential Breaking Updates table in the README before upgrading"
-    - kind: fixed
-      description: "imagePullSecrets are now applied to the CronJob pod template. Only the Deployment path honoured them, and the CronJob is the default mode (config.run_interval == 0), so private-registry users hit ImagePullBackOff"
+    - kind: security
+      description: "serviceAccount.automount is now applied to the pod spec, not only to the chart-managed ServiceAccount. With serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Defaults are unchanged (automount true, which is also the Kubernetes default)"
+    - kind: added
+      description: "unit test coverage pinning both the default and the mutated value of serviceAccount.automount on the pod spec"

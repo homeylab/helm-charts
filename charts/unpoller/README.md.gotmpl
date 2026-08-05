@@ -130,6 +130,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `4.2.0` | `4.3.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so in that combination it is **removed** on upgrade — it was alerting on a chart that exports no metrics. Set `metrics.enabled: true` to keep it. |
 | `3.X.X` | `4.0.0` | Standardized image schema, nested `tests.image.*` schema, chart-managed Secret for unifi/influxdb auth, hardened `securityContext`, and `appVersion` bumped to the current upstream `v3.3.1` image. **Read the [Migrating to 4.0.0](#migrating-to-400) section in full before upgrading.** |
 
 ### Migrating to 4.0.0

@@ -30,7 +30,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 5.3.2
+version: 5.4.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -63,9 +63,9 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
+    - kind: security
+      description: "serviceAccount.automount is now applied to the pod spec, not only to the chart-managed ServiceAccount. With serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Defaults are unchanged (automount true, which is also the Kubernetes default)"
     - kind: changed
-      description: "the optional bookstack-file-exporter subchart is re-pinned from 1.0.2 to 1.0.3. Only relevant with bookstack-file-exporter.enabled true. No values keys changed between the two, so no configuration to migrate"
-    - kind: fixed
-      description: "the embedded exporter no longer provisions an orphan PersistentVolumeClaim when bookstack-file-exporter.persistence.existingClaim is set. NOTE: upgrading in that state DELETES the redundant PVC, and its PersistentVolume under the default Delete reclaim policy - see the Upgrade Matrix in the README before upgrading"
-    - kind: fixed
-      description: "the embedded exporter now applies imagePullSecrets to its CronJob pod template. Only its Deployment path honoured them, and the CronJob is that subchart's default mode (config.run_interval == 0), so private-registry users hit ImagePullBackOff"
+      description: "the serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
+    - kind: added
+      description: "unit test coverage pinning both the default and the mutated value of serviceAccount.automount on the pod spec"

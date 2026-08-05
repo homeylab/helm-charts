@@ -102,6 +102,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `2.0.0` | `2.1.0` | **Only if you set `serviceAccount.create: false` together with `serviceAccount.automount: false`.** `automountServiceAccountToken` is now rendered on the pod spec, so that combination finally takes effect and the pod stops receiving a ServiceAccount API token. It previously applied only to the chart-managed ServiceAccount and was ignored when pointing at an external one. Defaults (`automount: true`) render exactly as before.<br><br>**Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so in that combination it is **removed** on upgrade — it was alerting on a chart that exports no metrics. Set `metrics.enabled: true` to keep it. |
 | `1.X.X` | `2.0.0` | The `helm test` image values moved from `testConnImage.*` to `tests.image.*`. Only affects you if you overrode those values. **Read the [Migrating to 2.0.0](#migrating-to-200) section before upgrading.** |
 | `0.1.X` | `1.0.0` | Hardened `securityContext` defaults and a standardized image schema now apply; credentials move into a chart-managed Secret (behavior-preserving). **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
