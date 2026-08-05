@@ -1,0 +1,149 @@
+# exportarr's slice of the kubeconform overlay, applied on top of the
+# fleet-wide scripts/ci/kubeconform-values.yaml.
+#
+# It nests its entire configuration under an `exportarr:` key, so not one key
+# from the shared file reaches it — every block the fleet gets has to be repeated
+# here one level down. That is why this file is the largest of the three.
+#
+# Named so it does NOT match `ci/*-values.yaml`: `ct` globs that pattern and
+# installs every match, and this file forces on CRD kinds kind has no schemas
+# for. `/ci/` is in .helmignore, so it never ships in the package.
+#
+# Its subchart values (qbittorrent-exporter, tdarr-exporter) are deliberately NOT
+# set: both are validated as charts in their own right, where the shared overlay
+# reaches them at the top level.
+#
+# The two rules from the base file apply unchanged: real payloads, >=2 entries.
+
+exportarr:
+  podAnnotations:
+    kubeconform.example.org/first: "1"
+    kubeconform.example.org/second: "2"
+  podLabels:
+    kubeconform-first: "1"
+    kubeconform-second: "2"
+  nodeSelector:
+    kubernetes.io/os: linux
+    kubeconform.example.org/pool: validation
+  tolerations:
+    - key: kubeconform.example.org/first
+      operator: Exists
+      effect: NoSchedule
+    - key: kubeconform.example.org/second
+      operator: Exists
+      effect: NoExecute
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values: [linux]
+              - key: kubernetes.io/arch
+                operator: In
+                values: [amd64, arm64]
+  imagePullSecrets:
+    - name: kubeconform-registry-first
+    - name: kubeconform-registry-second
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  extraEnv:
+    KUBECONFORM_FIRST: "1"
+    KUBECONFORM_SECOND: "2"
+  volumes:
+    - name: kubeconform-first
+      emptyDir: {}
+    - name: kubeconform-second
+      emptyDir: {}
+  volumeMounts:
+    - name: kubeconform-first
+      mountPath: /tmp/kubeconform-first
+    - name: kubeconform-second
+      mountPath: /tmp/kubeconform-second
+  metrics:
+    enabled: true
+    podAnnotations:
+      kubeconform.example.org/first: "1"
+      kubeconform.example.org/second: "2"
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        kubeconform-first: "1"
+        kubeconform-second: "2"
+      targetLabels:
+        - kubeconform-first
+        - kubeconform-second
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: ns
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: go_.*
+          action: drop
+        - sourceLabels: [__name__]
+          regex: promhttp_.*
+          action: drop
+    prometheusRule:
+      enabled: true
+      labels:
+        kubeconform-first: "1"
+        kubeconform-second: "2"
+      rules:
+        - alert: TargetDown
+          expr: up == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Exporter target is down.
+        - alert: TargetFlapping
+          expr: changes(up[15m]) > 3
+          for: 10m
+          labels:
+            severity: info
+          annotations:
+            summary: Exporter target is flapping.
+  serviceAccount:
+    create: true
+    automount: true
+    annotations:
+      kubeconform.example.org/first: "1"
+      kubeconform.example.org/second: "2"
+  # Its ServiceMonitor is emitted per enabled app — with every app disabled (the
+  # default) the chart renders zero resources. Two instances of one app, not one:
+  # the templates `range` over each app's list, so a single entry leaves every
+  # fencepost in that loop unreachable.
+  apps:
+    radarr:
+      - name: main
+        enabled: true
+        url: "http://radarr:7878"
+        apiKey: "0123456789abcdef0123456789abcdef"
+      - name: second
+        enabled: true
+        url: "http://radarr-second:7878"
+        apiKey: "89abcdef0123456789abcdef01234567"
+        # Per-app passthroughs, two levels below anything the coverage guard walks.
+        # deployment.yaml ranges `$app.extraEnv` and nindents `$app.volumeMounts`
+        # and `$app.volumes`; without a payload here those three render in no pass.
+        extraEnv:
+          KUBECONFORM_APP_FIRST: "1"
+          KUBECONFORM_APP_SECOND: "2"
+        volumes:
+          - name: kubeconform-app-first
+            emptyDir: {}
+          - name: kubeconform-app-second
+            emptyDir: {}
+        volumeMounts:
+          - name: kubeconform-app-first
+            mountPath: /tmp/kubeconform-app-first
+          - name: kubeconform-app-second
+            mountPath: /tmp/kubeconform-app-second
