@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.0.2
+version: 1.0.3
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=trueosiris/vrising versioning=regex:^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$
@@ -34,5 +34,11 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
   artifacthub.io/changes: |
-    - kind: added
-      description: "declared a minimum supported Kubernetes version via kubeVersion (>=1.19.0-0)"
+    - kind: fixed
+      description: "PVC annotations are no longer silently dropped. Both PVC templates used `indent` where the fleet uses `nindent`, so with more than one annotation only the first landed under metadata.annotations and the rest escaped to sibling keys under metadata. helm rendered this without error, so it shipped and the API server discarded the stray keys"
+    - kind: fixed
+      description: "a multi-key persistence selector (matchLabels plus matchExpressions) no longer fails the render with a YAML parse error; same indent vs nindent cause"
+    - kind: fixed
+      description: "the PVCs no longer emit a bare, null annotations key when no annotations are set"
+    - kind: fixed
+      description: "service.server.loadBalancerSourceRanges and service.rcon.loadBalancerSourceRanges no longer abort the render with a YAML parse error; same indent vs nindent cause as the PVC fixes, and neither had ever worked with more than one range"

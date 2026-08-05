@@ -30,7 +30,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 5.3.0
+version: 5.3.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -63,7 +63,7 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
+    - kind: fixed
+      description: "persistence.selector now works at all. The PVC template used `indent` where the fleet uses `nindent`, so any valid LabelSelector - matchLabels alone included, since it is itself a nested map - aborted the render with a YAML parse error"
     - kind: added
-      description: "serviceAccount.automount to control automountServiceAccountToken on the chart-managed ServiceAccount. The field was previously omitted entirely; the new default of true is what Kubernetes already applied, so effective behaviour is unchanged. Brings the chart in line with the rest of the fleet"
-    - kind: added
-      description: "unit test coverage for the ServiceAccount template"
+      description: "persistence.annotations and persistence.selector are now declared in values.yaml; the PVC template already read them but they were undocumented and absent from the README value table"

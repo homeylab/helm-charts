@@ -32,3 +32,32 @@ tests:
       persistence.world.storageClass: fast-ssd
     asserts:
       - equal: { path: spec.storageClassName, value: fast-ssd }
+  - it: nests every annotation under metadata.annotations
+    # two keys on purpose: with `indent` instead of `nindent` only the first landed
+    # correctly and the second escaped to metadata.<key>, which helm renders happily
+    set:
+      persistence.world.annotations:
+        foo: bar
+        baz: qux
+    asserts:
+      - equal: { path: metadata.annotations.foo, value: bar }
+      - equal: { path: metadata.annotations.baz, value: qux }
+      - notExists: { path: metadata.foo }
+      - notExists: { path: metadata.baz }
+  - it: omits the annotations key entirely when none are set
+    asserts:
+      - notExists: { path: metadata.annotations }
+  - it: renders a multi-key selector
+    # matchLabels + matchExpressions together; the `indent` form produced invalid
+    # YAML here and failed the render outright
+    set:
+      persistence.world.selector:
+        matchLabels:
+          disk: ssd
+        matchExpressions:
+          - key: zone
+            operator: In
+            values: [a, b]
+    asserts:
+      - equal: { path: spec.selector.matchLabels.disk, value: ssd }
+      - equal: { path: "spec.selector.matchExpressions[0].key", value: zone }

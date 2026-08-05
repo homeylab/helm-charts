@@ -12,9 +12,9 @@ spec:
   {{- if .Values.service.rcon.loadBalancerIP }}
   loadBalancerIP: {{ .Values.service.rcon.loadBalancerIP }}
   {{- end }}
-  {{- if .Values.service.rcon.loadBalancerSourceRanges }}
+  {{- with .Values.service.rcon.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
-  {{ toYaml .Values.service.rcon.loadBalancerSourceRanges | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
 {{- if .Values.service.rcon.clusterIP }}

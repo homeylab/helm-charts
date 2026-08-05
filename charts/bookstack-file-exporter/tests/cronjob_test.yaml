@@ -85,3 +85,16 @@ tests:
       - contains:
           path: "spec.jobTemplate.spec.template.spec.containers[0].securityContext.capabilities.drop"
           content: ALL
+  - it: renders imagePullSecrets on the job pod template
+    # the Deployment path always had this; the CronJob path did not, and CronJob is
+    # the default mode (config.run_interval == 0)
+    set:
+      imagePullSecrets:
+        - name: myreg
+        - name: backupreg
+    asserts:
+      - equal: { path: "spec.jobTemplate.spec.template.spec.imagePullSecrets[0].name", value: myreg }
+      - equal: { path: "spec.jobTemplate.spec.template.spec.imagePullSecrets[1].name", value: backupreg }
+  - it: omits imagePullSecrets when none are set
+    asserts:
+      - notExists: { path: spec.jobTemplate.spec.template.spec.imagePullSecrets }

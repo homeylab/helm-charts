@@ -5,10 +5,10 @@ apiVersion: v1
 metadata:
   name: {{ include "v-rising.fullname" . }}-world-files
   namespace: {{ .Release.Namespace }}
+  {{- with .Values.persistence.world.annotations }}
   annotations:
-  {{- if .Values.persistence.world.annotations }}
-    {{ toYaml .Values.persistence.world.annotations | indent 2 }}  
-  {{ end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "v-rising.labels" . | nindent 4 }}
 spec:
@@ -24,8 +24,8 @@ spec:
 {{- else if .Values.persistence.world.storageClass }}
   storageClassName: "{{ .Values.persistence.world.storageClass }}"
 {{- end }}
-  {{- if .Values.persistence.world.selector }}
+  {{- with .Values.persistence.world.selector }}
   selector:
-    {{ toYaml .Values.persistence.world.selector | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
