@@ -3,6 +3,52 @@ entries:
   bookstack:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: "the optional bookstack-file-exporter subchart is re-pinned from 1.0.2 to 1.0.3. Only relevant with bookstack-file-exporter.enabled true. No values keys changed between the two, so no configuration to migrate"
+        - kind: fixed
+          description: "the embedded exporter no longer provisions an orphan PersistentVolumeClaim when bookstack-file-exporter.persistence.existingClaim is set. NOTE: upgrading in that state DELETES the redundant PVC, and its PersistentVolume under the default Delete reclaim policy - see the Upgrade Matrix in the README before upgrading"
+        - kind: fixed
+          description: "the embedded exporter now applies imagePullSecrets to its CronJob pod template. Only its Deployment path honoured them, and the CronJob is that subchart's default mode (config.run_interval == 0), so private-registry users hit ImagePullBackOff"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-08-05T01:45:09.253084073Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.3
+    description: bookstack documentation platform
+    digest: 2cab9fc5787f7e66009bed06cafc10ec74d4b060c220ab89139a54eecab37b56
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.3.2/bookstack-5.3.2.tgz
+    version: 5.3.2
+  - annotations:
+      artifacthub.io/changes: |
         - kind: fixed
           description: "persistence.selector now works at all. The PVC template used `indent` where the fleet uses `nindent`, so any valid LabelSelector - matchLabels alone included, since it is itself a nested map - aborted the render with a YAML parse error"
         - kind: added
@@ -2602,4 +2648,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-08-05T01:31:35.584328366Z"
+generated: "2026-08-05T01:45:09.253508968Z"
