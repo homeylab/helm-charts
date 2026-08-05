@@ -1,9 +1,13 @@
-# exportarr's slice of the kubeconform overlay, applied on top of the fleet-wide
-# scripts/ci/kubeconform-values.yaml.
+# exportarr's slice of the kubeconform overlay, applied on top of the
+# fleet-wide scripts/ci/kubeconform-values.yaml.
 #
 # It nests its entire configuration under an `exportarr:` key, so not one key
 # from the shared file reaches it — every block the fleet gets has to be repeated
 # here one level down. That is why this file is the largest of the three.
+#
+# Named so it does NOT match `ci/*-values.yaml`: `ct` globs that pattern and
+# installs every match, and this file forces on CRD kinds kind has no schemas
+# for. `/ci/` is in .helmignore, so it never ships in the package.
 #
 # Its subchart values (qbittorrent-exporter, tdarr-exporter) are deliberately NOT
 # set: both are validated as charts in their own right, where the shared overlay

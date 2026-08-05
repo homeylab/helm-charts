@@ -14,7 +14,7 @@
 # the whole fleet.
 #
 # This file holds only keys whose NAME AND SHAPE are the same fleet-wide. Anything
-# chart-specific lives in `scripts/ci/kubeconform-values/<chart>.yaml`, applied on
+# chart-specific lives in `charts/<chart>/ci/kubeconform-overlay.yaml`, applied on
 # top when present — v-rising's nested persistence/service and its empty probes,
 # nut-exporter's webconfig_file and extraRunFlags, exportarr's whole nested
 # subtree. Keeping those out of here is what lets this file stay readable, and it

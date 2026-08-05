@@ -30,11 +30,16 @@ render | validate
 
 # The overlay is fleet-wide, so it only carries keys whose name AND shape are the
 # same everywhere. Anything chart-specific — v-rising's persistence/service
-# nesting, nut's webconfig_file, exportarr's whole nested subtree — lives in a
-# per-chart file, applied on top when it exists. Same guarded-pickup shape
-# prometheus-community uses for its per-chart `ci/lint.sh`.
+# nesting, nut's webconfig_file, exportarr's whole nested subtree — lives in that
+# chart's own `ci/kubeconform-overlay.yaml`, applied on top when it exists.
+#
+# In the chart, because that is where someone editing the chart will look, and in
+# `ci/` because every .helmignore already excludes it so it never ships. The name
+# deliberately does NOT end in `-values.yaml`: `ct` globs `ci/*-values.yaml` and
+# installs every match, and this file force-enables CRD kinds that kind has no
+# schemas for. Same spirit as prometheus-community's `ci/lint.sh`.
 overlay="$root/scripts/ci/kubeconform-values.yaml"
-chart_overlay="$root/scripts/ci/kubeconform-values/$name.yaml"
+chart_overlay="$chart/ci/kubeconform-overlay.yaml"
 overlay_args=(--values "$overlay")
 if [[ -f "$chart_overlay" ]]; then overlay_args+=(--values "$chart_overlay"); fi
 
@@ -101,7 +106,7 @@ if (( ${#missing[@]} > 0 )); then
   printf '         %s\n' "${missing[@]}" >&2
   echo "       They render empty, so their toYaml/nindent path executes in no pass." >&2
   echo "       Add a real payload (>=2 entries) to $(basename "$overlay"), or to" >&2
-  echo "       scripts/ci/kubeconform-values/$name.yaml if the shape is chart-specific." >&2
+  echo "       $chart/ci/kubeconform-overlay.yaml if the shape is chart-specific." >&2
   echo "       An empty \`key: {}\` in the overlay does NOT count as covered." >&2
   exit 1
 fi
@@ -131,7 +136,7 @@ for f in "$chart"/templates/{servicemonitor,prometheusrule,httproute}.yaml; do
   grep -q "^kind: ${kind}$" <<<"$crd_render" && continue
   echo "ERROR: $name ships $(basename "$f") but the overlay rendered no ${kind}." >&2
   echo "       Check its toggle in scripts/ci/kubeconform-values.yaml, or in" >&2
-  echo "       scripts/ci/kubeconform-values/$name.yaml." >&2
+  echo "       $chart/ci/kubeconform-overlay.yaml." >&2
   exit 1
 done
 

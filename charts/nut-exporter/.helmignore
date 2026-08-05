@@ -21,3 +21,7 @@
 .idea/
 *.tmproj
 .vscode/
+# Test scaffolding — never ships in the package. Anchored: a bare `tests/` would
+# also match templates/tests/ and strip the `helm test` hooks from the release.
+/ci/
+/tests/

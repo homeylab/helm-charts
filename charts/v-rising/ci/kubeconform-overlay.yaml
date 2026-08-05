@@ -1,6 +1,10 @@
-# v-rising's slice of the kubeconform overlay, applied on top of the fleet-wide
-# scripts/ci/kubeconform-values.yaml. Everything here is a key whose NAME matches
+# v-rising's slice of the kubeconform overlay, applied on top of the
+# fleet-wide scripts/ci/kubeconform-values.yaml. Everything here is a key whose NAME matches
 # the fleet but whose SHAPE does not, so it cannot live in the shared file.
+#
+# Named so it does NOT match `ci/*-values.yaml`: `ct` globs that pattern and
+# installs every match, and this file forces on CRD kinds kind has no schemas
+# for. `/ci/` is in .helmignore, so it never ships in the package.
 #
 # The two rules from the base file apply unchanged: real payloads, >=2 entries.
 

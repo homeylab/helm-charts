@@ -15,6 +15,10 @@ on:
       - main
     paths:
       - scripts/ci/**
+      # Per-chart kubeconform overlays. They live in each chart's helmignored
+      # ci/ dir, so `ct list-changed` never sees them and ci.yml skips - this
+      # workflow is their only gate.
+      - charts/*/ci/kubeconform-overlay.yaml
       - .github/ct/**
       - .github/workflows/ci-tooling.yml
 
