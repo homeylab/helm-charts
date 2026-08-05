@@ -87,18 +87,18 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- if .Values.webconfig_file }}
-          - mountPath: /webconfig.yml
-            name: webconfig
-            subPath: webconfig.yml
+            - mountPath: /webconfig.yml
+              name: webconfig
+              subPath: webconfig.yml
           {{- end }}
       volumes:
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.webconfig_file }}
-      - name: webconfig
-        configMap:
-          name: {{ include "nut-exporter.fullname" . }}-webconfig
+        - name: webconfig
+          configMap:
+            name: {{ include "nut-exporter.fullname" . }}-webconfig
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
