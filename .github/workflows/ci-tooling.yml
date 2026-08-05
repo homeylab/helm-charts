@@ -19,6 +19,10 @@ on:
       # ci/ dir, so `ct list-changed` never sees them and ci.yml skips - this
       # workflow is their only gate.
       - charts/*/ci/kubeconform-overlay.yaml
+      # helm-unittest suites, for the same reason: `/tests/` is helmignored in
+      # every chart, so a PR that only adds or edits a suite drops the chart out
+      # of `ct list-changed` and the new tests would run nowhere.
+      - charts/*/tests/**
       - .github/ct/**
       - .github/workflows/ci-tooling.yml
 
