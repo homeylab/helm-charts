@@ -1,4 +1,4 @@
-{{- if .Values.exportarr.metrics.prometheusRule.enabled -}}
+{{- if and .Values.exportarr.metrics.enabled .Values.exportarr.metrics.prometheusRule.enabled -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

@@ -57,3 +57,15 @@ tests:
       - equal:
           path: metadata.labels["app.kubernetes.io/name"]
           value: exportarr
+
+  - it: does not render when metrics.enabled is false, even with prometheusRule.enabled
+    # the two toggles are independent in values, so prometheusRule.enabled alone used to
+    # emit a rule for a chart that exports no metrics at all
+    set:
+      exportarr.metrics.enabled: false
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+    asserts:
+      - hasDocuments: { count: 0 }
