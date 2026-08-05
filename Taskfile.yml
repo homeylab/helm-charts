@@ -104,9 +104,16 @@ tasks:
     desc: Regenerate a chart's README from README.md.gotmpl via helm-docs (APP=<chart>)
     # Scoped to a single chart on purpose: charts without a README.md.gotmpl would
     # be overwritten with helm-docs' default template, clobbering hand-written READMEs.
+    # Scoping alone only prevents *incidental* regeneration — a direct APP=<chart>
+    # invocation still clobbers — so refuse outright when the chart has no template.
     requires:
       vars: [APP]
     cmds:
+      - |
+        if [ ! -f "{{.CHART_DIR}}/{{.APP}}/README.md.gotmpl" ]; then
+          echo "{{.APP}} has no README.md.gotmpl - its README is hand-written, refusing to overwrite it" >&2
+          exit 1
+        fi
       - helm-docs --chart-search-root {{.CHART_DIR}}/{{.APP}}
 
   local-template:
