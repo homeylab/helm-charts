@@ -5,9 +5,13 @@ release:
   name: rel
 tests:
   - it: does not render when disabled
+    set:
+      ingress.enabled: false
     asserts:
       - hasDocuments: { count: 0 }
 
+  # Pins the values.yaml defaults deliberately: the shipped host, path and
+  # pathType are user-facing, and a silent change to them is a chart change.
   - it: renders the shipped defaults when enabled
     set:
       ingress.enabled: true
@@ -16,7 +20,16 @@ tests:
       - equal: { path: apiVersion, value: networking.k8s.io/v1 }
       - equal: { path: kind, value: Ingress }
       - equal: { path: metadata.name, value: rel-qbittorrent-exporter }
-      - equal: { path: "metadata.labels[\"app.kubernetes.io/name\"]", value: qbittorrent-exporter }
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: qbittorrent-exporter
+      # The full label set, not just the selector half: swapping the template's
+      # `.labels` helper for `.selectorLabels` drops these two silently.
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+      - exists:
+          path: metadata.labels["helm.sh/chart"]
       - equal: { path: "spec.rules[0].host", value: chart-example.local }
       - equal: { path: "spec.rules[0].http.paths[0].path", value: / }
       - equal: { path: "spec.rules[0].http.paths[0].pathType", value: ImplementationSpecific }
@@ -46,14 +59,15 @@ tests:
           value: platform
 
   # Two entries with two hosts each: a single entry cannot catch a range that
-  # only ever emits its first item.
+  # only ever emits its first item. A wildcard host covers the `| quote` - the
+  # unquoted form renders a YAML alias and the document stops parsing.
   - it: renders every tls entry and every host inside it
     set:
       ingress.enabled: true
       ingress.tls:
         - secretName: first-tls
           hosts:
-            - a.example.org
+            - "*.example.org"
             - b.example.org
         - secretName: second-tls
           hosts:
@@ -62,6 +76,7 @@ tests:
     asserts:
       - lengthEqual: { path: spec.tls, count: 2 }
       - equal: { path: "spec.tls[0].secretName", value: first-tls }
+      - equal: { path: "spec.tls[0].hosts[0]", value: "*.example.org" }
       - equal: { path: "spec.tls[0].hosts[1]", value: b.example.org }
       - equal: { path: "spec.tls[1].secretName", value: second-tls }
       - equal: { path: "spec.tls[1].hosts[1]", value: d.example.org }
@@ -70,7 +85,7 @@ tests:
     set:
       ingress.enabled: true
       ingress.hosts:
-        - host: first.example.org
+        - host: "*.example.org"
           paths:
             - path: /
               pathType: Prefix
@@ -83,7 +98,7 @@ tests:
     asserts:
       - lengthEqual: { path: spec.rules, count: 2 }
       - lengthEqual: { path: "spec.rules[0].http.paths", count: 2 }
-      - equal: { path: "spec.rules[0].host", value: first.example.org }
+      - equal: { path: "spec.rules[0].host", value: "*.example.org" }
       - equal: { path: "spec.rules[0].http.paths[1].path", value: /metrics }
       - equal: { path: "spec.rules[0].http.paths[1].pathType", value: Exact }
       - equal: { path: "spec.rules[1].host", value: second.example.org }
@@ -104,13 +119,13 @@ tests:
   - it: points the backend at the Service, reading name and port from values
     set:
       ingress.enabled: true
-      fullnameOverride: my-exporter
+      fullnameOverride: custom-name
       service.port: 9999
     asserts:
-      - equal: { path: metadata.name, value: my-exporter }
+      - equal: { path: metadata.name, value: custom-name }
       - equal:
           path: spec.rules[0].http.paths[0].backend.service.name
-          value: my-exporter
+          value: custom-name
       - equal:
           path: spec.rules[0].http.paths[0].backend.service.port.number
           value: 9999
