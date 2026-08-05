@@ -6,9 +6,15 @@ permissions: {}
 # is no help either — with no changed charts it prints "All charts linted successfully"
 # and exits 0 on zero work. A typo in kubeconform.sh would merge green.
 #
-# So: run the tier against the whole fleet whenever the tier itself changes. Path filters
-# are workflow-level in Actions, which is why this is a separate file rather than a job
-# in ci.yml. No ct and no kind here — this tier is cluster-free and takes seconds.
+# So: run the tier against the whole fleet whenever the tier changes, or when one of the
+# chart-side inputs `ct` cannot see changes — the helmignored ci/ overlays and tests/
+# suites below. Chart PRs usually touch templates/ and tests/ together, so this now fires
+# alongside ci.yml on most of them; that is fine, it is cluster-free and takes seconds.
+# Path filters are workflow-level in Actions, which is why this is a separate file rather
+# than a job in ci.yml.
+#
+# Not a required status check: a path-filtered check never reports on PRs that miss the
+# filter, so branch protection would block forever waiting on it.
 on:
   pull_request:
     branches:

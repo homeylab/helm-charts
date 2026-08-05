@@ -165,9 +165,11 @@ The **`Lint and unit-test changed charts`** check is required via branch protect
 
 ### When the tooling itself changes
 
-`ct` only ever looks under `chart-dirs: [charts]`, so a PR that edits the validation tier — `scripts/ci/**` or `.github/ct/**` — changes no chart, and every step above skips. `ct lint` is no safety net either: with nothing changed it prints `All charts linted successfully` and exits 0 on zero work.
+`ct` only ever looks under `chart-dirs: [charts]`, so a PR that edits the validation tier — `scripts/ci/**` or `.github/ct/**` — changes no chart, and every step above skips. `ct lint` is no safety net either: with nothing changed it prints `All charts linted successfully` and exits 0 on zero work. The same hole swallows the chart-side inputs `ct` cannot see, because they are helmignored: `charts/*/ci/kubeconform-overlay.yaml` and `charts/*/tests/**`.
 
-[`ci-tooling.yml`](.github/workflows/ci-tooling.yml) covers that case. It triggers on those paths only, and runs `helm unittest` + `scripts/ci/kubeconform.sh` against **every** chart — no `ct`, no kind, a handful of seconds. Editing the gate proves the gate still works fleet-wide.
+[`ci-tooling.yml`](.github/workflows/ci-tooling.yml) covers all of those. It triggers on the static tier *and* on those two chart-side paths, and runs `helm unittest` + `scripts/ci/kubeconform.sh` against **every** chart — no `ct`, no kind, a handful of seconds. Editing the gate proves the gate still works fleet-wide; adding a unit-test suite gets it run.
+
+It is not a required status check, though — a path-filtered check never reports on PRs that miss the filter, so branch protection would wait on it forever (same reasoning as `actionlint.yml` below, resolved the other way). Treat a red `ci-tooling` as blocking by convention, not by mechanism.
 
 The workflows themselves are the other half: nothing validated *them*, so a typo'd `uses:`, an undefined context property or a bad `if:` expression would merge silently and surface when a release failed. [`actionlint.yml`](.github/workflows/actionlint.yml) type-checks the lot. It runs on **every** PR rather than filtering on `.github/workflows/**`: it costs seconds, and a path-filtered check can never be required by branch protection — PRs that miss the filter never report it, so the merge blocks forever waiting on a status that will never arrive.
 
@@ -175,10 +177,12 @@ Mirrored locally by `task actionlint`. Install `shellcheck` alongside actionlint
 
 ### What counts as "changed" (`use-helmignore`)
 
-`ct.yaml` sets `use-helmignore: true`, and each active chart's `.helmignore` excludes `/ci/` and `/tests/` (`nut-exporter` is deprecated and has neither directory). Those paths are test scaffolding: they are run *from the repo* and are not shipped to chart consumers. Two consequences:
+`ct.yaml` sets `use-helmignore: true`, and every chart's `.helmignore` excludes `/ci/` and `/tests/` (`nut-exporter` included, since 1.1.1 — it has a `ci/` overlay but no `tests/`). Those paths are test scaffolding: they are run *from the repo* and are not shipped to chart consumers. Two consequences:
 
 - **A test-only edit is not a chart change.** Touch only `ci/*-values.yaml` or `tests/*_test.yaml` and the chart drops out of `ct list-changed` — no version bump is demanded, and no release is published for scaffolding that consumers never receive.
-- **The flip side: that edit also gets no CI run.** No lint, no unittest, no `ct install` until the chart itself changes. A broken scenario can sit unnoticed. If you edit a scenario on its own and want it exercised now, run `task verify APP=<chart>` / `task test APP=<chart>` locally.
+- **The flip side: that edit gets no `ct` run.** No `ct lint`, no version-increment check, no `ct install` until the chart itself changes. How much else runs depends on *which* scaffolding you touched:
+  - `tests/**` and `ci/kubeconform-overlay.yaml` are in [`ci-tooling.yml`](.github/workflows/ci-tooling.yml)'s path filter, so `helm unittest` and `kubeconform` still run — fleet-wide, not just on your chart.
+  - `ci/*-values.yaml` is in no filter and consumed by no cluster-free job, so a broken `ct install` scenario sits unnoticed. Run `task test APP=<chart>` locally.
 
 Both patterns are anchored (`/ci/`, not `ci/`) on purpose: an unanchored `tests/` also matches `templates/tests/` and would strip the `helm test` hooks out of the published package.
 
