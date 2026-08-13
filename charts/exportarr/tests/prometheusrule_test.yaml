@@ -60,7 +60,7 @@ tests:
 
   - it: does not render when metrics.enabled is false, even with prometheusRule.enabled
     # the two toggles are independent in values, so prometheusRule.enabled alone used to
-    # emit a rule for a chart that exports no metrics at all
+    # emit a rule for an umbrella whose Prometheus wiring is switched off
     set:
       exportarr.metrics.enabled: false
       exportarr.metrics.prometheusRule.enabled: true
@@ -69,3 +69,55 @@ tests:
           expr: up == 0
     asserts:
       - hasDocuments: { count: 0 }
+
+  - it: still renders when a per-instance metrics override re-enables metrics
+    # metrics.enabled is a global default that apps.<app>[].metrics.enabled overrides,
+    # so a global-off/instance-on install is still scraped and still wants the rule
+    set:
+      exportarr.metrics.enabled: false
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal:
+          path: spec.groups[0].rules[0].alert
+          value: TargetDown
+
+  - it: does not render when every enabled instance overrides metrics off
+    set:
+      exportarr.metrics.enabled: true
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
+
+  - it: renders for an enabled instance that inherits the global metrics default
+    set:
+      exportarr.metrics.enabled: true
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics: {}
+    asserts:
+      - hasDocuments: { count: 1 }

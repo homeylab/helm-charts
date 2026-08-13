@@ -1,4 +1,28 @@
-{{- if and .Values.exportarr.metrics.enabled .Values.exportarr.metrics.prometheusRule.enabled -}}
+{{/*
+The PrometheusRule is umbrella-wide, but metrics.enabled is a per-instance override
+(see deployment.yaml / servicemonitor.yaml). Render whenever at least one enabled
+instance has metrics on; with no instance enabled at all, fall back to the global value.
+*/}}
+{{- $anyInstance := false -}}
+{{- $anyMetrics := false -}}
+{{- range $instance_key, $instance_val := .Values.exportarr.apps }}
+{{- range $app := $instance_val }}
+{{- if $app.enabled }}
+{{- $anyInstance = true -}}
+{{- $appMetrics := $.Values.exportarr.metrics.enabled -}}
+{{- if $app.metrics }}
+{{- if hasKey $app.metrics "enabled" }}
+{{- $appMetrics = $app.metrics.enabled -}}
+{{- end }}
+{{- end }}
+{{- if $appMetrics }}
+{{- $anyMetrics = true -}}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- $metricsEnabled := ternary $anyMetrics .Values.exportarr.metrics.enabled $anyInstance -}}
+{{- if and $metricsEnabled .Values.exportarr.metrics.prometheusRule.enabled -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
