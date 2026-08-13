@@ -64,7 +64,7 @@ annotations:
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
     - kind: security
-      description: "exportarr.serviceAccount.automount false is now honoured on the pod spec, not only on the chart-managed ServiceAccount. With exportarr.serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Nothing is written to the pod spec when automount is true, so an external ServiceAccount that opts out of token mounting keeps its own setting. Default rendering is unchanged"
+      description: "exportarr.serviceAccount.automount false is now honoured on the pod spec, not only on the chart-managed ServiceAccount. With exportarr.serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Nothing is written to the pod spec when automount is true, so an external ServiceAccount that opts out of token mounting keeps its own setting. Default rendering is unchanged; with exportarr.serviceAccount.create true and automount false the effective behaviour is also unchanged, but the pod template gains the field and rolls once"
     - kind: fixed
       description: "the PrometheusRule is now gated on the same effective metrics switch the Deployment and ServiceMonitor use - exportarr.metrics.enabled, overridable per instance via apps.<app>[].metrics.enabled - as well as exportarr.metrics.prometheusRule.enabled. It previously rendered even with the umbrella's Prometheus wiring switched off. NOTE: if no enabled instance has metrics on, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
     - kind: changed

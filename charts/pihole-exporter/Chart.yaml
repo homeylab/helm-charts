@@ -49,7 +49,7 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
   artifacthub.io/changes: |
     - kind: security
-      description: "serviceAccount.automount false is now honoured on the pod spec, not only on the chart-managed ServiceAccount. With serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Nothing is written to the pod spec when automount is true, so an external ServiceAccount that opts out of token mounting keeps its own setting. Default rendering is unchanged"
+      description: "serviceAccount.automount false is now honoured on the pod spec, not only on the chart-managed ServiceAccount. With serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Nothing is written to the pod spec when automount is true, so an external ServiceAccount that opts out of token mounting keeps its own setting. Default rendering is unchanged; with serviceAccount.create true and automount false the effective behaviour is also unchanged, but the pod template gains the field and rolls once"
     - kind: fixed
       description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. It previously rendered even with the chart's Prometheus wiring - podAnnotations and ServiceMonitor - switched off. NOTE: if you run with metrics.enabled false and metrics.prometheusRule.enabled true, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
     - kind: changed

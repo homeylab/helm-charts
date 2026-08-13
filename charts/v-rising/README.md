@@ -124,7 +124,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `1.0.3` | `1.1.0` | **Only if you set `serviceAccount.create: false` together with `serviceAccount.automount: false`.** The pod spec now renders `automountServiceAccountToken: false`, so that combination finally takes effect and the pod stops receiving a ServiceAccount API token. It previously applied only to the chart-managed ServiceAccount and was ignored when pointing at an external one. With the default `automount: true` nothing is written to the pod spec, so rendering is unchanged and an external ServiceAccount that opts out of token mounting keeps its own setting. |
+| `1.0.3` | `1.1.0` | **Only if you set `serviceAccount.automount: false`.** The pod spec now renders `automountServiceAccountToken: false`. Together with `serviceAccount.create: false` that finally takes effect and the pod stops receiving a ServiceAccount API token — it previously applied only to the chart-managed ServiceAccount and was ignored when pointing at an external one. With `create: true` the effective behaviour is unchanged (the ServiceAccount already opted out) but the pod template changes, so expect one rollout on upgrade. With the default `automount: true` nothing is written to the pod spec, so rendering is unchanged and an external ServiceAccount that opts out of token mounting keeps its own setting. |
 | `0.X.X` | `1.0.0` | Image schema split, rcon Service renamed, and Ingress removed. **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
 ### Migrating to 1.0.0

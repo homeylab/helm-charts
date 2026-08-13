@@ -64,7 +64,7 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
     - kind: security
-      description: "serviceAccount.automount false is now honoured on the pod spec, not only on the chart-managed ServiceAccount. With serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Nothing is written to the pod spec when automount is true, so an external ServiceAccount that opts out of token mounting keeps its own setting. Default rendering is unchanged"
+      description: "serviceAccount.automount false is now honoured on the pod spec, not only on the chart-managed ServiceAccount. With serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Nothing is written to the pod spec when automount is true, so an external ServiceAccount that opts out of token mounting keeps its own setting. Default rendering is unchanged; with serviceAccount.create true and automount false the effective behaviour is also unchanged, but the pod template gains the field and rolls once"
     - kind: changed
       description: "the serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
     - kind: added
