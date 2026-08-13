@@ -51,7 +51,9 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
   artifacthub.io/changes: |
+    - kind: changed
+      description: "the pod spec no longer hard-codes automountServiceAccountToken true; it is rendered only when serviceAccount.automount is false. unpoller was the one chart in the fleet already setting the field, and writing true there overrode an external ServiceAccount that had opted out of token mounting. Effective behaviour is unchanged for chart-managed ServiceAccounts, but the pod template changes, so expect one rollout on upgrade"
     - kind: fixed
-      description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. It previously rendered for a chart exporting no metrics at all. NOTE: if you run with metrics.enabled false and metrics.prometheusRule.enabled true, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
+      description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. It previously rendered even with the chart's Prometheus wiring - podAnnotations and ServiceMonitor - switched off. NOTE: if you run with metrics.enabled false and metrics.prometheusRule.enabled true, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
     - kind: added
       description: "unit test coverage pinning both the default and the mutated value of serviceAccount.automount on the pod spec, and that the PrometheusRule stays unrendered with metrics disabled"

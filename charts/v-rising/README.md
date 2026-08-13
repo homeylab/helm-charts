@@ -124,7 +124,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `1.0.3` | `1.1.0` | **Only if you set `serviceAccount.create: false` together with `serviceAccount.automount: false`.** `automountServiceAccountToken` is now rendered on the pod spec, so that combination finally takes effect and the pod stops receiving a ServiceAccount API token. It previously applied only to the chart-managed ServiceAccount and was ignored when pointing at an external one. Defaults (`automount: true`) render exactly as before. |
+| `1.0.3` | `1.1.0` | **Only if you set `serviceAccount.create: false` together with `serviceAccount.automount: false`.** The pod spec now renders `automountServiceAccountToken: false`, so that combination finally takes effect and the pod stops receiving a ServiceAccount API token. It previously applied only to the chart-managed ServiceAccount and was ignored when pointing at an external one. With the default `automount: true` nothing is written to the pod spec, so rendering is unchanged and an external ServiceAccount that opts out of token mounting keeps its own setting. |
 | `0.X.X` | `1.0.0` | Image schema split, rcon Service renamed, and Ingress removed. **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
 ### Migrating to 1.0.0
@@ -200,7 +200,7 @@ This version graduates the chart to `1.0.0` and standardizes its schema to match
 | service.server.queryPort.port | int | `9877` | set query port for v rising |
 | service.server.type | string | `"ClusterIP"` | set type of service, example: `ClusterIP`, `NodePort`, `LoadBalancer` for v-rising server |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; also set on the pod spec, so it is honoured when pointing at an external ServiceAccount (create false) |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` | tolerations for pod assignment |

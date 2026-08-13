@@ -162,7 +162,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `1.0.3` | `1.1.0` | **Only if you set `serviceAccount.create: false` together with `serviceAccount.automount: false`.** `automountServiceAccountToken` is now rendered on the pod spec, so that combination finally takes effect and the pod stops receiving a ServiceAccount API token. It previously applied only to the chart-managed ServiceAccount and was ignored when pointing at an external one. Defaults (`automount: true`) render exactly as before. |
+| `1.0.3` | `1.1.0` | **Only if you set `serviceAccount.create: false` together with `serviceAccount.automount: false`.** The pod spec now renders `automountServiceAccountToken: false`, so that combination finally takes effect and the pod stops receiving a ServiceAccount API token. It previously applied only to the chart-managed ServiceAccount and was ignored when pointing at an external one. With the default `automount: true` nothing is written to the pod spec, so rendering is unchanged and an external ServiceAccount that opts out of token mounting keeps its own setting. |
 | `1.0.2` | `1.0.3` | **Only if you set `persistence.existingClaim`.** Earlier versions provisioned a redundant chart-managed PVC alongside your existing claim; `1.0.3` correctly stops rendering it, so `helm upgrade` **deletes that PVC** — and, under the default `Delete` reclaim policy, its PersistentVolume and any data on it. Nothing mounted it, so this is normally the desired cleanup. If you previously ran *without* `existingClaim`, accumulated exports on the chart-managed PVC, and later switched to `existingClaim`, back up or run `kubectl patch pv <pv> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'` **before** upgrading. |
 | `0.X.X` | `1.0.0` | Exporter upgraded to upstream `v3.0.0` (breaking config rewrite), `config.minio` replaced by `config.object_storage`, inner `config:` keys are now snake_case, and image schema standardized. **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
@@ -230,7 +230,7 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 | securityContext.allowPrivilegeEscalation | bool | `false` | disallow privilege escalation |
 | securityContext.capabilities.drop | list | `["ALL"]` | drop all Linux capabilities |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; also set on the pod spec, so it is honoured when pointing at an external ServiceAccount (create false) |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins |
 | serviceAccount.create | bool | `true` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` |  |

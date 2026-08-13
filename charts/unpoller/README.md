@@ -133,7 +133,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `4.2.0` | `4.3.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so in that combination it is **removed** on upgrade — it was alerting on a chart that exports no metrics. Set `metrics.enabled: true` to keep it. |
+| `4.2.0` | `4.3.0` | **Applies to every install.** The pod spec no longer hard-codes `automountServiceAccountToken: true`; it renders only when `serviceAccount.automount: false`, so an external ServiceAccount's own opt-out is honoured. Effective behaviour is unchanged for chart-managed ServiceAccounts, but the pod template changes — expect one rollout on upgrade.<br><br>**Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so in that combination it is **removed** on upgrade. `metrics.enabled` is the chart's Prometheus wiring switch (podAnnotations + ServiceMonitor) — the exporter still serves `/metrics` either way, so if you scrape it some other way and want the rule, set `metrics.enabled: true`. |
 | `3.X.X` | `4.0.0` | Standardized image schema, nested `tests.image.*` schema, chart-managed Secret for unifi/influxdb auth, hardened `securityContext`, and `appVersion` bumped to the current upstream `v3.3.1` image. **Read the [Migrating to 4.0.0](#migrating-to-400) section in full before upgrading.** |
 
 ### Migrating to 4.0.0
@@ -222,7 +222,7 @@ This version hardens the chart and standardizes its schema to match the other ho
 | service.protocol | string | `"TCP"` | set protocol for the service |
 | service.type | string | `"ClusterIP"` | set the service type |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; also set on the pod spec, so it is honoured when pointing at an external ServiceAccount (create false) |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | settings.influxdb.auth.auth_token | string | `""` | influxdb v2 auth token. Maps to UP_INFLUXDB_AUTH_TOKEN; when set, user/pass are omitted |
