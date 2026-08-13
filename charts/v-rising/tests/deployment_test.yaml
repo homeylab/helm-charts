@@ -108,9 +108,11 @@ tests:
           path: spec.template.spec.volumes[1].persistentVolumeClaim.claimName
           value: my-world-claim
 
-  - it: defaults automountServiceAccountToken to true on the pod spec
+  - it: leaves automountServiceAccountToken unset on the pod spec by default
+    # the pod spec wins over the ServiceAccount, so writing true here would override
+    # an external ServiceAccount that opted out - only the false case is rendered
     asserts:
-      - equal: { path: spec.template.spec.automountServiceAccountToken, value: true }
+      - notExists: { path: spec.template.spec.automountServiceAccountToken }
 
   - it: honours serviceAccount.automount when pointing at an external ServiceAccount
     # the knob used to be wired only into the chart-managed ServiceAccount, so with

@@ -35,7 +35,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "bookstack-file-exporter.serviceAccountName" . }}
-      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      {{- if not .Values.serviceAccount.automount }}
+      automountServiceAccountToken: false
+      {{- end }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}

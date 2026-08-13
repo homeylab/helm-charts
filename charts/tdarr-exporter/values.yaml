@@ -125,7 +125,7 @@ extraEnv: {}
 serviceAccount:
   # -- specifies whether a service account should be created
   create: false
-  # -- automatically mount a ServiceAccount's API credentials; also set on the pod spec, so it is honoured when pointing at an external ServiceAccount (create false)
+  # -- automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins
   automount: true
   # -- annotations to add to the service account
   annotations: {}

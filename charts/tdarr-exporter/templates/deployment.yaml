@@ -35,7 +35,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "tdarr-exporter.serviceAccountName" . }}
-      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      {{- if not .Values.serviceAccount.automount }}
+      automountServiceAccountToken: false
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

@@ -99,11 +99,12 @@ tests:
     asserts:
       - notExists: { path: spec.jobTemplate.spec.template.spec.imagePullSecrets }
 
-  - it: defaults automountServiceAccountToken to true on the CronJob pod spec
+  - it: leaves automountServiceAccountToken unset on the CronJob pod spec by default
+    # the pod spec wins over the ServiceAccount, so writing true here would override
+    # an external ServiceAccount that opted out - only the false case is rendered
     asserts:
-      - equal:
+      - notExists:
           path: spec.jobTemplate.spec.template.spec.automountServiceAccountToken
-          value: true
 
   - it: honours serviceAccount.automount on the CronJob pod spec with an external ServiceAccount
     set:
