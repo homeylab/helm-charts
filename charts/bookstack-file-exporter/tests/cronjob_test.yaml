@@ -103,6 +103,9 @@ tests:
     # the pod spec wins over the ServiceAccount, so writing true here would override
     # an external ServiceAccount that opted out - only the false case is rendered
     asserts:
+      # anchor the render so the notExists below cannot pass on an absent document
+      - exists:
+          path: spec.jobTemplate.spec.template.spec.serviceAccountName
       - notExists:
           path: spec.jobTemplate.spec.template.spec.automountServiceAccountToken
 

@@ -153,6 +153,8 @@ tests:
         enabled: true
         url: http://radarr:7878
     asserts:
+      # anchor the render so the notExists below cannot pass on an absent document
+      - exists: { path: spec.template.spec.serviceAccountName }
       - notExists: { path: spec.template.spec.automountServiceAccountToken }
 
   - it: honours serviceAccount.automount when pointing at an external ServiceAccount

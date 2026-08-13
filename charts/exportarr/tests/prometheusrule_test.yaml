@@ -107,6 +107,25 @@ tests:
     asserts:
       - hasDocuments: { count: 0 }
 
+  - it: inherits the global metrics default when the instance sets other metrics keys
+    # a metrics block without an "enabled" key must fall through to the global value,
+    # which is what the hasKey guard buys - without it the missing key reads as false
+    set:
+      exportarr.metrics.enabled: true
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          serviceMonitor:
+            enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+
   - it: renders for an enabled instance that inherits the global metrics default
     set:
       exportarr.metrics.enabled: true
