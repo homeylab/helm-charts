@@ -248,7 +248,11 @@ httproute:
 # so one block covers every chart that ships the template.
 serviceAccount:
   create: true
-  automount: true
+  # false on purpose: the pod specs render `automountServiceAccountToken` only in
+  # the opt-out branch, so `true` here would leave that branch unvalidated in both
+  # passes (pass 1 renders the chart default, which is also true). The SA object
+  # takes either value.
+  automount: false
   annotations:
     kubeconform.example.org/first: "1"
     kubeconform.example.org/second: "2"

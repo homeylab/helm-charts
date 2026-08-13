@@ -113,7 +113,9 @@ exportarr:
             summary: Exporter target is flapping.
   serviceAccount:
     create: true
-    automount: true
+    # false on purpose - see the note in scripts/ci/kubeconform-values.yaml: the
+    # pod spec renders automountServiceAccountToken only in the opt-out branch.
+    automount: false
     annotations:
       kubeconform.example.org/first: "1"
       kubeconform.example.org/second: "2"
