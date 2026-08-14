@@ -118,3 +118,13 @@ tests:
     asserts:
       - equal: { path: spec.template.spec.serviceAccountName, value: default }
       - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }
+
+  - it: honours serviceAccount.automount on a chart-managed ServiceAccount
+    # the gate is on automount alone, so a chart-managed ServiceAccount must opt the
+    # pod out too - the SA object's own field does not reach an already-created pod template
+    set:
+      serviceAccount.create: true
+      serviceAccount.automount: false
+    asserts:
+      - exists: { path: spec.template.spec.serviceAccountName }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }

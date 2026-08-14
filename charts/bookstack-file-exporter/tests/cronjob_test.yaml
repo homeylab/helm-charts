@@ -120,3 +120,31 @@ tests:
       - equal:
           path: spec.jobTemplate.spec.template.spec.automountServiceAccountToken
           value: false
+
+  - it: does not force a token mount onto an external ServiceAccount from the CronJob
+    # create false + automount true must stay silent so an external ServiceAccount
+    # carrying automountServiceAccountToken false keeps its own opt-out. This chart
+    # defaults create true, so the default case above does not cover this pairing -
+    # and the CronJob is the default mode (config.run_interval == 0)
+    set:
+      serviceAccount.create: false
+      serviceAccount.automount: true
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.serviceAccountName
+          value: default
+      - notExists:
+          path: spec.jobTemplate.spec.template.spec.automountServiceAccountToken
+
+  - it: honours serviceAccount.automount on the CronJob pod spec with a chart-managed ServiceAccount
+    # the gate is on automount alone, so a chart-managed ServiceAccount must opt the
+    # pod out too - the SA object's own field does not reach an already-created pod template
+    set:
+      serviceAccount.create: true
+      serviceAccount.automount: false
+    asserts:
+      - exists:
+          path: spec.jobTemplate.spec.template.spec.serviceAccountName
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.automountServiceAccountToken
+          value: false
