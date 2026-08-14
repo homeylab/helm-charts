@@ -1,0 +1,51 @@
+suite: exportarr values.schema.json
+# The booleans below are read by `{{- if not ... }}` / `{{- if ... }}` branches, and a
+# YAML string is truthy in Go templates - `automount: "false"` would skip the pod-spec
+# opt-out, and `metrics.enabled: "false"` would leave metrics on. values.schema.json is
+# what rejects that input, and nothing else pins the schema, so these cases do.
+templates:
+  - templates/serviceaccount.yaml
+release:
+  name: ex
+tests:
+  - it: rejects a string serviceAccount.automount
+    set:
+      exportarr.serviceAccount.create: true
+      exportarr.serviceAccount.automount: "false"
+    asserts:
+      - failedTemplate:
+          errorMessage: "values don't meet the specifications of the schema(s) in the following chart(s):\nexportarr:\n- at '/exportarr/serviceAccount/automount': got string, want boolean\n"
+
+  - it: accepts a boolean serviceAccount.automount
+    set:
+      exportarr.serviceAccount.create: true
+      exportarr.serviceAccount.automount: false
+    asserts:
+      - equal: { path: automountServiceAccountToken, value: false }
+
+  - it: rejects a string per-instance metrics.enabled
+    set:
+      exportarr.serviceAccount.create: true
+      exportarr.apps.radarr:
+        - name: main
+          enabled: true
+          url: http://radarr:7878
+          metrics:
+            enabled: "false"
+    asserts:
+      - failedTemplate:
+          errorMessage: "values don't meet the specifications of the schema(s) in the following chart(s):\nexportarr:\n- at '/exportarr/apps/radarr/0/metrics/enabled': got string, want boolean\n"
+
+  - it: rejects a string per-instance metrics.serviceMonitor.enabled
+    set:
+      exportarr.serviceAccount.create: true
+      exportarr.apps.radarr:
+        - name: main
+          enabled: true
+          url: http://radarr:7878
+          metrics:
+            serviceMonitor:
+              enabled: "true"
+    asserts:
+      - failedTemplate:
+          errorMessage: "values don't meet the specifications of the schema(s) in the following chart(s):\nexportarr:\n- at '/exportarr/apps/radarr/0/metrics/serviceMonitor/enabled': got string, want boolean\n"

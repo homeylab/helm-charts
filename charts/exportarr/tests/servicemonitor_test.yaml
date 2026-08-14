@@ -57,3 +57,32 @@ tests:
             enabled: false
     asserts:
       - hasDocuments: { count: 0 }
+
+  - it: per-instance metrics.enabled false suppresses the ServiceMonitor
+    # metrics.enabled is resolved by the shared exportarr.metricsEnabled helper, which
+    # this template, deployment.yaml and prometheusrule.yaml all consume - pin it here
+    # so breaking the helper cannot leave this suite green
+    set:
+      exportarr.metrics.serviceMonitor.enabled: true
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
+
+  - it: per-instance metrics.enabled true overrides a disabled global default
+    set:
+      exportarr.metrics.enabled: false
+      exportarr.metrics.serviceMonitor.enabled: true
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal: { path: metadata.name, value: ex-exportarr-radarr-main }
