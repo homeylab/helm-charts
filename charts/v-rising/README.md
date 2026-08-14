@@ -199,11 +199,11 @@ This version graduates the chart to `1.0.0` and standardizes its schema to match
 | service.server.queryPort.port | int | `9877` | set query port for v rising |
 | service.server.type | string | `"ClusterIP"` | set type of service, example: `ClusterIP`, `NodePort`, `LoadBalancer` for v-rising server |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` | tolerations for pod assignment |
-| updateStrategy | object | `{"type":"Recreate"}` | deployment update strategy. `Recreate` terminates the old pod before creating the new one, avoiding a ReadWriteOnce PVC multi-attach deadlock on upgrade (the game server holds its steam/world RWO volumes). Override to `{type: RollingUpdate}` only if your persistence supports ReadWriteMany. |
+| updateStrategy | object | `{"type":"Recreate"}` | deployment update strategy; `Recreate` avoids a ReadWriteOnce multi-attach deadlock on upgrade. Use `{type: RollingUpdate}` only if your persistence supports ReadWriteMany. |
 | volumeMounts | list | `[]` | additional volumeMounts on the output Deployment definition |
 | volumes | list | `[]` | additional volumes on the output Deployment definition |
 

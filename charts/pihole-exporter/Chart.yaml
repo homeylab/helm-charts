@@ -49,12 +49,12 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
   artifacthub.io/changes: |
     - kind: security
-      description: "serviceAccount.automount false is now honoured on the pod spec, not only on the chart-managed ServiceAccount. With serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Nothing is written to the pod spec when automount is true, so an external ServiceAccount that opts out of token mounting keeps its own setting. Default rendering is unchanged; with serviceAccount.create true and automount false the effective behaviour is also unchanged, but the pod template gains the field and rolls once"
+      description: "serviceAccount.automount false now reaches the pod spec, so it applies with an external ServiceAccount (serviceAccount.create false) too - previously it only set the chart-managed ServiceAccount and was dropped. Nothing is written when automount is true. Default rendering unchanged; affected pods roll once"
     - kind: fixed
-      description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. It previously rendered even with the chart's Prometheus wiring - podAnnotations and ServiceMonitor - switched off. NOTE: if you run with metrics.enabled false and metrics.prometheusRule.enabled true, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
+      description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. NOTE: with metrics.enabled false it is REMOVED on upgrade - see the upgrade matrix in the README"
+    - kind: fixed
+      description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
     - kind: changed
       description: "the serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
     - kind: added
-      description: "unit test coverage pinning both the default and the mutated value of serviceAccount.automount on the pod spec, and that the PrometheusRule stays unrendered with metrics disabled"
-    - kind: fixed
-      description: "a PrometheusRule is no longer rendered when metrics.prometheusRule.enabled is true but metrics.prometheusRule.rules is empty. The spec block takes its only child from the rules list, so that combination emitted `spec: null` - rejected by the PrometheusRule CRD as \"got null, want object\", an object that could never be applied. Set rules to render one"
+      description: "unit test coverage for serviceAccount.automount on both the pod spec and the ServiceAccount object"

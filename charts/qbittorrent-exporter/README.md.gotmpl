@@ -106,7 +106,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `1.1.0` | `1.2.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so in that combination it is **removed** on upgrade and its alerts stop firing. `metrics.enabled` is the chart's Prometheus wiring switch (podAnnotations + ServiceMonitor) — the exporter still serves `/metrics` either way, so if you scrape it some other way and want the rule, set `metrics.enabled: true`. |
+| `1.1.0` | `1.2.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so it is **removed** on upgrade and its alerts stop firing. Set `metrics.enabled: true` to keep it. |
 | `0.1.X` | `1.0.0` | Backing exporter swapped, hardened `securityContext`, standardized image schema, chart-managed Secret. **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
 ### Migrating to 1.0.0

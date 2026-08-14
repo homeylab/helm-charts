@@ -105,7 +105,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `2.0.0` | `2.1.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so in that combination it is **removed** on upgrade and its alerts stop firing. `metrics.enabled` is the chart's Prometheus wiring switch (podAnnotations + ServiceMonitor) — the exporter still serves `/metrics` either way, so if you scrape it some other way and want the rule, set `metrics.enabled: true`. |
+| `2.0.0` | `2.1.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so it is **removed** on upgrade and its alerts stop firing. Set `metrics.enabled: true` to keep it. |
 | `1.X.X` | `2.0.0` | The `helm test` image values moved from `testConnImage.*` to `tests.image.*`. Only affects you if you overrode those values. **Read the [Migrating to 2.0.0](#migrating-to-200) section before upgrading.** |
 | `0.1.X` | `1.0.0` | Hardened `securityContext` defaults and a standardized image schema now apply; credentials move into a chart-managed Secret (behavior-preserving). **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
@@ -206,7 +206,7 @@ First major release. Most changes are transparent if you already set `settings.a
 | service.protocol | string | `"TCP"` | set protocol for the service |
 | service.type | string | `"ClusterIP"` |  |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | settings.auth | object | `{"existingSecret":"","password":"","token":""}` | Set auth configuration for pihole. As of pihole-exporter v1.x (Pi-hole v6 API) the exporter reads only `PIHOLE_PASSWORD`. It accepts either the Pi-hole app password or the legacy WEBPASSWORD API token. |

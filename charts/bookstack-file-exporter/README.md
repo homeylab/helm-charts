@@ -186,14 +186,14 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 | auth.tokenId | string | `""` | BookStack API token id. Injected as env `BOOKSTACK_TOKEN_ID` via a chart-managed Secret. Leave empty when using `existingSecret` |
 | auth.tokenSecret | string | `""` | BookStack API token secret. Injected as env `BOOKSTACK_TOKEN_SECRET` via a chart-managed Secret. Leave empty when using `existingSecret` |
 | config | object | `{"existingConfigMap":"","formats":["markdown"],"health_host":"","health_port":"","host":"http://bookstack.bookstack.svc.cluster.local","keep_last":1,"object_storage":[],"run_interval":0}` | exporter configuration, rendered into config.yml (snake_case, 1:1 with upstream; see notes above) |
-| config.existingConfigMap | string | `""` | use an existing ConfigMap for config.yml instead of the chart-rendered one (must contain a `config.yml` key). When set, the rest of the `config` block below is ignored and the chart's own ConfigMap is not rendered. Useful for GitOps-managed config or upstream keys not yet modeled by this chart |
+| config.existingConfigMap | string | `""` | use an existing ConfigMap for config.yml instead of the chart-rendered one (must contain a `config.yml` key); the rest of the `config` block is then ignored |
 | config.formats | list | `["markdown"]` | one or more export formats (markdown, html, pdf, plaintext, zip) |
 | config.health_host | string | `""` | optional health check server bind host; maps to upstream `health_host`. Omitted from the rendered config when empty |
-| config.health_port | string | `""` | optional health check server port; when set, the exporter binds a `/healthz` server and liveness/readiness probes are enabled in Deployment mode (`run_interval > 0`). Omitted from the rendered config (probes disabled) when empty. Maps to upstream `health_port` |
+| config.health_port | string | `""` | health check server port; when set, the exporter binds `/healthz` and probes are enabled in Deployment mode. Omitted from the config when empty |
 | config.host | string | `"http://bookstack.bookstack.svc.cluster.local"` | required: URL of the BookStack instance to export from |
 | config.keep_last | int | `1` | how many backups to keep on the local filesystem; `-1` keeps all (requires at least one `object_storage` target). Upstream default is `0`; this chart defaults to `1` to preserve the previous chart's default behavior |
 | config.object_storage | list | `[]` | optional list of S3 / S3-compatible remote storage targets to also upload backups to; omitted from the rendered config when empty. AWS S3 is used when `endpoint` is unset, otherwise treated as S3-compatible |
-| config.run_interval | int | `0` | if `run_interval` is > `0`, the exporter runs as a Deployment and waits the given number of seconds between runs; `0` (default) uses a CronJob (see `cron.*`) instead. NOTE: upstream's app-native `run_schedule` is not supported by this chart (it cannot fire under CronJob mode, and is redundant under Deployment mode) and setting it will fail the render - use CronJob scheduling (`run_interval: 0` + `cron.schedule`) or this interval loop (`run_interval > 0`) instead |
+| config.run_interval | int | `0` | seconds between runs; `> 0` runs the exporter as a Deployment, `0` (default) uses a CronJob (see `cron.*`). Upstream's `run_schedule` is unsupported here and fails the render - use `cron.schedule` or this interval |
 | cron.concurrencyPolicy | string | `"Forbid"` | set the concurrency policy |
 | cron.restartPolicy | string | `"OnFailure"` | set restart policy |
 | cron.schedule | string | `"@daily"` | applied when `config.run_interval == 0` (CronJob mode); set a valid cron schedule |
@@ -229,7 +229,7 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 | securityContext.allowPrivilegeEscalation | bool | `false` | disallow privilege escalation |
 | securityContext.capabilities.drop | list | `["ALL"]` | drop all Linux capabilities |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
 | serviceAccount.create | bool | `true` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` |  |

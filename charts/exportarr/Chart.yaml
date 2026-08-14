@@ -64,16 +64,16 @@ annotations:
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
     - kind: security
-      description: "exportarr.serviceAccount.automount false is now honoured on the pod spec, not only on the chart-managed ServiceAccount. With exportarr.serviceAccount.create false the setting was silently dropped, so a chart pointed at an external ServiceAccount mounted an API token regardless. Nothing is written to the pod spec when automount is true, so an external ServiceAccount that opts out of token mounting keeps its own setting. Default rendering is unchanged; with exportarr.serviceAccount.create true and automount false the effective behaviour is also unchanged, but the pod template gains the field and rolls once"
+      description: "exportarr.serviceAccount.automount false now reaches the pod spec, so it applies with an external ServiceAccount (exportarr.serviceAccount.create false) too - previously it only set the chart-managed ServiceAccount and was dropped. Nothing is written when automount is true. Default rendering unchanged; affected pods roll once"
     - kind: fixed
-      description: "the PrometheusRule is now gated on the same effective metrics switch the Deployment and ServiceMonitor use - exportarr.metrics.enabled, overridable per instance via apps.<app>[].metrics.enabled - as well as exportarr.metrics.prometheusRule.enabled. It previously rendered even with the umbrella's Prometheus wiring switched off. NOTE: if no enabled instance has metrics on, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
+      description: "the PrometheusRule is now gated on the same effective metrics switch the Deployment and ServiceMonitor use - exportarr.metrics.enabled, overridable per instance - as well as prometheusRule.enabled. NOTE: with no enabled instance scraping, it is REMOVED on upgrade"
+    - kind: fixed
+      description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
     - kind: changed
-      description: "values.schema.json now types the booleans the new render branches test with `not` and `if`: exportarr.serviceAccount.automount, and per instance apps.<app>[].metrics.enabled and apps.<app>[].metrics.serviceMonitor.enabled. A string - from `--set-string` or a quoted values entry - is truthy in Go templates, so `automount: \"false\"` would skip the pod-spec opt-out and `metrics.enabled: \"false\"` would leave metrics on. Both are now rejected at render time. The ServiceAccount object always interpolated automount directly and was never affected"
+      description: "values.schema.json now types the booleans the render branches test: serviceAccount.automount and per-instance metrics.enabled / metrics.serviceMonitor.enabled. A string is truthy in Go templates, so those values are now rejected at render time"
+    - kind: changed
+      description: "the per-instance metrics resolution duplicated across deployment.yaml, servicemonitor.yaml and prometheusrule.yaml is now one exportarr.metricsEnabled helper; rendered output is unchanged"
     - kind: changed
       description: "the exportarr.serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
-    - kind: changed
-      description: "the per-instance metrics resolution that deployment.yaml, servicemonitor.yaml and prometheusrule.yaml each re-derived is now a single exportarr.metricsEnabled helper. Rendered output is byte-identical across a matrix of instance and override combinations; the templates change so that the three copies cannot drift apart again"
     - kind: added
-      description: "unit test coverage pinning both the default and the mutated value of exportarr.serviceAccount.automount on the pod spec, and the PrometheusRule gate across metrics disabled, per-instance overrides in both directions, and mixed multi-instance installs"
-    - kind: fixed
-      description: "a PrometheusRule is no longer rendered when exportarr.metrics.prometheusRule.enabled is true but exportarr.metrics.prometheusRule.rules is empty. The spec block takes its only child from the rules list, so that combination emitted `spec: null` - rejected by the PrometheusRule CRD as \"got null, want object\", an object that could never be applied. Set rules to render one"
+      description: "unit test coverage for exportarr.serviceAccount.automount on the pod spec and the ServiceAccount object, and for the PrometheusRule gate across per-instance overrides and multi-instance installs"

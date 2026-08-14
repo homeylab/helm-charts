@@ -105,7 +105,7 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `2.1.0` | `2.2.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so in that combination it is **removed** on upgrade and its alerts stop firing. `metrics.enabled` is the chart's Prometheus wiring switch (podAnnotations + ServiceMonitor) — the exporter still serves `/metrics` either way, so if you scrape it some other way and want the rule, set `metrics.enabled: true`. |
+| `2.1.0` | `2.2.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so it is **removed** on upgrade and its alerts stop firing. Set `metrics.enabled: true` to keep it. |
 | `1.X.X` | `2.0.0` | Hardened `securityContext`, standardized image schema, chart-managed Secret for the inline API key, and `appVersion` bumped to the current upstream `v3.0.0` image. **Read the [Migrating to 2.0.0](#migrating-to-200) section in full before upgrading.** |
 | `1.1.X` | `1.2.0` | Exporter upgraded to upstream `v2.x` (`appVersion` `1.4.3` -> `2.1.0`). No chart configuration changes. This is a breaking _upstream_ release: it requires Tdarr `v2.24.01`+ and renames/removes many Prometheus metrics and labels, so existing dashboards and alerts will break. Review the [upstream v2.0.0 release notes](https://github.com/homeylab/tdarr-exporter/releases/tag/v2.0.0) and reimport the [Grafana dashboard](https://grafana.com/grafana/dashboards/20388-tdarr/) before upgrading. |
 
@@ -158,7 +158,7 @@ This version hardens the chart and standardizes its schema to match the other ho
 | metrics.prometheusRule.rules | list | `[]` | alerting/recording rules rendered under a single group |
 | metrics.serviceMonitor.additionalLabels | object | `{}` | set additional labels for serviceMonitor |
 | metrics.serviceMonitor.enabled | bool | `false` | enable/disable serviceMonitor, if enabled podAnnotations will be ignored |
-| metrics.serviceMonitor.interval | string | `"1m"` | how often to scrape for serviceMonitor change frequency of scrapes on tdarr here, a decent value range to start from is 1m to 2m; if you want your running transcode/health jobs to refresh more often, try lowering this; if you find it hitting your tdarr instance too often, try increasing this |
+| metrics.serviceMonitor.interval | string | `"1m"` | how often to scrape for serviceMonitor; 1m-2m is a sensible range - lower it to refresh running transcode/health jobs more often |
 | metrics.serviceMonitor.metricRelabelings | list | `[]` |  |
 | metrics.serviceMonitor.path | string | `"/metrics"` | set the path for prometheus scraping for serviceMonitor |
 | metrics.serviceMonitor.relabelings | list | `[]` |  |
@@ -190,7 +190,7 @@ This version hardens the chart and standardizes its schema to match the other ho
 | service.protocol | string | `"TCP"` | set protocol for the service |
 | service.type | string | `"ClusterIP"` |  |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | settings.config.apiKey | string | `""` | Tdarr API key, rendered into a chart-managed Secret. Ignored if `existingSecret.name` is set. If neither is set, the exporter connects unauthenticated |
