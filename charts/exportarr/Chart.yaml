@@ -68,6 +68,10 @@ annotations:
     - kind: fixed
       description: "the PrometheusRule is now gated on the same effective metrics switch the Deployment and ServiceMonitor use - exportarr.metrics.enabled, overridable per instance via apps.<app>[].metrics.enabled - as well as exportarr.metrics.prometheusRule.enabled. It previously rendered even with the umbrella's Prometheus wiring switched off. NOTE: if no enabled instance has metrics on, the PrometheusRule is REMOVED on upgrade - see the upgrade matrix in the README"
     - kind: changed
+      description: "values.schema.json now types the booleans the new render branches test with `not` and `if`: exportarr.serviceAccount.automount, and per instance apps.<app>[].metrics.enabled and apps.<app>[].metrics.serviceMonitor.enabled. A string - from `--set-string` or a quoted values entry - is truthy in Go templates, so `automount: \"false\"` would skip the pod-spec opt-out and `metrics.enabled: \"false\"` would leave metrics on. Both are now rejected at render time. The ServiceAccount object always interpolated automount directly and was never affected"
+    - kind: changed
       description: "the exportarr.serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
+    - kind: changed
+      description: "the per-instance metrics resolution that deployment.yaml, servicemonitor.yaml and prometheusrule.yaml each re-derived is now a single exportarr.metricsEnabled helper. Rendered output is byte-identical across a matrix of instance and override combinations; the templates change so that the three copies cannot drift apart again"
     - kind: added
-      description: "unit test coverage pinning both the default and the mutated value of exportarr.serviceAccount.automount on the pod spec, and that the PrometheusRule stays unrendered with metrics disabled"
+      description: "unit test coverage pinning both the default and the mutated value of exportarr.serviceAccount.automount on the pod spec, and the PrometheusRule gate across metrics disabled, per-instance overrides in both directions, and mixed multi-instance installs"

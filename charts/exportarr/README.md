@@ -222,7 +222,6 @@ This version hardens the umbrella chart and swaps the backing image for the opti
 | exportarr.service.port | int | `9707` | port for exportarr metrics scraping |
 | exportarr.service.protocol | string | `"TCP"` | protocol for the service |
 | exportarr.service.type | string | `"ClusterIP"` | Kubernetes Service type |
-| exportarr.serviceAccount | object | `{"annotations":{},"automount":true,"create":false,"name":""}` | serviceAccount configuration |
 | exportarr.serviceAccount.annotations | object | `{}` | annotations to add to the service account |
 | exportarr.serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; when false the pod spec opts out too, so it is honoured when pointing at an external ServiceAccount (create false). When true nothing is written to the pod spec, so an external ServiceAccount's own opt-out still wins |
 | exportarr.serviceAccount.create | bool | `false` | specifies whether a service account should be created |

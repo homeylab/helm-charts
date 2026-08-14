@@ -348,7 +348,9 @@ exportarr:
     failureThreshold: 5
     successThreshold: 1
 
-  # -- serviceAccount configuration
+  ## serviceAccount configuration. No `# --` on this key on purpose: the child
+  ## keys below carry their own, and marking both makes helm-docs emit a
+  ## whole-object row plus a row per child.
   serviceAccount:
     # -- specifies whether a service account should be created
     create: false
