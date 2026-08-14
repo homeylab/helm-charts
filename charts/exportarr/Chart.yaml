@@ -75,3 +75,5 @@ annotations:
       description: "the per-instance metrics resolution that deployment.yaml, servicemonitor.yaml and prometheusrule.yaml each re-derived is now a single exportarr.metricsEnabled helper. Rendered output is byte-identical across a matrix of instance and override combinations; the templates change so that the three copies cannot drift apart again"
     - kind: added
       description: "unit test coverage pinning both the default and the mutated value of exportarr.serviceAccount.automount on the pod spec, and the PrometheusRule gate across metrics disabled, per-instance overrides in both directions, and mixed multi-instance installs"
+    - kind: fixed
+      description: "a PrometheusRule is no longer rendered when exportarr.metrics.prometheusRule.enabled is true but exportarr.metrics.prometheusRule.rules is empty. The spec block takes its only child from the rules list, so that combination emitted `spec: null` - rejected by the PrometheusRule CRD as \"got null, want object\", an object that could never be applied. Set rules to render one"

@@ -9,12 +9,14 @@ tests:
       exportarr.metrics.prometheusRule.enabled: false
     asserts:
       - hasDocuments: { count: 0 }
-  - it: omits groups entirely when enabled with no rules
+  - it: does not render when enabled with no rules
+    # `spec` gets its only child from the rules block, so rendering with an empty
+    # rules list emitted `spec: null` - rejected by the CRD as "got null, want
+    # object", i.e. an object that could never be applied
     set:
       exportarr.metrics.prometheusRule.enabled: true
     asserts:
-      - hasDocuments: { count: 1 }
-      - notExists: { path: spec.groups }
+      - hasDocuments: { count: 0 }
   - it: renders one umbrella-wide PrometheusRule with the rule when enabled
     set:
       exportarr.metrics.prometheusRule.enabled: true

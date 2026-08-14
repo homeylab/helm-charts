@@ -42,3 +42,5 @@ annotations:
       description: "the serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
     - kind: added
       description: "unit test coverage pinning both the default and the mutated value of serviceAccount.automount on the pod spec, and that the PrometheusRule stays unrendered with metrics disabled"
+    - kind: fixed
+      description: "a PrometheusRule is no longer rendered when metrics.prometheusRule.enabled is true but metrics.prometheusRule.rules is empty. The spec block takes its only child from the rules list, so that combination emitted `spec: null` - rejected by the PrometheusRule CRD as \"got null, want object\", an object that could never be applied. Set rules to render one"
