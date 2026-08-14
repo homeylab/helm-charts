@@ -51,6 +51,29 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Effective metrics switch for a single app instance.
+
+exportarr.metrics.enabled is the umbrella-wide default; apps.<app>[].metrics.enabled
+overrides it per instance. A define can only return a string, so this returns "true"
+when metrics are on and "" when they are off - callers compare:
+
+  {{- $metricsEnabled := eq (include "exportarr.metricsEnabled" (dict "app" $app "root" $)) "true" -}}
+
+Takes a dict of:
+  app  - one entry from apps.<app>[]
+  root - the root context ($)
+*/}}
+{{- define "exportarr.metricsEnabled" -}}
+{{- $enabled := .root.Values.exportarr.metrics.enabled -}}
+{{- if .app.metrics -}}
+{{- if hasKey .app.metrics "enabled" -}}
+{{- $enabled = .app.metrics.enabled -}}
+{{- end -}}
+{{- end -}}
+{{- if $enabled -}}true{{- end -}}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "exportarr.serviceAccountName" -}}

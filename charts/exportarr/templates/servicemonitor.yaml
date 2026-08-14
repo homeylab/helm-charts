@@ -2,15 +2,11 @@
 {{- range $app := $instance_val }}
 {{- if $app.enabled }}
 
-{{- $metricsEnabled := $.Values.exportarr.metrics.enabled -}}
+{{- $metricsEnabled := eq (include "exportarr.metricsEnabled" (dict "app" $app "root" $)) "true" -}}
 {{- $smConfig := $.Values.exportarr.metrics.serviceMonitor -}}
 {{- $smEnabled := $.Values.exportarr.metrics.serviceMonitor.enabled -}}
 
 {{- if $app.metrics }}
-{{- if hasKey $app.metrics "enabled" }}
-{{- $metricsEnabled = $app.metrics.enabled -}}
-{{- end }}
-
 {{- if and ($metricsEnabled) ($app.metrics.serviceMonitor) }}
 {{- if hasKey $app.metrics.serviceMonitor "enabled" }}
 {{- $smEnabled = $app.metrics.serviceMonitor.enabled -}}

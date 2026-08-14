@@ -9,13 +9,7 @@ instance has metrics on; with no instance enabled at all, fall back to the globa
 {{- range $app := $instance_val }}
 {{- if $app.enabled }}
 {{- $anyInstance = true -}}
-{{- $appMetrics := $.Values.exportarr.metrics.enabled -}}
-{{- if $app.metrics }}
-{{- if hasKey $app.metrics "enabled" }}
-{{- $appMetrics = $app.metrics.enabled -}}
-{{- end }}
-{{- end }}
-{{- if $appMetrics }}
+{{- if eq (include "exportarr.metricsEnabled" (dict "app" $app "root" $)) "true" }}
 {{- $anyMetrics = true -}}
 {{- end }}
 {{- end }}
