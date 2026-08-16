@@ -3,6 +3,48 @@ entries:
   bookstack:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: "the bookstack-file-exporter subchart is re-pinned 1.0.3 -> 1.1.0, so the serviceAccount.automount fix in 5.4.0 now reaches its Deployment and CronJob pod specs. Only relevant with bookstack-file-exporter.enabled; no values keys changed"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-08-16T06:26:56.596531491Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.1.0
+    description: bookstack documentation platform
+    digest: dc77083fb425523a557b83f1f181f461ff39c782f0d0cfcb2217c9274036b70b
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.5.0/bookstack-5.5.0.tgz
+    version: 5.5.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: security
           description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged. Does not reach the embedded bookstack-file-exporter, which stays pinned to 1.0.3"
       artifacthub.io/license: MIT
@@ -1053,6 +1095,52 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-0.0.1/bookstack-file-exporter-0.0.1.tgz
     version: 0.0.1
   exportarr:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "the qbittorrent-exporter subchart is re-pinned 1.1.0 -> 1.2.0 and tdarr-exporter 2.1.0 -> 2.2.0, so the serviceAccount.automount fix in 4.2.0 now reaches their pod specs. Only relevant with those subcharts enabled; no values keys changed"
+        - kind: fixed
+          description: "the subcharts' own PrometheusRule is now gated on their metrics.enabled and a non-empty rules list. NOTE: with qbittorrent-exporter.metrics.enabled or tdarr-exporter.metrics.enabled false and prometheusRule.enabled true, that rule is REMOVED on upgrade"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-08-16T06:26:56.853188881Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.2.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 2.2.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 2743bb8722ea240e4ee9d43e9cd1ddc54794519007d3fa91a7ad8aa424fa65b6
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-4.3.0/exportarr-4.3.0.tgz
+    version: 4.3.0
   - annotations:
       artifacthub.io/changes: |
         - kind: security
@@ -2965,4 +3053,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-08-16T06:14:31.022046107Z"
+generated: "2026-08-16T06:26:56.854093947Z"
