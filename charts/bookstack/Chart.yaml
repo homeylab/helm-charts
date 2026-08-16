@@ -19,7 +19,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 5.4.0
+version: 5.5.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=linuxserver/bookstack versioning=regex:^version-v(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$
@@ -39,7 +39,7 @@ dependencies:
   condition: mariadb.enabled
   repository: "oci://registry-1.docker.io/cloudpirates"
 - name: bookstack-file-exporter
-  version: "1.0.3"
+  version: "1.1.0"
   condition: bookstack-file-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
 
@@ -49,5 +49,5 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
-    - kind: security
-      description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged. Does not reach the embedded bookstack-file-exporter, which stays pinned to 1.0.3"
+    - kind: changed
+      description: "the bookstack-file-exporter subchart is re-pinned 1.0.3 -> 1.1.0, so the serviceAccount.automount fix in 5.4.0 now reaches its Deployment and CronJob pod specs. Only relevant with bookstack-file-exporter.enabled; no values keys changed"
