@@ -100,3 +100,31 @@ tests:
     asserts:
       - notExists:
           path: spec.template.spec.volumes
+
+  - it: leaves automountServiceAccountToken unset on the pod spec by default
+    # the pod spec wins over the ServiceAccount, so writing true here would override
+    # an external ServiceAccount that opted out - only the false case is rendered
+    asserts:
+      # anchor the render so the notExists below cannot pass on an absent document
+      - exists: { path: spec.template.spec.serviceAccountName }
+      - notExists: { path: spec.template.spec.automountServiceAccountToken }
+
+  - it: honours serviceAccount.automount when pointing at an external ServiceAccount
+    # the knob used to be wired only into the chart-managed ServiceAccount, so with
+    # create false it was silently dropped - assert the pod spec, not the SA object
+    set:
+      serviceAccount.create: false
+      serviceAccount.automount: false
+    asserts:
+      - equal: { path: spec.template.spec.serviceAccountName, value: default }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }
+
+  - it: honours serviceAccount.automount on a chart-managed ServiceAccount
+    # the gate is on automount alone, so a chart-managed ServiceAccount must opt the
+    # pod out too - the SA object's own field does not reach an already-created pod template
+    set:
+      serviceAccount.create: true
+      serviceAccount.automount: false
+    asserts:
+      - exists: { path: spec.template.spec.serviceAccountName }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }

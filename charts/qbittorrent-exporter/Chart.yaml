@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.1.0
+version: 1.2.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=ghcr.io/martabal/qbittorrent-exporter
@@ -34,7 +34,9 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
   artifacthub.io/changes: |
-    - kind: added
-      description: "implemented the metrics.prometheusRule block, which previously configured nothing; set metrics.prometheusRule.enabled to render a PrometheusRule"
-    - kind: added
-      description: "added unit test coverage for the PrometheusRule, ServiceMonitor and HTTPRoute templates"
+    - kind: security
+      description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"
+    - kind: fixed
+      description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. NOTE: with metrics.enabled false it is REMOVED on upgrade"
+    - kind: fixed
+      description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"

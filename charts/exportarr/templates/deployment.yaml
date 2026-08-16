@@ -2,15 +2,11 @@
 {{- range $app := $instance_val }}
 {{- if $app.enabled }}
 
-{{- $metricsEnabled := $.Values.exportarr.metrics.enabled -}}
+{{- $metricsEnabled := eq (include "exportarr.metricsEnabled" (dict "app" $app "root" $)) "true" -}}
 {{- $pdMetrics := $.Values.exportarr.metrics.podAnnotations -}}
 {{- $smEnabled := $.Values.exportarr.metrics.serviceMonitor.enabled -}}
 
 {{- if $app.metrics }}
-{{- if hasKey $app.metrics "enabled" }}
-{{- $metricsEnabled = $app.metrics.enabled -}}
-{{- end }}
-
 {{- if and ($metricsEnabled) ($app.metrics.serviceMonitor) }}
 {{- if hasKey $app.metrics.serviceMonitor "enabled" }}
 {{- $smEnabled = $app.metrics.serviceMonitor.enabled -}}
@@ -64,6 +60,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: "{{ include "exportarr.serviceAccountName" $ }}"
+      {{- if not $.Values.exportarr.serviceAccount.automount }}
+      automountServiceAccountToken: false
+      {{- end }}
       securityContext:
         {{- toYaml $.Values.exportarr.podSecurityContext | nindent 8 }}
       containers:

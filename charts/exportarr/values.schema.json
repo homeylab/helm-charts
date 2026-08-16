@@ -37,7 +37,23 @@
                                         "type": "object"
                                     },
                                     "metrics": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": {
+                                                "type": "boolean"
+                                            },
+                                            "podAnnotations": {
+                                                "type": "object"
+                                            },
+                                            "serviceMonitor": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "enabled": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
                                     },
                                     "name": {
                                         "type": "string"
@@ -80,7 +96,23 @@
                                         "type": "object"
                                     },
                                     "metrics": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": {
+                                                "type": "boolean"
+                                            },
+                                            "podAnnotations": {
+                                                "type": "object"
+                                            },
+                                            "serviceMonitor": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "enabled": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
                                     },
                                     "name": {
                                         "type": "string"
@@ -123,7 +155,23 @@
                                         "type": "object"
                                     },
                                     "metrics": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": {
+                                                "type": "boolean"
+                                            },
+                                            "podAnnotations": {
+                                                "type": "object"
+                                            },
+                                            "serviceMonitor": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "enabled": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
                                     },
                                     "name": {
                                         "type": "string"
@@ -166,7 +214,23 @@
                                         "type": "object"
                                     },
                                     "metrics": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": {
+                                                "type": "boolean"
+                                            },
+                                            "podAnnotations": {
+                                                "type": "object"
+                                            },
+                                            "serviceMonitor": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "enabled": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
                                     },
                                     "name": {
                                         "type": "string"
@@ -209,7 +273,23 @@
                                         "type": "object"
                                     },
                                     "metrics": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": {
+                                                "type": "boolean"
+                                            },
+                                            "podAnnotations": {
+                                                "type": "object"
+                                            },
+                                            "serviceMonitor": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "enabled": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
                                     },
                                     "name": {
                                         "type": "string"
@@ -252,7 +332,23 @@
                                         "type": "object"
                                     },
                                     "metrics": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": {
+                                                "type": "boolean"
+                                            },
+                                            "podAnnotations": {
+                                                "type": "object"
+                                            },
+                                            "serviceMonitor": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "enabled": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
                                     },
                                     "name": {
                                         "type": "string"
@@ -295,7 +391,23 @@
                                         "type": "object"
                                     },
                                     "metrics": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": {
+                                                "type": "boolean"
+                                            },
+                                            "podAnnotations": {
+                                                "type": "object"
+                                            },
+                                            "serviceMonitor": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "enabled": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
                                     },
                                     "name": {
                                         "type": "string"
@@ -510,6 +622,9 @@
                     "properties": {
                         "annotations": {
                             "type": "object"
+                        },
+                        "automount": {
+                            "type": "boolean"
                         },
                         "create": {
                             "type": "boolean"

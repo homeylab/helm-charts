@@ -143,3 +143,75 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content: { name: CUSTOM_FLAG, value: enabled }
+
+  - it: leaves automountServiceAccountToken unset on the pod spec by default
+    # the pod spec wins over the ServiceAccount, so writing true here would override
+    # an external ServiceAccount that opted out - only the false case is rendered
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      # anchor the render so the notExists below cannot pass on an absent document
+      - exists: { path: spec.template.spec.serviceAccountName }
+      - notExists: { path: spec.template.spec.automountServiceAccountToken }
+
+  - it: honours serviceAccount.automount when pointing at an external ServiceAccount
+    # the knob used to be wired only into the chart-managed ServiceAccount, so with
+    # create false it was silently dropped - assert the pod spec, not the SA object
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+      exportarr.serviceAccount.create: false
+      exportarr.serviceAccount.automount: false
+    asserts:
+      - equal: { path: spec.template.spec.serviceAccountName, value: default }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }
+
+  - it: honours serviceAccount.automount on a chart-managed ServiceAccount
+    # the gate is on automount alone, so a chart-managed ServiceAccount must opt the
+    # pod out too - the SA object's own field does not reach an already-created pod template
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+      exportarr.serviceAccount.create: true
+      exportarr.serviceAccount.automount: false
+    asserts:
+      - exists: { path: spec.template.spec.serviceAccountName }
+      - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }
+
+  - it: renders the prometheus scrape annotations when metrics are on and no ServiceMonitor is used
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/port"]
+          value: "9707"
+
+  - it: drops the prometheus scrape annotations when the instance overrides metrics off
+    # metrics.enabled is resolved by the shared exportarr.metricsEnabled helper, which
+    # this template, servicemonitor.yaml and prometheusrule.yaml all consume - pin it
+    # here so breaking the helper cannot leave this suite green
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          enabled: false
+    asserts:
+      - notExists:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+      - exists:
+          path: spec.template.spec.serviceAccountName

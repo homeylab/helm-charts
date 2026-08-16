@@ -22,16 +22,15 @@ fullnameOverride: ""
 serviceAccount:
   # -- specifies whether a service account should be created
   create: false
-  # -- automatically mount a ServiceAccount's API credentials
+  # -- automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec
   automount: true
   # -- annotations to add to the service account
   annotations: {}
   # -- the name of the service account to use; if not set and create is true, a name is generated using the fullname template
   name: ""
 
-# -- deployment update strategy. `Recreate` terminates the old pod before creating the new one, avoiding a
-# ReadWriteOnce PVC multi-attach deadlock on upgrade (the game server holds its steam/world RWO volumes).
-# Override to `{type: RollingUpdate}` only if your persistence supports ReadWriteMany.
+# -- deployment update strategy; `Recreate` avoids a ReadWriteOnce multi-attach deadlock on upgrade. Use
+# `{type: RollingUpdate}` only if your persistence supports ReadWriteMany.
 updateStrategy:
   type: Recreate
 

@@ -80,11 +80,11 @@ exportarr:
       metricRelabelings: []
     ## Enable and configure a PrometheusRule for the whole umbrella under this key.
     prometheusRule:
-      # -- enable a PrometheusRule (requires the Prometheus Operator CRD)
+      # -- enable a PrometheusRule; also needs metrics.enabled and a non-empty rules list (and the Prometheus Operator CRD)
       enabled: false
       # -- additional labels for the PrometheusRule (e.g. to match your Prometheus ruleSelector)
       labels: {}
-      # -- alerting/recording rules rendered under a single group
+      # -- alerting/recording rules rendered under a single group; nothing is rendered when empty
       rules: []
         # - alert: ExportarrTargetDown
         #   annotations:
@@ -348,16 +348,17 @@ exportarr:
     failureThreshold: 5
     successThreshold: 1
 
-  # -- serviceAccount configuration
+  ## serviceAccount configuration. No `# --` on this key on purpose: the child
+  ## keys below carry their own, and marking both makes helm-docs emit a
+  ## whole-object row plus a row per child.
   serviceAccount:
-    # Specifies whether a service account should be created
+    # -- specifies whether a service account should be created
     create: false
-    # Automatically mount a ServiceAccount's API credentials?
+    # -- automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec
     automount: true
-    # Annotations to add to the service account
+    # -- annotations to add to the service account
     annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
+    # -- the name of the service account to use; if not set and create is true, a name is generated using the fullname template
     name: ""
 
 

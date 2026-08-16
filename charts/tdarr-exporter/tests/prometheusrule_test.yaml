@@ -9,12 +9,14 @@ tests:
       metrics.prometheusRule.enabled: false
     asserts:
       - hasDocuments: { count: 0 }
-  - it: omits groups entirely when enabled with no rules
+  - it: does not render when enabled with no rules
+    # `spec` gets its only child from the rules block, so rendering with an empty
+    # rules list emitted `spec: null` - rejected by the CRD as "got null, want
+    # object", i.e. an object that could never be applied
     set:
       metrics.prometheusRule.enabled: true
     asserts:
-      - hasDocuments: { count: 1 }
-      - notExists: { path: spec.groups }
+      - hasDocuments: { count: 0 }
   - it: renders with one rule when enabled
     set:
       metrics.prometheusRule.enabled: true
@@ -57,3 +59,15 @@ tests:
       - equal:
           path: metadata.labels["app.kubernetes.io/name"]
           value: tdarr-exporter
+
+  - it: does not render when metrics.enabled is false, even with prometheusRule.enabled
+    # the two toggles are independent in values, so prometheusRule.enabled alone used to
+    # emit a rule for a chart that exports no metrics at all
+    set:
+      metrics.enabled: false
+      metrics.prometheusRule.enabled: true
+      metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+    asserts:
+      - hasDocuments: { count: 0 }

@@ -9,12 +9,14 @@ tests:
       exportarr.metrics.prometheusRule.enabled: false
     asserts:
       - hasDocuments: { count: 0 }
-  - it: omits groups entirely when enabled with no rules
+  - it: does not render when enabled with no rules
+    # `spec` gets its only child from the rules block, so rendering with an empty
+    # rules list emitted `spec: null` - rejected by the CRD as "got null, want
+    # object", i.e. an object that could never be applied
     set:
       exportarr.metrics.prometheusRule.enabled: true
     asserts:
-      - hasDocuments: { count: 1 }
-      - notExists: { path: spec.groups }
+      - hasDocuments: { count: 0 }
   - it: renders one umbrella-wide PrometheusRule with the rule when enabled
     set:
       exportarr.metrics.prometheusRule.enabled: true
@@ -57,3 +59,138 @@ tests:
       - equal:
           path: metadata.labels["app.kubernetes.io/name"]
           value: exportarr
+
+  - it: does not render when metrics.enabled is false, even with prometheusRule.enabled
+    # the two toggles are independent in values, so prometheusRule.enabled alone used to
+    # emit a rule for an umbrella whose Prometheus wiring is switched off
+    set:
+      exportarr.metrics.enabled: false
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+    asserts:
+      - hasDocuments: { count: 0 }
+
+  - it: still renders when a per-instance metrics override re-enables metrics
+    # metrics.enabled is a global default that apps.<app>[].metrics.enabled overrides,
+    # so a global-off/instance-on install is still scraped and still wants the rule
+    set:
+      exportarr.metrics.enabled: false
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+      - equal:
+          path: spec.groups[0].rules[0].alert
+          value: TargetDown
+
+  - it: does not render when every enabled instance overrides metrics off
+    set:
+      exportarr.metrics.enabled: true
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          enabled: false
+    asserts:
+      - hasDocuments: { count: 0 }
+
+  - it: inherits the global metrics default when the instance sets other metrics keys
+    # a metrics block without an "enabled" key must fall through to the global value,
+    # which is what the hasKey guard buys - without it the missing key reads as false
+    set:
+      exportarr.metrics.enabled: true
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics:
+          serviceMonitor:
+            enabled: true
+    asserts:
+      - hasDocuments: { count: 1 }
+
+  - it: renders for an enabled instance that inherits the global metrics default
+    set:
+      exportarr.metrics.enabled: true
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+        metrics: {}
+    asserts:
+      - hasDocuments: { count: 1 }
+
+  - it: renders when only one of several enabled instances has metrics on
+    # the rule is umbrella-wide, so the gate is "any enabled instance", not "all" -
+    # one scraped instance is enough to want the rule
+    set:
+      exportarr.metrics.enabled: true
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      # assigned as whole lists - setting apps.radarr[0] and apps.radarr[1] as
+      # separate paths leaves the first element null
+      exportarr.apps.radarr:
+        - name: one
+          enabled: true
+          url: http://radarr:7878
+          metrics:
+            enabled: false
+        - name: two
+          enabled: true
+          url: http://radarr2:7878
+      exportarr.apps.sonarr:
+        - name: three
+          enabled: true
+          url: http://sonarr:8989
+          metrics:
+            enabled: false
+    asserts:
+      - hasDocuments: { count: 1 }
+
+  - it: ignores a disabled instance that overrides metrics on
+    # $app.enabled gates the scan. The disabled sonarr instance is the ONLY thing
+    # here with metrics on - global is off and the enabled radarr inherits that -
+    # so dropping the enabled gate is the one change that flips this to 1 document
+    set:
+      exportarr.metrics.enabled: false
+      exportarr.metrics.prometheusRule.enabled: true
+      exportarr.metrics.prometheusRule.rules:
+        - alert: TargetDown
+          expr: up == 0
+      exportarr.apps.radarr:
+        - name: one
+          enabled: true
+          url: http://radarr:7878
+      exportarr.apps.sonarr:
+        - name: two
+          enabled: false
+          url: http://sonarr:8989
+          metrics:
+            enabled: true
+    asserts:
+      - hasDocuments: { count: 0 }

@@ -1,15 +1,6 @@
 apiVersion: v2
 name: exportarr
 description: A Helm Chart to export Prometheus metrics for Arr applications.
-
-# A chart can be either an 'application' or a 'library' chart.
-#
-# Application charts are a collection of templates that can be packaged into versioned archives
-# to be deployed.
-#
-# Library charts provide useful utilities or functions for the chart developer. They're included as
-# a dependency of application charts to inject those utilities and functions into the rendering
-# pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
 home: https://github.com/onedr0p/exportarr
@@ -26,15 +17,10 @@ maintainers:
   - name: homeylab
     url: https://github.com/homeylab
 
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 4.1.0
+# This is the chart version. SemVer: https://semver.org/
+version: 4.2.0
 
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
-# It is recommended to use it with quotes.
+# Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=ghcr.io/onedr0p/exportarr
 appVersion: "v2.3.0"
 
@@ -63,7 +49,11 @@ annotations:
     - name: exportarr
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
-    - kind: added
-      description: "exportarr.serviceAccount.automount to control automountServiceAccountToken on the chart-managed ServiceAccount. The field was previously omitted entirely; the new default of true is what Kubernetes already applied, so effective behaviour is unchanged. Brings the chart in line with the rest of the fleet"
-    - kind: added
-      description: "unit test coverage for the ServiceAccount template"
+    - kind: security
+      description: "exportarr.serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged. Does not reach the pinned qbittorrent-exporter / tdarr-exporter subcharts"
+    - kind: fixed
+      description: "the PrometheusRule is now gated on exportarr.metrics.enabled - global or per-instance - as well as prometheusRule.enabled. NOTE: with no enabled instance scraping, it is REMOVED on upgrade"
+    - kind: fixed
+      description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
+    - kind: changed
+      description: "values.schema.json now types serviceAccount.automount and per-instance metrics.enabled / metrics.serviceMonitor.enabled, so a string is rejected at render time instead of silently reading as true"
