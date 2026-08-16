@@ -1,0 +1,106 @@
+suite: exportarr Service
+templates:
+  - templates/service.yaml
+release:
+  name: ex
+tests:
+  - it: renders no Service when no instance is enabled
+    asserts:
+      - hasDocuments: { count: 0 }
+
+  - it: renders no Service for an instance that is disabled
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: false
+        url: http://radarr:7878
+    asserts:
+      - hasDocuments: { count: 0 }
+
+  # Two instances across two app types on purpose: the name is built from the
+  # apps map key *and* the per-instance name, so a template that dropped either
+  # half would still render a unique-looking name for a single-instance install
+  # and only collide once a second instance exists.
+  - it: renders one Service per enabled instance, named app-key-instance
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+      exportarr.apps.sonarr[0]:
+        name: second
+        enabled: true
+        url: http://sonarr:8989
+    asserts:
+      - hasDocuments: { count: 2 }
+      - exists:
+          path: metadata.name
+        documentSelector:
+          path: metadata.name
+          value: ex-exportarr-radarr-main
+      - exists:
+          path: metadata.name
+        documentSelector:
+          path: metadata.name
+          value: ex-exportarr-sonarr-second
+
+  - it: wires port, targetPort, protocol and name from values
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal: { path: "spec.ports[0].port", value: 9707 }
+      - equal: { path: "spec.ports[0].targetPort", value: 9707 }
+      - equal: { path: "spec.ports[0].protocol", value: TCP }
+      - equal: { path: "spec.ports[0].name", value: metrics }
+      - equal: { path: spec.type, value: ClusterIP }
+
+  - it: honours the service value overrides
+    set:
+      exportarr.service.type: LoadBalancer
+      exportarr.service.port: 18080
+      exportarr.service.protocol: UDP
+      exportarr.service.name: custom
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal: { path: spec.type, value: LoadBalancer }
+      - equal: { path: "spec.ports[0].port", value: 18080 }
+      - equal: { path: "spec.ports[0].targetPort", value: 18080 }
+      - equal: { path: "spec.ports[0].protocol", value: UDP }
+      - equal: { path: "spec.ports[0].name", value: custom }
+
+  # The component label is what keeps one instance's Service from selecting
+  # another instance's pods - every instance shares the same name/instance
+  # selector labels, so without it a two-instance install cross-wires. Asserted
+  # on the selector, not just on metadata: only the selector half affects
+  # routing.
+  - it: scopes the selector to the instance with the component label
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal:
+          path: spec.selector["app.kubernetes.io/component"]
+          value: ex-exportarr-radarr-main
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: ex-exportarr-radarr-main
+      - equal:
+          path: spec.selector["app.kubernetes.io/name"]
+          value: exportarr
+      - equal:
+          path: spec.selector["app.kubernetes.io/instance"]
+          value: ex
+      - notExists:
+          path: spec.selector["helm.sh/chart"]
+      - notExists:
+          path: spec.selector["app.kubernetes.io/version"]
+      - notExists:
+          path: spec.selector["app.kubernetes.io/managed-by"]
