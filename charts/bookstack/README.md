@@ -316,7 +316,7 @@ extraEnv:
 | service.portName | string | `"http"` | name of the Service port (NOT the Service name) |
 | service.type | string | `"ClusterIP"` | Kubernetes Service type |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | startupProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/status","port":"http"},"initialDelaySeconds":30,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":2}` | startup probe config; set to `{}` to disable |

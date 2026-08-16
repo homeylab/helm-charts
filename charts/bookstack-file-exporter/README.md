@@ -229,7 +229,7 @@ This version graduates the chart to `1.0.0`, bumps the image to the current upst
 | securityContext.allowPrivilegeEscalation | bool | `false` | disallow privilege escalation |
 | securityContext.capabilities.drop | list | `["ALL"]` | drop all Linux capabilities |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec |
 | serviceAccount.create | bool | `true` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` |  |

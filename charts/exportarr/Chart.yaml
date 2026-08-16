@@ -50,16 +50,10 @@ annotations:
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
     - kind: security
-      description: "exportarr.serviceAccount.automount false now reaches the pod spec, so it applies with an external ServiceAccount (exportarr.serviceAccount.create false) too - previously it only set the chart-managed ServiceAccount and was dropped. Nothing is written when automount is true. Default rendering unchanged; affected pods roll once"
+      description: "exportarr.serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged. Does not reach the pinned qbittorrent-exporter / tdarr-exporter subcharts"
     - kind: fixed
-      description: "the PrometheusRule is now gated on the same effective metrics switch the Deployment and ServiceMonitor use - exportarr.metrics.enabled, overridable per instance - as well as prometheusRule.enabled. NOTE: with no enabled instance scraping, it is REMOVED on upgrade"
+      description: "the PrometheusRule is now gated on exportarr.metrics.enabled - global or per-instance - as well as prometheusRule.enabled. NOTE: with no enabled instance scraping, it is REMOVED on upgrade"
     - kind: fixed
       description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
     - kind: changed
-      description: "values.schema.json now types the booleans the render branches test: serviceAccount.automount and per-instance metrics.enabled / metrics.serviceMonitor.enabled. A string is truthy in Go templates, so those values are now rejected at render time"
-    - kind: changed
-      description: "the per-instance metrics resolution duplicated across deployment.yaml, servicemonitor.yaml and prometheusrule.yaml is now one exportarr.metricsEnabled helper; rendered output is unchanged"
-    - kind: changed
-      description: "the exportarr.serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
-    - kind: added
-      description: "unit test coverage for exportarr.serviceAccount.automount on the pod spec and the ServiceAccount object, and for the PrometheusRule gate across per-instance overrides and multi-instance installs"
+      description: "values.schema.json now types serviceAccount.automount and per-instance metrics.enabled / metrics.serviceMonitor.enabled, so a string is rejected at render time instead of silently reading as true"

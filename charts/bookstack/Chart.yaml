@@ -50,8 +50,4 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
   artifacthub.io/changes: |
     - kind: security
-      description: "serviceAccount.automount false now reaches the pod spec, so it applies with an external ServiceAccount (serviceAccount.create false) too - previously it only set the chart-managed ServiceAccount and was dropped. Nothing is written when automount is true. Default rendering unchanged; affected pods roll once"
-    - kind: changed
-      description: "the serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
-    - kind: added
-      description: "unit test coverage for serviceAccount.automount on both the pod spec and the ServiceAccount object"
+      description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged. Does not reach the embedded bookstack-file-exporter, which stays pinned to 1.0.3"

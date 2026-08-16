@@ -35,6 +35,4 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
   artifacthub.io/changes: |
     - kind: security
-      description: "serviceAccount.automount false now reaches the pod spec, so it applies with an external ServiceAccount (serviceAccount.create false) too - previously it only set the chart-managed ServiceAccount and was dropped. Nothing is written when automount is true. Default rendering unchanged; affected pods roll once"
-    - kind: added
-      description: "unit test coverage for serviceAccount.automount on both the pod spec and the ServiceAccount object"
+      description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"

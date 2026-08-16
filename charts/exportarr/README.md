@@ -143,7 +143,6 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `4.1.0` | `4.2.0` | **Only if no enabled instance has metrics on** and `exportarr.metrics.prometheusRule.enabled: true`. The PrometheusRule is now gated on the same effective metrics switch the Deployment and ServiceMonitor use, so it is **removed** on upgrade and its alerts stop firing; a per-instance override keeps it. The `qbittorrent-exporter` / `tdarr-exporter` subcharts stay pinned here and gain the same gate in a follow-up release. |
 | `3.1.X` | `4.0.0` | BREAKING: `exportarr.image` schema renamed (`repository` -> `registry`, `name` -> `repository`) and the `helm test` values moved from `exportarr.testImage.*` to `exportarr.tests.image.*` (and `testImage.path` -> `tests.path`). Also implements the previously-inert PrometheusRule and adds `exportarr.tests.enabled` + `exportarr.podLabels`; optional subcharts bumped (qbittorrent-exporter `1.0.1` -> `1.1.0`, tdarr-exporter `2.0.1` -> `2.1.0`). **Read the [Migrating to 4.0.0](#migrating-to-400) section before upgrading.** |
 | `3.0.X` | `3.1.0` | Optional `tdarr-exporter` subchart bumped `1.2.0` -> `2.0.0` (hardened `securityContext`, standardized image schema, `appVersion` -> upstream `v3.0.0`); passthrough value keys are unchanged. **Only affects installs with `tdarr-exporter.enabled`** — see the subchart's [Migrating to 2.0.0](https://github.com/homeylab/helm-charts/blob/main/charts/tdarr-exporter/README.md#migrating-to-200) notes. |
 | `2.1.X` | `3.0.0` | Backing `qbittorrent-exporter` subchart swapped image/schema, hardened `securityContext` on all exportarr instances, inline `apiKey` now renders into a chart-managed Secret. **Read the [Migrating to 3.0.0](#migrating-to-300) section in full before upgrading.** |
@@ -199,9 +198,9 @@ This version hardens the umbrella chart and swaps the backing image for the opti
 | exportarr.metrics.podAnnotations | object | `{"prometheus.io/path":"/metrics","prometheus.io/port":"9707","prometheus.io/scrape":"true"}` | Add podAnnotations for prometheus scraping |
 | exportarr.metrics.podAnnotations."prometheus.io/path" | string | `"/metrics"` | set the path for prometheus scraping |
 | exportarr.metrics.podAnnotations."prometheus.io/port" | string | `"9707"` | set the port for prometheus scraping, should match the service port |
-| exportarr.metrics.prometheusRule.enabled | bool | `false` | enable a PrometheusRule (requires the Prometheus Operator CRD) |
+| exportarr.metrics.prometheusRule.enabled | bool | `false` | enable a PrometheusRule; also needs metrics.enabled and a non-empty rules list (and the Prometheus Operator CRD) |
 | exportarr.metrics.prometheusRule.labels | object | `{}` | additional labels for the PrometheusRule (e.g. to match your Prometheus ruleSelector) |
-| exportarr.metrics.prometheusRule.rules | list | `[]` | alerting/recording rules rendered under a single group |
+| exportarr.metrics.prometheusRule.rules | list | `[]` | alerting/recording rules rendered under a single group; nothing is rendered when empty |
 | exportarr.metrics.serviceMonitor.additionalLabels | object | `{}` | set additional labels for serviceMonitor |
 | exportarr.metrics.serviceMonitor.enabled | bool | `false` | enable/disable serviceMonitor, if enabled podAnnotations will be ignored |
 | exportarr.metrics.serviceMonitor.interval | string | `"4m"` | how often to scrape for serviceMonitor |
@@ -223,7 +222,7 @@ This version hardens the umbrella chart and swaps the backing image for the opti
 | exportarr.service.protocol | string | `"TCP"` | protocol for the service |
 | exportarr.service.type | string | `"ClusterIP"` | Kubernetes Service type |
 | exportarr.serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| exportarr.serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
+| exportarr.serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec |
 | exportarr.serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | exportarr.serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | exportarr.startupProbe | object | `{"failureThreshold":5,"httpGet":{"path":"/healthz","port":"metrics"},"initialDelaySeconds":2,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":2}` | startup probe configuration for the exportarr instances |

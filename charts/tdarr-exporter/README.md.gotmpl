@@ -102,7 +102,6 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `2.1.0` | `2.2.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so it is **removed** on upgrade and its alerts stop firing. Set `metrics.enabled: true` to keep it. |
 | `1.X.X` | `2.0.0` | Hardened `securityContext`, standardized image schema, chart-managed Secret for the inline API key, and `appVersion` bumped to the current upstream `v3.0.0` image. **Read the [Migrating to 2.0.0](#migrating-to-200) section in full before upgrading.** |
 | `1.1.X` | `1.2.0` | Exporter upgraded to upstream `v2.x` (`appVersion` `1.4.3` -> `2.1.0`). No chart configuration changes. This is a breaking _upstream_ release: it requires Tdarr `v2.24.01`+ and renames/removes many Prometheus metrics and labels, so existing dashboards and alerts will break. Review the [upstream v2.0.0 release notes](https://github.com/homeylab/tdarr-exporter/releases/tag/v2.0.0) and reimport the [Grafana dashboard](https://grafana.com/grafana/dashboards/20388-tdarr/) before upgrading. |
 

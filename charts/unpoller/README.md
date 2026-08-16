@@ -133,7 +133,6 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `4.2.0` | `4.3.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so it is **removed** on upgrade and its alerts stop firing. Set `metrics.enabled: true` to keep it. |
 | `3.X.X` | `4.0.0` | Standardized image schema, nested `tests.image.*` schema, chart-managed Secret for unifi/influxdb auth, hardened `securityContext`, and `appVersion` bumped to the current upstream `v3.3.1` image. **Read the [Migrating to 4.0.0](#migrating-to-400) section in full before upgrading.** |
 
 ### Migrating to 4.0.0
@@ -184,9 +183,9 @@ This version hardens the chart and standardizes its schema to match the other ho
 | metrics.podAnnotations | object | `{"prometheus.io/path":"/metrics","prometheus.io/port":"9130","prometheus.io/scrape":"true"}` | Add podAnnotations for prometheus scraping |
 | metrics.podAnnotations."prometheus.io/path" | string | `"/metrics"` | set the path for prometheus scraping |
 | metrics.podAnnotations."prometheus.io/port" | string | `"9130"` | set the port for prometheus scraping, should match the service port |
-| metrics.prometheusRule.enabled | bool | `false` | enable a PrometheusRule (requires the Prometheus Operator CRD) |
+| metrics.prometheusRule.enabled | bool | `false` | enable a PrometheusRule; also needs metrics.enabled and a non-empty rules list (and the Prometheus Operator CRD) |
 | metrics.prometheusRule.labels | object | `{}` | additional labels for the PrometheusRule (e.g. to match your Prometheus ruleSelector) |
-| metrics.prometheusRule.rules | list | `[]` | alerting/recording rules rendered under a single group |
+| metrics.prometheusRule.rules | list | `[]` | alerting/recording rules rendered under a single group; nothing is rendered when empty |
 | metrics.serviceMonitor.additionalLabels | object | `{}` | set additional labels for serviceMonitor |
 | metrics.serviceMonitor.enabled | bool | `false` | enable/disable serviceMonitor, if enabled podAnnotations will be ignored |
 | metrics.serviceMonitor.interval | string | `"30s"` | how often to scrape for serviceMonitor |
@@ -222,7 +221,7 @@ This version hardens the chart and standardizes its schema to match the other ho
 | service.protocol | string | `"TCP"` | set protocol for the service |
 | service.type | string | `"ClusterIP"` | set the service type |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | settings.influxdb.auth.auth_token | string | `""` | influxdb v2 auth token. Maps to UP_INFLUXDB_AUTH_TOKEN; when set, user/pass are omitted |

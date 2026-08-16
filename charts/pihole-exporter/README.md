@@ -105,7 +105,6 @@ _The table below lists chart version upgrades that may introduce breaking change
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
-| `2.0.0` | `2.1.0` | **Only if you run `metrics.enabled: false` with `metrics.prometheusRule.enabled: true`.** The PrometheusRule is now gated on `metrics.enabled` too, so it is **removed** on upgrade and its alerts stop firing. Set `metrics.enabled: true` to keep it. |
 | `1.X.X` | `2.0.0` | The `helm test` image values moved from `testConnImage.*` to `tests.image.*`. Only affects you if you overrode those values. **Read the [Migrating to 2.0.0](#migrating-to-200) section before upgrading.** |
 | `0.1.X` | `1.0.0` | Hardened `securityContext` defaults and a standardized image schema now apply; credentials move into a chart-managed Secret (behavior-preserving). **Read the [Migrating to 1.0.0](#migrating-to-100) section in full before upgrading.** |
 
@@ -170,9 +169,9 @@ First major release. Most changes are transparent if you already set `settings.a
 | metrics.podAnnotations | object | `{"prometheus.io/path":"/metrics","prometheus.io/port":"9617","prometheus.io/scrape":"true"}` | Add podAnnotations for prometheus scraping |
 | metrics.podAnnotations."prometheus.io/path" | string | `"/metrics"` | set the path for prometheus scraping |
 | metrics.podAnnotations."prometheus.io/port" | string | `"9617"` | set the port for prometheus scraping, should match the service port |
-| metrics.prometheusRule.enabled | bool | `false` | enable a PrometheusRule (requires the Prometheus Operator CRD) |
+| metrics.prometheusRule.enabled | bool | `false` | enable a PrometheusRule; also needs metrics.enabled and a non-empty rules list (and the Prometheus Operator CRD) |
 | metrics.prometheusRule.labels | object | `{}` | additional labels for the PrometheusRule (e.g. to match your Prometheus ruleSelector) |
-| metrics.prometheusRule.rules | list | `[]` | alerting/recording rules rendered under a single group |
+| metrics.prometheusRule.rules | list | `[]` | alerting/recording rules rendered under a single group; nothing is rendered when empty |
 | metrics.serviceMonitor.additionalLabels | object | `{}` | set additional labels for serviceMonitor |
 | metrics.serviceMonitor.enabled | bool | `false` | enable/disable serviceMonitor, if enabled podAnnotations will be ignored |
 | metrics.serviceMonitor.interval | string | `"2m"` | how often to scrape for serviceMonitor |
@@ -206,7 +205,7 @@ First major release. Most changes are transparent if you already set `settings.a
 | service.protocol | string | `"TCP"` | set protocol for the service |
 | service.type | string | `"ClusterIP"` |  |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | settings.auth | object | `{"existingSecret":"","password":"","token":""}` | Set auth configuration for pihole. As of pihole-exporter v1.x (Pi-hole v6 API) the exporter reads only `PIHOLE_PASSWORD`. It accepts either the Pi-hole app password or the legacy WEBPASSWORD API token. |

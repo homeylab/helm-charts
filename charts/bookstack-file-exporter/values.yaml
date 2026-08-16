@@ -23,7 +23,7 @@ fullnameOverride: ""
 serviceAccount:
   # -- specifies whether a service account should be created
   create: true
-  # -- automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false)
+  # -- automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec
   automount: true
   # -- annotations to add to the service account
   annotations: {}

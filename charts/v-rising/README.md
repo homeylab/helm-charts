@@ -199,7 +199,7 @@ This version graduates the chart to `1.0.0` and standardizes its schema to match
 | service.server.queryPort.port | int | `9877` | set query port for v rising |
 | service.server.type | string | `"ClusterIP"` | set type of service, example: `ClusterIP`, `NodePort`, `LoadBalancer` for v-rising server |
 | serviceAccount.annotations | object | `{}` | annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false also opts the pod spec out, so it applies with an external ServiceAccount (create false) |
+| serviceAccount.automount | bool | `true` | automatically mount a ServiceAccount's API credentials; false is also applied to the pod spec |
 | serviceAccount.create | bool | `false` | specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | the name of the service account to use; if not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` | tolerations for pod assignment |

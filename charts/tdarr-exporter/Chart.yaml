@@ -35,12 +35,8 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
   artifacthub.io/changes: |
     - kind: security
-      description: "serviceAccount.automount false now reaches the pod spec, so it applies with an external ServiceAccount (serviceAccount.create false) too - previously it only set the chart-managed ServiceAccount and was dropped. Nothing is written when automount is true. Default rendering unchanged; affected pods roll once"
+      description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"
     - kind: fixed
-      description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. NOTE: with metrics.enabled false it is REMOVED on upgrade - see the upgrade matrix in the README"
+      description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. NOTE: with metrics.enabled false it is REMOVED on upgrade"
     - kind: fixed
       description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
-    - kind: changed
-      description: "the serviceAccount value keys now carry helm-docs `# --` markers, so they appear in the README value table; no behavioural change"
-    - kind: added
-      description: "unit test coverage for serviceAccount.automount on both the pod spec and the ServiceAccount object"
