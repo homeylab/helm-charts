@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 4.2.0
+version: 4.3.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=ghcr.io/onedr0p/exportarr
@@ -32,11 +32,11 @@ kubeVersion: ">=1.19.0-0"
 # ref: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
 dependencies:
 - name: qbittorrent-exporter
-  version: "1.1.0"
+  version: "1.2.0"
   condition: qbittorrent-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
 - name: tdarr-exporter
-  version: "2.1.0"
+  version: "2.2.0"
   condition: tdarr-exporter.enabled
   repository: "oci://registry-1.docker.io/homeylabcharts"
 
@@ -49,11 +49,7 @@ annotations:
     - name: exportarr
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
-    - kind: security
-      description: "exportarr.serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged. Does not reach the pinned qbittorrent-exporter / tdarr-exporter subcharts"
-    - kind: fixed
-      description: "the PrometheusRule is now gated on exportarr.metrics.enabled - global or per-instance - as well as prometheusRule.enabled. NOTE: with no enabled instance scraping, it is REMOVED on upgrade"
-    - kind: fixed
-      description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
     - kind: changed
-      description: "values.schema.json now types serviceAccount.automount and per-instance metrics.enabled / metrics.serviceMonitor.enabled, so a string is rejected at render time instead of silently reading as true"
+      description: "the qbittorrent-exporter subchart is re-pinned 1.1.0 -> 1.2.0 and tdarr-exporter 2.1.0 -> 2.2.0, so the serviceAccount.automount fix in 4.2.0 now reaches their pod specs. Only relevant with those subcharts enabled; no values keys changed"
+    - kind: fixed
+      description: "the subcharts' own PrometheusRule is now gated on their metrics.enabled and a non-empty rules list. NOTE: with qbittorrent-exporter.metrics.enabled or tdarr-exporter.metrics.enabled false and prometheusRule.enabled true, that rule is REMOVED on upgrade"
