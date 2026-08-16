@@ -3,6 +3,48 @@ entries:
   bookstack:
   - annotations:
       artifacthub.io/changes: |
+        - kind: security
+          description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged. Does not reach the embedded bookstack-file-exporter, which stays pinned to 1.0.3"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-08-16T06:14:29.920835962Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.0.3
+    description: bookstack documentation platform
+    digest: 07795293c312745639c1902906ebde8a792e4e2fc5c3c41783e20156e6be0a79
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.4.0/bookstack-5.4.0.tgz
+    version: 5.4.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "the optional bookstack-file-exporter subchart is re-pinned from 1.0.2 to 1.0.3. Only relevant with bookstack-file-exporter.enabled true. No values keys changed between the two, so no configuration to migrate"
         - kind: fixed
@@ -791,6 +833,39 @@ entries:
   bookstack-file-exporter:
   - annotations:
       artifacthub.io/changes: |
+        - kind: security
+          description: "serviceAccount.automount false now also sets automountServiceAccountToken on the Deployment and CronJob pod specs, so it applies with an external ServiceAccount. Default rendering unchanged"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-08-16T06:14:30.094231166Z"
+    description: A Helm chart to run scheduled exports/backups of a BookStack instance's
+      pages, images, and attachments.
+    digest: 808f6ebd876e5db3af1f5037add2b7c4ac553fbfbc5d77210e6dc2b7d285baf4
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - bookstack
+    - backup
+    - export
+    - wiki
+    - documentation
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack-file-exporter
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/homeylab/bookstack-file-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-1.1.0/bookstack-file-exporter-1.1.0.tgz
+    version: 1.1.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: fixed
           description: "no longer provisions an orphan PersistentVolumeClaim when persistence.existingClaim is set. The PVC gated on persistence.enabled alone, so it created a second claim that nothing mounted. NOTE: upgrading with existingClaim set will DELETE that redundant PVC, and its PersistentVolume under the default Delete reclaim policy - see the Potential Breaking Updates table in the README before upgrading"
         - kind: fixed
@@ -978,6 +1053,56 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-0.0.1/bookstack-file-exporter-0.0.1.tgz
     version: 0.0.1
   exportarr:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: security
+          description: "exportarr.serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged. Does not reach the pinned qbittorrent-exporter / tdarr-exporter subcharts"
+        - kind: fixed
+          description: "the PrometheusRule is now gated on exportarr.metrics.enabled - global or per-instance - as well as prometheusRule.enabled. NOTE: with no enabled instance scraping, it is REMOVED on upgrade"
+        - kind: fixed
+          description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
+        - kind: changed
+          description: "values.schema.json now types serviceAccount.automount and per-instance metrics.enabled / metrics.serviceMonitor.enabled, so a string is rejected at render time instead of silently reading as true"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-08-16T06:14:30.252951282Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.1.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 2.1.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: 1630b4f324963069218f912c781c2f52b6c7d8b3f1d91372884957abd29db0c7
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-4.2.0/exportarr-4.2.0.tgz
+    version: 4.2.0
   - annotations:
       artifacthub.io/changes: |
         - kind: added
@@ -1739,6 +1864,42 @@ entries:
   pihole-exporter:
   - annotations:
       artifacthub.io/changes: |
+        - kind: security
+          description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"
+        - kind: fixed
+          description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. NOTE: with metrics.enabled false it is REMOVED on upgrade"
+        - kind: fixed
+          description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/pihole-exporter
+    apiVersion: v2
+    appVersion: v1.2.0
+    created: "2026-08-16T06:14:30.39599863Z"
+    description: A Helm Chart to deploy a Prometheus exporter for Pi-hole
+    digest: fc050d430e9ebbb792875f52bfa8eed813fc5b8bbc56e789fe140159108e8ace
+    home: https://github.com/eko/pihole-exporter
+    keywords:
+    - pihole
+    - pi-hole
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: pihole-exporter
+    sources:
+    - https://github.com/eko/pihole-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/pihole-exporter-2.1.0/pihole-exporter-2.1.0.tgz
+    version: 2.1.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "BREAKING: renamed the helm test values from testConnImage.* to tests.image.* (and testConnImage.path to tests.path); see the Migrating to 2.0.0 section"
         - kind: added
@@ -1881,6 +2042,42 @@ entries:
   qbittorrent-exporter:
   - annotations:
       artifacthub.io/changes: |
+        - kind: security
+          description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"
+        - kind: fixed
+          description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. NOTE: with metrics.enabled false it is REMOVED on upgrade"
+        - kind: fixed
+          description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/qbittorrent-exporter
+    apiVersion: v2
+    appVersion: v2.0.1
+    created: "2026-08-16T06:14:30.571513278Z"
+    description: A Helm chart to export Prometheus metrics for qbittorrent.
+    digest: 73b8064c67cc94e1035a9bf024fc376bbf17c46d6ea16af5a07a55af55cc0b45
+    home: https://github.com/martabal/qbittorrent-exporter
+    keywords:
+    - qbittorrent
+    - torrent
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: qbittorrent-exporter
+    sources:
+    - https://github.com/martabal/qbittorrent-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/qbittorrent-exporter-1.2.0/qbittorrent-exporter-1.2.0.tgz
+    version: 1.2.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: "implemented the metrics.prometheusRule block, which previously configured nothing; set metrics.prometheusRule.enabled to render a PrometheusRule"
         - kind: added
@@ -2007,6 +2204,42 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/qbittorrent-exporter-0.0.1/qbittorrent-exporter-0.0.1.tgz
     version: 0.0.1
   tdarr-exporter:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: security
+          description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"
+        - kind: fixed
+          description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. NOTE: with metrics.enabled false it is REMOVED on upgrade"
+        - kind: fixed
+          description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/tdarr-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-08-16T06:14:30.732227231Z"
+    description: A Helm chart to export Prometheus metrics for Tdarr.
+    digest: 790fd8c96c32ddc37e28edb3d53d90d022f250d3ff6c01f3c2ffc982d0357a67
+    home: https://github.com/homeylab/tdarr-exporter
+    keywords:
+    - tdarr
+    - transcode
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: tdarr-exporter
+    sources:
+    - https://github.com/homeylab/tdarr-exporter
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/tdarr-exporter-2.2.0/tdarr-exporter-2.2.0.tgz
+    version: 2.2.0
   - annotations:
       artifacthub.io/changes: |
         - kind: added
@@ -2227,6 +2460,44 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/tdarr-exporter-0.0.1/tdarr-exporter-0.0.1.tgz
     version: 0.0.1
   unpoller:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "automountServiceAccountToken is now written to the pod spec only when serviceAccount.automount is false, so an external ServiceAccount's own opt-out is honoured. Pods roll once"
+        - kind: fixed
+          description: "the PrometheusRule is now gated on metrics.enabled as well as metrics.prometheusRule.enabled. NOTE: with metrics.enabled false it is REMOVED on upgrade"
+        - kind: fixed
+          description: "a PrometheusRule with an empty rules list is no longer rendered - it emitted `spec: null`, which the CRD rejects"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
+    apiVersion: v2
+    appVersion: v3.3.1
+    created: "2026-08-16T06:14:30.876466896Z"
+    description: unpoller for unifi controller metrics
+    digest: 3ad2cd77d24140f310b592bed69374c47a8d56b5e07930269f8b6530fe53ef35
+    home: https://unpoller.com
+    icon: https://unpoller.com/img/logo.png
+    keywords:
+    - unpoller
+    - unifi
+    - ubiquiti
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: unpoller
+    sources:
+    - https://github.com/unpoller/unpoller
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-4.3.0/unpoller-4.3.0.tgz
+    version: 4.3.0
   - annotations:
       artifacthub.io/changes: |
         - kind: added
@@ -2495,6 +2766,39 @@ entries:
   v-rising:
   - annotations:
       artifacthub.io/changes: |
+        - kind: security
+          description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
+    apiVersion: v2
+    appVersion: "3.0"
+    created: "2026-08-16T06:14:31.021468901Z"
+    description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
+      server
+    digest: 16b4660d282049d74c35f414213947a6e77b9e14edbd0e6f4b359cf2a379940a
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - v-rising
+    - vrising
+    - game-server
+    - gaming
+    - dedicated-server
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: v-rising
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/TrueOsiris/docker-vrising
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/v-rising-1.1.0/v-rising-1.1.0.tgz
+    version: 1.1.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: fixed
           description: "PVC annotations are no longer silently dropped. Both PVC templates used `indent` where the fleet uses `nindent`, so with more than one annotation only the first landed under metadata.annotations and the rest escaped to sibling keys under metadata. helm rendered this without error, so it shipped and the API server discarded the stray keys"
         - kind: fixed
@@ -2661,4 +2965,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-08-05T04:44:07.789416135Z"
+generated: "2026-08-16T06:14:31.022046107Z"
