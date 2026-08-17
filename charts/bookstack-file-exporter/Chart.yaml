@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.1.0
+version: 1.2.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=homeylab/bookstack-file-exporter
@@ -36,5 +36,7 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
   artifacthub.io/changes: |
-    - kind: security
-      description: "serviceAccount.automount false now also sets automountServiceAccountToken on the Deployment and CronJob pod specs, so it applies with an external ServiceAccount. Default rendering unchanged"
+    - kind: added
+      description: "livenessProbe and readinessProbe are now values passthroughs instead of hardcoded blocks, and the health port is a named container port. Probes still render only in Deployment mode with config.health_port set; set a probe to null to drop it"
+    - kind: changed
+      description: "the probes now default to initialDelaySeconds 10 / periodSeconds 30 (upstream's documented shape) instead of the Kubernetes defaults. Affects Deployment mode with config.health_port set; pods roll once"

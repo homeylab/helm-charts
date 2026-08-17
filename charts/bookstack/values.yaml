@@ -289,6 +289,19 @@ startupProbe:
   failureThreshold: 3
   successThreshold: 1
 
+# -- set additional volumes, mounted alongside the chart's own `config` volume
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# -- set additional volumeMounts, mounted alongside the chart's own `/config` mount
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
 nodeSelector: {}
 
 tolerations: []

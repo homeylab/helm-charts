@@ -319,6 +319,20 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+# -- set additional volumes, e.g. a CA bundle for a self-signed Unifi controller certificate
+volumes: []
+# - name: unifi-ca
+#   secret:
+#     secretName: unifi-ca
+#     optional: false
+
+# -- set additional volumeMounts
+volumeMounts: []
+# - name: unifi-ca
+#   mountPath: /etc/ssl/certs/unifi-ca.crt
+#   subPath: ca.crt
+#   readOnly: true
+
 nodeSelector: {}
 
 tolerations: []

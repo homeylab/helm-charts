@@ -159,3 +159,40 @@ tests:
       - equal:
           path: spec.template.metadata.annotations["second-annotation"]
           value: two
+
+  # bookstack always carries its own `config` volume and `/config` mount, so the
+  # passthroughs append rather than replace. The counts pin both halves: a chart
+  # entry lost to a misplaced `with` fails here, and so does a passthrough that
+  # renders nothing.
+  - it: mounts only the config volume when the passthroughs are unset
+    asserts:
+      - lengthEqual: { path: spec.template.spec.volumes, count: 1 }
+      - equal: { path: "spec.template.spec.volumes[0].name", value: config }
+      - lengthEqual: { path: "spec.template.spec.containers[0].volumeMounts", count: 1 }
+      - equal: { path: "spec.template.spec.containers[0].volumeMounts[0].mountPath", value: /config }
+
+  - it: appends extra volumes and volumeMounts to the chart's own
+    set:
+      volumes:
+        - name: first-extra
+          emptyDir: {}
+        - name: second-extra
+          emptyDir: {}
+      volumeMounts:
+        - name: first-extra
+          mountPath: /first
+        - name: second-extra
+          mountPath: /second
+    asserts:
+      - lengthEqual: { path: spec.template.spec.volumes, count: 3 }
+      - equal: { path: "spec.template.spec.volumes[0].name", value: config }
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: first-extra, emptyDir: {} }
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: second-extra, emptyDir: {} }
+      - lengthEqual: { path: "spec.template.spec.containers[0].volumeMounts", count: 3 }
+      - equal: { path: "spec.template.spec.containers[0].volumeMounts[0].mountPath", value: /config }
+      - equal: { path: "spec.template.spec.containers[0].volumeMounts[1].mountPath", value: /first }
+      - equal: { path: "spec.template.spec.containers[0].volumeMounts[2].mountPath", value: /second }

@@ -176,6 +176,8 @@ tests:
       - notExists: { path: spec.template.spec.nodeSelector }
       - notExists: { path: spec.template.spec.affinity }
       - notExists: { path: spec.template.spec.tolerations }
+      - notExists: { path: spec.template.spec.volumes }
+      - notExists: { path: "spec.template.spec.containers[0].volumeMounts" }
       - equal:
           path: spec.template.metadata.annotations["prometheus.io/scrape"]
           value: "true"
@@ -221,6 +223,16 @@ tests:
       podAnnotations:
         first-annotation: one
         second-annotation: two
+      volumes:
+        - name: first-extra
+          emptyDir: {}
+        - name: second-extra
+          emptyDir: {}
+      volumeMounts:
+        - name: first-extra
+          mountPath: /first
+        - name: second-extra
+          mountPath: /second
     asserts:
       - lengthEqual: { path: "spec.template.spec.imagePullSecrets", count: 2 }
       - equal: { path: "spec.template.spec.imagePullSecrets[0].name", value: first-registry }
@@ -249,3 +261,13 @@ tests:
       - equal:
           path: spec.template.metadata.annotations["second-annotation"]
           value: two
+      - lengthEqual: { path: spec.template.spec.volumes, count: 2 }
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: first-extra, emptyDir: {} }
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: second-extra, emptyDir: {} }
+      - lengthEqual: { path: "spec.template.spec.containers[0].volumeMounts", count: 2 }
+      - equal: { path: "spec.template.spec.containers[0].volumeMounts[0].mountPath", value: /first }
+      - equal: { path: "spec.template.spec.containers[0].volumeMounts[1].mountPath", value: /second }
