@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "v-rising.fullname" . }}-rcon
+  name: {{ include "v-rising.rconServiceName" . }}
   labels:
     {{- include "v-rising.labels" . | nindent 4 }}
   {{- with .Values.service.rcon.annotations }}

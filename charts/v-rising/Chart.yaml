@@ -36,3 +36,5 @@ annotations:
   artifacthub.io/changes: |
     - kind: fixed
       description: "service.server.annotations and service.rcon.annotations are now applied to their Services. Both were documented but consumed by no template, so setting them did nothing"
+    - kind: changed
+      description: "the RCON Service name now fails the render when a long release name would push it past the Kubernetes 63-character limit, instead of emitting a name the API server rejects at install. Names that render today are unchanged"
