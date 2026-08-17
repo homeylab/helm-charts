@@ -33,13 +33,19 @@ tests:
         url: http://sonarr:8989
     asserts:
       - hasDocuments: { count: 2 }
-      - exists:
-          path: metadata.name
+      # documentSelector fails outright when nothing matches, so selecting on
+      # the name already proves the name. Each selected document then asserts
+      # the selector half, which is what actually keeps the two instances from
+      # cross-wiring onto each other's pods.
+      - equal:
+          path: spec.selector["app.kubernetes.io/component"]
+          value: ex-exportarr-radarr-main
         documentSelector:
           path: metadata.name
           value: ex-exportarr-radarr-main
-      - exists:
-          path: metadata.name
+      - equal:
+          path: spec.selector["app.kubernetes.io/component"]
+          value: ex-exportarr-sonarr-second
         documentSelector:
           path: metadata.name
           value: ex-exportarr-sonarr-second
