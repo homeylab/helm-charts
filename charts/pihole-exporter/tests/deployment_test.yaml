@@ -73,3 +73,111 @@ tests:
     asserts:
       - exists: { path: spec.template.spec.serviceAccountName }
       - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }
+
+  # Optional pod-spec blocks. Static validation cannot see these: a pod spec
+  # missing imagePullSecrets is schema-valid, so only a unit test catches a
+  # `with` block that stopped rendering. Both directions are pinned - absent
+  # when unset, and every entry present when set.
+  - it: omits every optional pod-spec block when unset
+    asserts:
+      - notExists: { path: spec.template.spec.imagePullSecrets }
+      - notExists: { path: spec.template.spec.nodeSelector }
+      - notExists: { path: spec.template.spec.affinity }
+      - notExists: { path: spec.template.spec.tolerations }
+      - notExists: { path: spec.template.spec.volumes }
+      - notExists: { path: "spec.template.spec.containers[0].volumeMounts" }
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+
+  # updateStrategy is a `with` block with a NON-empty default, so losing it
+  # does not omit a feature - it silently flips the workload to RollingUpdate.
+  - it: keeps the Recreate update strategy by default
+    asserts:
+      - equal: { path: spec.strategy.type, value: Recreate }
+
+  # Two entries per list on purpose: one entry cannot catch a range that only
+  # ever emits its first item, and two map keys catch a `toYaml` swapped for a
+  # single-key interpolation. Lengths are pinned too, so a spurious third entry
+  # fails rather than passing on the two that were checked.
+  - it: renders every entry of every optional pod-spec block when set
+    set:
+      imagePullSecrets:
+        - name: first-registry
+        - name: second-registry
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        topology.kubernetes.io/zone: us-east-1a
+      tolerations:
+        - key: first-taint
+          operator: Exists
+          effect: NoSchedule
+        - key: second-taint
+          operator: Exists
+          effect: NoExecute
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+                      - windows
+      podLabels:
+        first-label: one
+        second-label: two
+      podAnnotations:
+        first-annotation: one
+        second-annotation: two
+      volumes:
+        - name: first-extra
+          emptyDir: {}
+        - name: second-extra
+          emptyDir: {}
+      volumeMounts:
+        - name: first-extra
+          mountPath: /first
+        - name: second-extra
+          mountPath: /second
+    asserts:
+      - lengthEqual: { path: "spec.template.spec.imagePullSecrets", count: 2 }
+      - equal: { path: "spec.template.spec.imagePullSecrets[0].name", value: first-registry }
+      - equal: { path: "spec.template.spec.imagePullSecrets[1].name", value: second-registry }
+      - equal:
+          path: spec.template.spec.nodeSelector["kubernetes.io/arch"]
+          value: amd64
+      - equal:
+          path: spec.template.spec.nodeSelector["topology.kubernetes.io/zone"]
+          value: us-east-1a
+      - lengthEqual: { path: "spec.template.spec.tolerations", count: 2 }
+      - equal: { path: "spec.template.spec.tolerations[0].key", value: first-taint }
+      - equal: { path: "spec.template.spec.tolerations[1].key", value: second-taint }
+      - equal:
+          path: "spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].values[1]"
+          value: windows
+      - equal:
+          path: spec.template.metadata.labels["first-label"]
+          value: one
+      - equal:
+          path: spec.template.metadata.labels["second-label"]
+          value: two
+      - equal:
+          path: spec.template.metadata.annotations["first-annotation"]
+          value: one
+      - equal:
+          path: spec.template.metadata.annotations["second-annotation"]
+          value: two
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: first-extra, emptyDir: {} }
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: second-extra, emptyDir: {} }
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: { name: first-extra, mountPath: /first }
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: { name: second-extra, mountPath: /second }

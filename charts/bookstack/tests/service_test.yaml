@@ -1,0 +1,72 @@
+suite: bookstack Service
+templates:
+  - templates/service.yaml
+release:
+  name: rel
+tests:
+  - it: renders one Service named for the chart fullname
+    asserts:
+      - hasDocuments: { count: 1 }
+      - isKind: { of: Service }
+      - equal: { path: metadata.name, value: rel-bookstack }
+
+  # Unlike the exporter charts, this Service targets a *named* container port:
+  # `targetPort` and the port's `name` both come from service.portName.
+  - it: targets the container port by name, not by number
+    asserts:
+      - equal: { path: "spec.ports[0].port", value: 80 }
+      - equal: { path: "spec.ports[0].targetPort", value: http }
+      - equal: { path: "spec.ports[0].name", value: http }
+      - equal: { path: "spec.ports[0].protocol", value: TCP }
+      - equal: { path: spec.type, value: ClusterIP }
+
+  - it: honours the service value overrides
+    set:
+      service.type: NodePort
+      service.port: 8080
+      service.portName: web
+    asserts:
+      - equal: { path: spec.type, value: NodePort }
+      - equal: { path: "spec.ports[0].port", value: 8080 }
+      - equal: { path: "spec.ports[0].targetPort", value: web }
+      - equal: { path: "spec.ports[0].name", value: web }
+
+  # The template quotes both fields, which is what keeps the value a string. A
+  # digits-only portName is not a legal IANA_SVC_NAME, so this is a type-stability
+  # guard rather than a reachable bug: dropping the quotes silently turns the
+  # rendered targetPort into an integer, which is a different Service.
+  - it: keeps a numeric-looking portName a string
+    set:
+      service.portName: "8080"
+    asserts:
+      - isType: { path: "spec.ports[0].targetPort", type: string }
+      - equal: { path: "spec.ports[0].targetPort", value: "8080" }
+      - equal: { path: "spec.ports[0].name", value: "8080" }
+
+  # The selector must stay the `selectorLabels` subset. Swapping it for the full
+  # `labels` helper bakes helm.sh/chart and app.kubernetes.io/version into the
+  # selector, which then changes on every chart bump - the Service silently
+  # stops matching any pod whose template labels were rendered by an older
+  # revision.
+  - it: selects on the selector-label subset only
+    asserts:
+      - equal:
+          path: spec.selector["app.kubernetes.io/name"]
+          value: bookstack
+      - equal:
+          path: spec.selector["app.kubernetes.io/instance"]
+          value: rel
+      - notExists:
+          path: spec.selector["helm.sh/chart"]
+      - notExists:
+          path: spec.selector["app.kubernetes.io/version"]
+      - notExists:
+          path: spec.selector["app.kubernetes.io/managed-by"]
+
+  - it: carries the full label set on metadata
+    asserts:
+      - exists:
+          path: metadata.labels["helm.sh/chart"]
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm

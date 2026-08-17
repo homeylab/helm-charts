@@ -215,3 +215,109 @@ tests:
     asserts:
       - exists: { path: spec.template.spec.serviceAccountName }
       - equal: { path: spec.template.spec.automountServiceAccountToken, value: false }
+
+  # Optional pod-spec blocks on the Deployment path. Its sibling CronJob suite
+  # pins these, but this template renders only when config.run_interval > 0 and
+  # had no coverage of them at all - 13 `with` passthroughs, none asserted.
+  - it: omits every optional pod-spec block when unset
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+    asserts:
+      - notExists: { path: spec.template.spec.imagePullSecrets }
+      - notExists: { path: spec.template.spec.nodeSelector }
+      - notExists: { path: spec.template.spec.affinity }
+      - notExists: { path: spec.template.spec.tolerations }
+      # The annotations key is never absent here: the template always writes a
+      # checksum/config annotation so a ConfigMap change rolls the pod. Losing it
+      # silently stops config reloads, so pin its presence rather than absence.
+      - exists:
+          path: spec.template.metadata.annotations["checksum/config"]
+
+  # Two entries per list on purpose: one entry cannot catch a range that only
+  # ever emits its first item. Volumes are asserted with `contains` because the
+  # chart already mounts its config volume by default, so an index would be
+  # brittle.
+  - it: renders every entry of every optional pod-spec block when set
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      imagePullSecrets:
+        - name: first-registry
+        - name: second-registry
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        topology.kubernetes.io/zone: us-east-1a
+      tolerations:
+        - key: first-taint
+          operator: Exists
+          effect: NoSchedule
+        - key: second-taint
+          operator: Exists
+          effect: NoExecute
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+                      - windows
+      podLabels:
+        first-label: one
+        second-label: two
+      podAnnotations:
+        first-annotation: one
+        second-annotation: two
+      volumes:
+        - name: first-extra
+          emptyDir: {}
+        - name: second-extra
+          emptyDir: {}
+      volumeMounts:
+        - name: first-extra
+          mountPath: /first
+        - name: second-extra
+          mountPath: /second
+    asserts:
+      - lengthEqual: { path: "spec.template.spec.imagePullSecrets", count: 2 }
+      - equal: { path: "spec.template.spec.imagePullSecrets[0].name", value: first-registry }
+      - equal: { path: "spec.template.spec.imagePullSecrets[1].name", value: second-registry }
+      - equal:
+          path: spec.template.spec.nodeSelector["kubernetes.io/arch"]
+          value: amd64
+      - equal:
+          path: spec.template.spec.nodeSelector["topology.kubernetes.io/zone"]
+          value: us-east-1a
+      - lengthEqual: { path: "spec.template.spec.tolerations", count: 2 }
+      - equal: { path: "spec.template.spec.tolerations[0].key", value: first-taint }
+      - equal: { path: "spec.template.spec.tolerations[1].key", value: second-taint }
+      - equal:
+          path: "spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].values[1]"
+          value: windows
+      - equal:
+          path: spec.template.metadata.labels["first-label"]
+          value: one
+      - equal:
+          path: spec.template.metadata.labels["second-label"]
+          value: two
+      - equal:
+          path: spec.template.metadata.annotations["first-annotation"]
+          value: one
+      - equal:
+          path: spec.template.metadata.annotations["second-annotation"]
+          value: two
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: first-extra, emptyDir: {} }
+      - contains:
+          path: spec.template.spec.volumes
+          content: { name: second-extra, emptyDir: {} }
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: { name: first-extra, mountPath: /first }
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: { name: second-extra, mountPath: /second }
