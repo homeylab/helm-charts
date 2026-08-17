@@ -6,31 +6,21 @@ permissions: {}
 # is no help either — with no changed charts it prints "All charts linted successfully"
 # and exits 0 on zero work. A typo in kubeconform.sh would merge green.
 #
-# So: run the tier against the whole fleet whenever the tier changes, or when one of the
-# chart-side inputs `ct` cannot see changes — the helmignored ci/ overlays and tests/
-# suites below. Chart PRs usually touch templates/ and tests/ together, so this now fires
-# alongside ci.yml on most of them; that is fine, it is cluster-free and takes seconds.
-# Path filters are workflow-level in Actions, which is why this is a separate file rather
-# than a job in ci.yml.
+# The same blind spot covers the chart-side inputs `ct` cannot see: the helmignored
+# `ci/` overlays and `tests/` suites. On a PR that touches only those, ci.yml's job is
+# the one that does no work, and this one runs every unit suite in the fleet.
 #
-# Not a required status check: a path-filtered check never reports on PRs that miss the
-# filter, so branch protection would block forever waiting on it.
+# Runs on every PR, deliberately unfiltered, because this is a required status check.
+# A path-filtered check can never be required: PRs that miss the filter never report it,
+# so the merge blocks forever waiting on a status that will not arrive. Running it
+# unconditionally costs seconds — it is cluster-free and only renders nine charts.
+#
+# Kept as its own workflow rather than a job in ci.yml so it reports under its own
+# status name and is not queued behind ci.yml's kind cluster.
 on:
   pull_request:
     branches:
       - main
-    paths:
-      - scripts/ci/**
-      # Per-chart kubeconform overlays. They live in each chart's helmignored
-      # ci/ dir, so `ct list-changed` never sees them and ci.yml skips - this
-      # workflow is their only gate.
-      - charts/*/ci/kubeconform-overlay.yaml
-      # helm-unittest suites, for the same reason: `/tests/` is helmignored in
-      # every chart, so a PR that only adds or edits a suite drops the chart out
-      # of `ct list-changed` and the new tests would run nowhere.
-      - charts/*/tests/**
-      - .github/ct/**
-      - .github/workflows/ci-tooling.yml
 
 concurrency:
   group: ci-tooling-${{ github.workflow }}-${{ github.ref }}
