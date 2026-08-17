@@ -1,0 +1,56 @@
+suite: exportarr per-instance name length guard
+# One template only: `fail` aborts the whole render, and `failedTemplate` asserts
+# against whichever template raised. The overflow cases disable the helm-test
+# hook, which would otherwise raise ahead of service.yaml.
+templates:
+  - templates/service.yaml
+release:
+  # fullname is "ex-exportarr" (12), plus "-radarr-" (8), leaving 43 for the
+  # instance name before the 63 cap.
+  name: ex
+tests:
+  - it: renders a name of exactly 63 characters
+    set:
+      exportarr.apps.radarr[0]:
+        name: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal:
+          path: metadata.name
+          value: ex-exportarr-radarr-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+  - it: fails the render at 64 characters rather than emitting an invalid name
+    set:
+      exportarr.tests.enabled: false
+      exportarr.apps.radarr[0]:
+        name: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - failedTemplate:
+          errorPattern: 'is 64 characters, over the Kubernetes 63-character limit'
+
+  # The user sees this instead of a manifest, so it has to stand alone.
+  - it: names the offending value and every way out in the failure message
+    set:
+      exportarr.tests.enabled: false
+      exportarr.apps.radarr[0]:
+        name: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - failedTemplate:
+          errorPattern: 'apps\.radarr\[\]\.name'
+      - failedTemplate:
+          errorPattern: 'exportarr\.fullnameOverride'
+
+  # Pins that the guard is inert for realistic installs.
+  - it: leaves an ordinary instance name untouched
+    set:
+      exportarr.apps.radarr[0]:
+        name: main
+        enabled: true
+        url: http://radarr:7878
+    asserts:
+      - equal: { path: metadata.name, value: ex-exportarr-radarr-main }

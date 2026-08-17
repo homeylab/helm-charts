@@ -74,6 +74,22 @@ Takes a dict of:
 {{- end }}
 
 {{/*
+Per-instance resource name, used as metadata.name and as the
+app.kubernetes.io/component label value - both capped at 63 by the API.
+Nothing before install catches an overflow (JSON schemas don't encode length),
+so fail here where the message can name the fix. Not truncated on purpose: the
+suffix is the instance discriminator and sits in the Deployment's immutable
+spec.selector, so shortening it would collide instances or break helm upgrade.
+*/}}
+{{- define "exportarr.appName" -}}
+{{- $name := printf "%s-%s-%s" (include "exportarr.fullname" .root) .appKey .instanceName -}}
+{{- if gt (len $name) 63 -}}
+{{- fail (printf "exportarr: generated name %q is %d characters, over the Kubernetes 63-character limit for Service names and label values. Shorten the release name or apps.%s[].name, or set exportarr.fullnameOverride." $name (len $name) .appKey) -}}
+{{- end -}}
+{{- $name -}}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "exportarr.serviceAccountName" -}}

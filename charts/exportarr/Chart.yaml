@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 4.3.0
+version: 4.4.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=ghcr.io/onedr0p/exportarr
@@ -50,6 +50,4 @@ annotations:
       image: ghcr.io/onedr0p/exportarr:v2.3.0
   artifacthub.io/changes: |
     - kind: changed
-      description: "the qbittorrent-exporter subchart is re-pinned 1.1.0 -> 1.2.0 and tdarr-exporter 2.1.0 -> 2.2.0, so the serviceAccount.automount fix in 4.2.0 now reaches their pod specs. Only relevant with those subcharts enabled; no values keys changed"
-    - kind: fixed
-      description: "the subcharts' own PrometheusRule is now gated on their metrics.enabled and a non-empty rules list. NOTE: with qbittorrent-exporter.metrics.enabled or tdarr-exporter.metrics.enabled false and prometheusRule.enabled true, that rule is REMOVED on upgrade"
+      description: "per-instance resource names now render through a shared helper that fails the render when a name would exceed the Kubernetes 63-character limit, instead of emitting a manifest the API server rejects at install. Names that render today are unchanged"

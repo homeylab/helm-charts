@@ -17,7 +17,7 @@
 {{- end }}
 
 {{- if and ($metricsEnabled) ($smEnabled) }}
-{{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}
+{{- $appName := include "exportarr.appName" (dict "root" $ "appKey" $instance_key "instanceName" $app.name) }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
