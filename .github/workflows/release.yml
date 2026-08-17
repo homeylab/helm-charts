@@ -44,12 +44,15 @@ jobs:
           CR_SKIP_EXISTING: true # https://github.com/helm/chart-releaser-action/issues/97
           CR_GENERATE_RELEASE_NOTES: true
 
-      # chart-releaser leaves the charts it just released (changed versions only,
-      # deps vendored) in .cr-release-packages/. Push those same packages to OCI so
-      # (a) OCI publishes only what Pages did, and (b) a failed release blocks the
-      # push — no channel desync. Mirrors the prometheus-community pattern.
-      - name: Detect released charts
-        id: released
+      # chart-releaser packages every chart whose files changed since
+      # `git describe --tags --abbrev=0 HEAD~`. That assumes one linear release
+      # tag; with per-chart tags the base is whichever tag describe happens to
+      # pick, so .cr-release-packages/ can hold far more than was just released.
+      # CR_SKIP_EXISTING gates only the Pages upload, and `helm package` is not
+      # reproducible across checkouts (file mtimes land in the tarball), so an
+      # unguarded push moves published tags to new digests. Hence the probe below.
+      - name: Detect packaged charts
+        id: packaged
         run: |
           shopt -s nullglob
           pkgs=(.cr-release-packages/*.tgz)
@@ -63,17 +66,45 @@ jobs:
       # Log in / push only when there's something to publish, so doc- or
       # workflow-only merges never touch Docker Hub.
       - name: Helm Registry Login
-        if: steps.released.outputs.has == 'true'
+        if: steps.packaged.outputs.has == 'true'
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: echo "$DOCKERHUB_TOKEN" | helm registry login registry-1.docker.io -u "$DOCKERHUB_USERNAME" --password-stdin
 
-      - name: Push released charts to OCI
-        if: steps.released.outputs.has == 'true'
+      - name: Push packaged charts to OCI
+        if: steps.packaged.outputs.has == 'true'
         run: |
           shopt -s nullglob
           for pkg in .cr-release-packages/*.tgz; do
-            echo "Pushing $pkg"
+            # Anchor the match to column 1: `helm package` sorts Chart.yaml keys,
+            # so `annotations:` and `dependencies:` both precede `name:`, and both
+            # carry their own indented name:/version: entries. Unanchored, an
+            # umbrella resolves to a dependency (bookstack -> mariadb).
+            top=$(tar -tzf "$pkg" | awk -F/ 'NF==2 && $2=="Chart.yaml"{print; exit}')
+            meta=$(tar -xzOf "$pkg" "$top")
+            name=$(awk '/^name:/{print $2; exit}' <<< "$meta")
+            version=$(awk '/^version:/{print $2; exit}' <<< "$meta")
+            if [ -z "$name" ] || [ -z "$version" ]; then
+              echo "::error::Could not read name/version from ${pkg}"
+              exit 1
+            fi
+            repo="registry-1.docker.io/homeylabcharts/${name}"
+
+            # Three states, not two: only a definite "not found" means absent. An
+            # auth, DNS or 5xx failure must fail the job rather than fall through
+            # to a push, which would re-push exactly when the registry is flaky.
+            if output=$(helm show chart "oci://${repo}" --version "$version" 2>&1); then
+              echo "::notice::Skipping ${name} ${version}: already published"
+              continue
+            elif grep -q "not found" <<< "$output"; then
+              : # absent - fall through and push
+            else
+              echo "::error::Cannot verify ${name} ${version}; refusing to push blind"
+              echo "$output"
+              exit 1
+            fi
+
+            echo "Pushing ${name} ${version}"
             helm push "$pkg" oci://registry-1.docker.io/homeylabcharts
           done
