@@ -1098,6 +1098,50 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
+          description: "per-instance resource names now render through a shared helper that fails the render when a name would exceed the Kubernetes 63-character limit, instead of emitting a manifest the API server rejects at install. Names that render today are unchanged"
+      artifacthub.io/images: |
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/exportarr
+    apiVersion: v2
+    appVersion: v2.3.0
+    created: "2026-08-17T04:34:46.282919848Z"
+    dependencies:
+    - condition: qbittorrent-exporter.enabled
+      name: qbittorrent-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.2.0
+    - condition: tdarr-exporter.enabled
+      name: tdarr-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 2.2.0
+    description: A Helm Chart to export Prometheus metrics for Arr applications.
+    digest: e29c3ea2743ea924ebeee224835086f69f3a64f82c6281d217aedac9efc00a1c
+    home: https://github.com/onedr0p/exportarr
+    keywords:
+    - exportarr
+    - arr
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: exportarr
+    sources:
+    - https://github.com/onedr0p/exportarr
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/exportarr-4.4.0/exportarr-4.4.0.tgz
+    version: 4.4.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
           description: "the qbittorrent-exporter subchart is re-pinned 1.1.0 -> 1.2.0 and tdarr-exporter 2.1.0 -> 2.2.0, so the serviceAccount.automount fix in 4.2.0 now reaches their pod specs. Only relevant with those subcharts enabled; no values keys changed"
         - kind: fixed
           description: "the subcharts' own PrometheusRule is now gated on their metrics.enabled and a non-empty rules list. NOTE: with qbittorrent-exporter.metrics.enabled or tdarr-exporter.metrics.enabled false and prometheusRule.enabled true, that rule is REMOVED on upgrade"
@@ -2854,6 +2898,41 @@ entries:
   v-rising:
   - annotations:
       artifacthub.io/changes: |
+        - kind: fixed
+          description: "service.server.annotations and service.rcon.annotations are now applied to their Services. Both were documented but consumed by no template, so setting them did nothing"
+        - kind: changed
+          description: "the RCON Service name now fails the render when a long release name would push it past the Kubernetes 63-character limit, instead of emitting a name the API server rejects at install. Names that render today are unchanged"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
+    apiVersion: v2
+    appVersion: "3.0"
+    created: "2026-08-17T04:34:47.204503209Z"
+    description: A Helm chart to deploy TrueOsiris/docker-vrising image for v-rising
+      server
+    digest: 2d4526c1bff9356c1e837ccf5df96cc29f19fae874f5e32990b4d8cbba76933f
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - v-rising
+    - vrising
+    - game-server
+    - gaming
+    - dedicated-server
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: v-rising
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/TrueOsiris/docker-vrising
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/v-rising-1.2.0/v-rising-1.2.0.tgz
+    version: 1.2.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: security
           description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"
       artifacthub.io/license: MIT
@@ -3053,4 +3132,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-08-16T06:26:56.854093947Z"
+generated: "2026-08-17T04:34:47.204734683Z"
