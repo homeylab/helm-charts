@@ -148,11 +148,15 @@ Three workflows run on a PR to `main`.
 
 Its **`Lint and unit-test changed charts`** check is required via branch protection.
 
-**[`ci-tooling.yml`](.github/workflows/ci-tooling.yml)** — `helm unittest` + `scripts/ci/kubeconform.sh` against **every** chart; no `ct`, no kind, a handful of seconds. It exists because `ct` only looks under `chart-dirs: [charts]`: a PR that edits `scripts/ci/**` or `.github/ct/**` changes no chart, so every step above skips and `ct lint` exits 0 on zero work. The same hole swallows the helmignored chart-side inputs `charts/*/ci/kubeconform-overlay.yaml` and `charts/*/tests/**`, which are in this workflow's path filter instead.
+**[`ci-tooling.yml`](.github/workflows/ci-tooling.yml)** — `helm unittest` + `scripts/ci/kubeconform.sh` against **every** chart; no `ct`, no kind, a handful of seconds. It exists because `ct` only looks under `chart-dirs: [charts]`: a PR that edits `scripts/ci/**` or `.github/ct/**` changes no chart, so every step above skips and `ct lint` exits 0 on zero work. The same blind spot covers the helmignored chart-side inputs `charts/*/ci/kubeconform-overlay.yaml` and `charts/*/tests/**`.
 
-It is not a required check: a path-filtered workflow never reports on PRs that miss the filter, so branch protection would wait on it forever. Treat a red `ci-tooling` as blocking by convention.
+**[`actionlint.yml`](.github/workflows/actionlint.yml)** — type-checks the workflows, so a typo'd `uses:`, undefined context property or bad `if:` fails here instead of during a release. Mirrored by `task actionlint`; install `shellcheck` alongside actionlint, since it is picked up automatically to lint `run:` blocks and CI's image bundles it.
 
-**[`actionlint.yml`](.github/workflows/actionlint.yml)** — type-checks the workflows, so a typo'd `uses:`, undefined context property or bad `if:` fails here instead of during a release. It runs on **every** PR rather than filtering on `.github/workflows/**`, for the required-check reason above. Mirrored by `task actionlint`; install `shellcheck` alongside actionlint, since it is picked up automatically to lint `run:` blocks and CI's image bundles it.
+### Why every PR runs all three
+
+All three are required contexts on `main` — `Lint and unit-test changed charts`, `Validate the static tier against every chart`, `Lint workflow files` — and none carries a `paths:` filter, deliberately. A path-filtered check never reports on PRs that miss the filter, so branch protection would wait on it forever. The cost of that is a docs-only PR running the lot: `ci.yml` finds nothing in `ct list-changed`, skips its lint/install steps and reports green in under a minute, while the other two do their (cheap, cluster-free) work in full.
+
+One consequence to know about: **retargeting a PR's base branch does not start a run.** A stacked PR whose base is auto-retargeted to `main` when the parent merges reports no checks at all, and stays unmergeable until you push to it — rebase onto `main` and force-push.
 
 ### What counts as "changed" (`use-helmignore`)
 
