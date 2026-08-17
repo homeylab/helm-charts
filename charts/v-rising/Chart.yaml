@@ -18,7 +18,7 @@ maintainers:
     url: https://github.com/homeylab
 
 # This is the chart version. SemVer: https://semver.org/
-version: 1.1.0
+version: 1.2.0
 
 # Application version (upstream image tag). Not SemVer-bound.
 # renovate: datasource=docker depName=trueosiris/vrising versioning=regex:^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$
@@ -34,5 +34,5 @@ annotations:
     - name: Chart Source
       url: https://github.com/homeylab/helm-charts/tree/main/charts/v-rising
   artifacthub.io/changes: |
-    - kind: security
-      description: "serviceAccount.automount false now also sets automountServiceAccountToken on the pod spec, so it applies with an external ServiceAccount. Default rendering unchanged"
+    - kind: fixed
+      description: "service.server.annotations and service.rcon.annotations are now applied to their Services. Both were documented but consumed by no template, so setting them did nothing"

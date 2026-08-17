@@ -35,6 +35,10 @@ persistence:
 service:
   server:
     type: LoadBalancer
+    # Nested two levels down, so the coverage guard cannot see these either.
+    annotations: &serviceAnnotations
+      metallb.universe.tf/address-pool: kubeconform-pool
+      external-dns.alpha.kubernetes.io/hostname: kubeconform.example.org
     loadBalancerSourceRanges: &sourceRanges
       - 10.0.0.0/8
       - 192.168.0.0/16
@@ -46,6 +50,7 @@ service:
   rcon:
     enabled: true
     type: LoadBalancer
+    annotations: *serviceAnnotations
     loadBalancerSourceRanges: *sourceRanges
     externalIPs: *externalIPs
 

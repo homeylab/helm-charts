@@ -36,3 +36,32 @@ tests:
     asserts:
       - equal: { path: "spec.loadBalancerSourceRanges[0]", value: 10.0.0.0/8 }
       - equal: { path: "spec.loadBalancerSourceRanges[1]", value: 192.168.0.0/16 }
+
+  # Was declared and documented but consumed by no template - setting it did
+  # nothing. Both directions pinned so the wiring cannot come undone.
+  - it: omits the annotations key when service.rcon.annotations is unset
+    set:
+      service.rcon.enabled: true
+    asserts:
+      - notExists: { path: metadata.annotations }
+  - it: renders every service.rcon.annotations entry
+    # two keys: one cannot catch a toYaml swapped for a single-key interpolation
+    set:
+      service.rcon.enabled: true
+      service.rcon.annotations:
+        metallb.universe.tf/address-pool: rcon-pool
+        external-dns.alpha.kubernetes.io/hostname: rcon.example.com
+    asserts:
+      - equal:
+          path: metadata.annotations["metallb.universe.tf/address-pool"]
+          value: rcon-pool
+      - equal:
+          path: metadata.annotations["external-dns.alpha.kubernetes.io/hostname"]
+          value: rcon.example.com
+  - it: keeps rcon and server annotations independent
+    set:
+      service.rcon.enabled: true
+      service.server.annotations:
+        server-only: "true"
+    asserts:
+      - notExists: { path: metadata.annotations }

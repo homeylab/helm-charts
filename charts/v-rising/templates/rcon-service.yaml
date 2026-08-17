@@ -6,6 +6,10 @@ metadata:
   name: {{ include "v-rising.fullname" . }}-rcon
   labels:
     {{- include "v-rising.labels" . | nindent 4 }}
+  {{- with .Values.service.rcon.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.rcon.type }}
 {{- if eq .Values.service.rcon.type "LoadBalancer" }}
