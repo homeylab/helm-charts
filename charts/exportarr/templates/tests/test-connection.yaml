@@ -1,7 +1,7 @@
 {{- range $instance_key, $instance_val := .Values.exportarr.apps }}
 {{- range $app := $instance_val }}
 {{- if and $app.enabled $.Values.exportarr.tests.enabled }}
-{{- $appName := printf "%s-%s-%s" (include "exportarr.fullname" $) $instance_key $app.name }}
+{{- $appName := include "exportarr.appName" (dict "root" $ "appKey" $instance_key "instanceName" $app.name) }}
 apiVersion: v1
 kind: Pod
 metadata:

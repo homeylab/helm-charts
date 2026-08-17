@@ -23,6 +23,31 @@ tests:
       service.server.type: LoadBalancer
     asserts:
       - equal: { path: spec.type, value: LoadBalancer }
+  # Was declared and documented but consumed by no template - setting it did
+  # nothing. Both directions pinned so the wiring cannot come undone.
+  - it: omits the annotations key when service.server.annotations is unset
+    asserts:
+      - notExists: { path: metadata.annotations }
+  - it: renders every service.server.annotations entry
+    # two keys: one cannot catch a toYaml swapped for a single-key interpolation
+    set:
+      service.server.annotations:
+        metallb.universe.tf/address-pool: game-pool
+        external-dns.alpha.kubernetes.io/hostname: vrising.example.com
+    asserts:
+      - equal:
+          path: metadata.annotations["metallb.universe.tf/address-pool"]
+          value: game-pool
+      - equal:
+          path: metadata.annotations["external-dns.alpha.kubernetes.io/hostname"]
+          value: vrising.example.com
+  - it: keeps server and rcon annotations independent
+    set:
+      service.rcon.annotations:
+        rcon-only: "true"
+    asserts:
+      - notExists: { path: metadata.annotations }
+
   - it: renders every loadBalancerSourceRange
     # two ranges on purpose: the previous `indent` form aborted the render outright
     set:

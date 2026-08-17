@@ -36,3 +36,54 @@ tests:
     asserts:
       - equal: { path: "spec.loadBalancerSourceRanges[0]", value: 10.0.0.0/8 }
       - equal: { path: "spec.loadBalancerSourceRanges[1]", value: 192.168.0.0/16 }
+
+  # Was declared and documented but consumed by no template - setting it did
+  # nothing. Both directions pinned so the wiring cannot come undone.
+  - it: omits the annotations key when service.rcon.annotations is unset
+    set:
+      service.rcon.enabled: true
+    asserts:
+      - notExists: { path: metadata.annotations }
+  - it: renders every service.rcon.annotations entry
+    # two keys: one cannot catch a toYaml swapped for a single-key interpolation
+    set:
+      service.rcon.enabled: true
+      service.rcon.annotations:
+        metallb.universe.tf/address-pool: rcon-pool
+        external-dns.alpha.kubernetes.io/hostname: rcon.example.com
+    asserts:
+      - equal:
+          path: metadata.annotations["metallb.universe.tf/address-pool"]
+          value: rcon-pool
+      - equal:
+          path: metadata.annotations["external-dns.alpha.kubernetes.io/hostname"]
+          value: rcon.example.com
+  # "-rcon" is appended outside v-rising.fullname, so the helper's trunc 63 does
+  # not cover it. A 49-char release name leaves the name at exactly 63.
+  - it: renders an rcon Service name of exactly 63 characters
+    release:
+      name: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    set:
+      service.rcon.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-v-rising-rcon
+  - it: fails the render rather than emitting an rcon Service name over 63
+    release:
+      name: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    set:
+      service.rcon.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: 'is 64 characters, over the Kubernetes 63-character limit'
+      - failedTemplate:
+          errorPattern: 'fullnameOverride'
+
+  - it: keeps rcon and server annotations independent
+    set:
+      service.rcon.enabled: true
+      service.server.annotations:
+        server-only: "true"
+    asserts:
+      - notExists: { path: metadata.annotations }
