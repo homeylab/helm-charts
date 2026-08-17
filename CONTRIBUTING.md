@@ -197,12 +197,14 @@ Pipeline:
 
 1. **Renovate** (CI) bumps `appVersion` when the upstream image releases, then bumps the chart `version` (upstream patch → chart patch; minor/major → chart minor), scoped so only the changed chart bumps. (The `helm-values` manager is disabled — image versions are tracked *only* via `appVersion`, never `values.yaml`.)
 2. On **merge to `main`**, the single `release` job in [`release.yml`](.github/workflows/release.yml) runs:
-   - **`chart-releaser`** publishes any chart whose `Chart.yaml` `version` changed to the GitHub Pages Helm repo (`CR_SKIP_EXISTING` — unchanged versions are skipped), leaving the packaged `.tgz` (deps vendored) in `.cr-release-packages/`.
-   - a later step in the same job `helm push`es those same packages to the `homeylabcharts` OCI registry on Docker Hub — so OCI publishes **only** the charts Pages just did, and a failed release blocks the push (the two channels can't desync).
+   - **`chart-releaser`** publishes any chart whose `Chart.yaml` `version` changed to the GitHub Pages Helm repo (`CR_SKIP_EXISTING` — unchanged versions are skipped), leaving the packaged `.tgz` (deps vendored) in `.cr-release-packages/`. It *packages* more than it publishes: the set is a file diff against `git describe --tags --abbrev=0 HEAD~`, which with per-chart tags can resolve to a tag from an older release.
+   - a later step `helm push`es those packages to the `homeylabcharts` OCI registry on Docker Hub, **skipping any version already published there**. Pages is immutable by construction; the skip makes OCI match. Without it an unrelated edit republishes an unchanged chart under its existing tag with a new digest — `helm package` is not reproducible across checkouts (file mtimes land in the tarball).
 
 **Consequence:** a templates-only change with an unchanged `version` ships **nothing** via chart-releaser. Always bump `version` when you want a release.
 
-**If the OCI push step fails after the release already published to Pages** (e.g. a Docker Hub auth/network blip), re-running the job won't republish it — `chart-releaser` now sees the version as already released and repackages nothing, leaving `.cr-release-packages/` empty. Recover manually for the affected chart: `task pkg-with-dep APP=<chart>` then `task oci-push FILE=<chart>-<version>.tgz`.
+**If the OCI push step fails after the release already published to Pages** (e.g. a Docker Hub auth/network blip), **re-run the failed workflow run**. Same commit → same packaged set → the guard skips what landed and pushes only what didn't. Don't wait for the next merge: once that merge's own tags move the diff base, a chart it doesn't touch is no longer packaged. Fallback if the run is gone: `task pkg-with-dep APP=<chart>` then `task oci-push FILE=<chart>-<version>.tgz`.
+
+**A published version cannot be corrected in place.** Pages has never allowed it, and OCI no longer does either. Fix a bad release by superseding it with a new patch version, or by deleting the tag from *both* channels (the GitHub Release and its asset, the `gh-pages` `index.yaml` entry, and the Docker Hub tag) and letting the next merge republish.
 
 ### Umbrella charts: release the subchart first
 
