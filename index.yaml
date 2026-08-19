@@ -3,6 +3,48 @@ entries:
   bookstack:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "volumes and volumeMounts passthroughs, appended to the chart's own config volume and /config mount. Default rendering unchanged"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-08-19T02:45:03.905988918Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.1.0
+    description: bookstack documentation platform
+    digest: a4913347da2b43df126e255646a83af9367289fac0c457ff55f6d4124a939e56
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.6.0/bookstack-5.6.0.tgz
+    version: 5.6.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "the bookstack-file-exporter subchart is re-pinned 1.0.3 -> 1.1.0, so the serviceAccount.automount fix in 5.4.0 now reaches its Deployment and CronJob pod specs. Only relevant with bookstack-file-exporter.enabled; no values keys changed"
       artifacthub.io/license: MIT
@@ -873,6 +915,41 @@ entries:
     - https://github.com/homeylab/helm-charts/releases/download/bookstack-0.1.2/bookstack-0.1.2.tgz
     version: 0.1.2
   bookstack-file-exporter:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: "livenessProbe and readinessProbe are now values passthroughs, and the health port is a named container port. Set a probe to null to drop it; the Deployment-mode + config.health_port gate is unchanged"
+        - kind: changed
+          description: "probes now default to initialDelaySeconds 10 / periodSeconds 30 (upstream's documented liveness shape, applied to both) instead of the Kubernetes defaults; pods roll once"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
+    apiVersion: v2
+    appVersion: 3.0.0
+    created: "2026-08-19T02:45:04.114188753Z"
+    description: A Helm chart to run scheduled exports/backups of a BookStack instance's
+      pages, images, and attachments.
+    digest: c4b28428e5815aae43720cd550935f8e489df6e49fe8e1532a739d55b192981e
+    home: https://github.com/homeylab/helm-charts
+    keywords:
+    - bookstack
+    - backup
+    - export
+    - wiki
+    - documentation
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack-file-exporter
+    sources:
+    - https://github.com/homeylab/helm-charts
+    - https://github.com/homeylab/bookstack-file-exporter
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-file-exporter-1.2.0/bookstack-file-exporter-1.2.0.tgz
+    version: 1.2.0
   - annotations:
       artifacthub.io/changes: |
         - kind: security
@@ -2594,6 +2671,40 @@ entries:
   unpoller:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: "volumes and volumeMounts passthroughs, so a self-signed Unifi controller CA can be mounted and verify_ssl set true instead of leaving verification off. Default rendering unchanged"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
+    apiVersion: v2
+    appVersion: v3.3.1
+    created: "2026-08-19T02:45:04.258963979Z"
+    description: unpoller for unifi controller metrics
+    digest: f04623ab30a169eb1e33191cd3d20461618c10cafb4990c5ea736b6caff3ec98
+    home: https://unpoller.com
+    icon: https://unpoller.com/img/logo.png
+    keywords:
+    - unpoller
+    - unifi
+    - ubiquiti
+    - prometheus
+    - exporter
+    - metrics
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: unpoller
+    sources:
+    - https://github.com/unpoller/unpoller
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/unpoller-4.4.0/unpoller-4.4.0.tgz
+    version: 4.4.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: changed
           description: "automountServiceAccountToken is now written to the pod spec only when serviceAccount.automount is false, so an external ServiceAccount's own opt-out is honoured. Pods roll once"
         - kind: fixed
@@ -3132,4 +3243,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-08-17T04:34:47.204734683Z"
+generated: "2026-08-19T02:45:04.259661902Z"
