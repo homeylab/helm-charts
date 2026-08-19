@@ -138,23 +138,64 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].envFrom[0].configMapRef.name
           value: extra-cm
-  - it: omits liveness/readiness probes by default (config.health_port unset)
+  # Gated because the probe values are non-empty by default: with no health_port
+  # there is no health server, so an ungated probe would fail every check.
+  - it: omits the health port and both probes by default (config.health_port unset)
     template: templates/deployment.yaml
     set:
       config.run_interval: 60
     asserts:
+      - notExists: { path: "spec.template.spec.containers[0].ports" }
       - notExists: { path: "spec.template.spec.containers[0].livenessProbe" }
       - notExists: { path: "spec.template.spec.containers[0].readinessProbe" }
-  - it: adds /healthz liveness/readiness probes when config.health_port is set
+  - it: names the health port and renders both probes when config.health_port is set
     template: templates/deployment.yaml
     set:
       config.run_interval: 60
       config.health_port: "8080"
     asserts:
+      - equal: { path: "spec.template.spec.containers[0].ports[0].name", value: health }
+      - equal: { path: "spec.template.spec.containers[0].ports[0].containerPort", value: 8080 }
       - equal: { path: "spec.template.spec.containers[0].livenessProbe.httpGet.path", value: /healthz }
-      - equal: { path: "spec.template.spec.containers[0].livenessProbe.httpGet.port", value: 8080 }
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.httpGet.port", value: health }
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.initialDelaySeconds", value: 10 }
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.periodSeconds", value: 30 }
       - equal: { path: "spec.template.spec.containers[0].readinessProbe.httpGet.path", value: /healthz }
-      - equal: { path: "spec.template.spec.containers[0].readinessProbe.httpGet.port", value: 8080 }
+      - equal: { path: "spec.template.spec.containers[0].readinessProbe.httpGet.port", value: health }
+  # `{}` would merge into the default rather than replace it, so `null` is the only way to drop one.
+  - it: honours probe overrides and drops a probe set to null
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      config.health_port: "9090"
+      livenessProbe:
+        httpGet: { path: /healthz, port: health }
+        initialDelaySeconds: 45
+        periodSeconds: 120
+        failureThreshold: 6
+      readinessProbe: null
+    asserts:
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.initialDelaySeconds", value: 45 }
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.periodSeconds", value: 120 }
+      - equal: { path: "spec.template.spec.containers[0].livenessProbe.failureThreshold", value: 6 }
+      - notExists: { path: "spec.template.spec.containers[0].readinessProbe" }
+
+  - it: honours readinessProbe overrides and drops the liveness probe set to null
+    template: templates/deployment.yaml
+    set:
+      config.run_interval: 60
+      config.health_port: "9090"
+      readinessProbe:
+        httpGet: { path: /healthz, port: health }
+        initialDelaySeconds: 20
+        periodSeconds: 60
+        failureThreshold: 3
+      livenessProbe: null
+    asserts:
+      - equal: { path: "spec.template.spec.containers[0].readinessProbe.initialDelaySeconds", value: 20 }
+      - equal: { path: "spec.template.spec.containers[0].readinessProbe.periodSeconds", value: 60 }
+      - equal: { path: "spec.template.spec.containers[0].readinessProbe.failureThreshold", value: 3 }
+      - notExists: { path: "spec.template.spec.containers[0].livenessProbe" }
   - it: applies hardened securityContext defaults (UID/GID 33333)
     template: templates/deployment.yaml
     set:

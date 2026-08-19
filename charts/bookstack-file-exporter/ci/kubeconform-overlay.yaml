@@ -1,0 +1,9 @@
+# Per-chart half of the kubeconform overlay (base: scripts/ci/kubeconform-values.yaml).
+# NOT a `ct install` scenario — the name must not end in `-values.yaml` or `ct` deploys it.
+#
+# The run modes are mutually exclusive: pass 1 (defaults) renders the CronJob, so this file
+# flips pass 2 to Deployment mode to reach that template, the health port, and the probes.
+config:
+  run_interval: 300
+  health_port: 8080
+  health_host: "0.0.0.0"
