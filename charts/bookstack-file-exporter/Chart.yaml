@@ -37,6 +37,6 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack-file-exporter
   artifacthub.io/changes: |
     - kind: added
-      description: "livenessProbe and readinessProbe are now values passthroughs instead of hardcoded blocks, and the health port is a named container port. Probes still render only in Deployment mode with config.health_port set; set a probe to null to drop it"
+      description: "livenessProbe and readinessProbe are now values passthroughs, and the health port is a named container port. Set a probe to null to drop it; the Deployment-mode + config.health_port gate is unchanged"
     - kind: changed
-      description: "the probes now default to initialDelaySeconds 10 / periodSeconds 30 (upstream's documented shape) instead of the Kubernetes defaults. Affects Deployment mode with config.health_port set; pods roll once"
+      description: "probes now default to initialDelaySeconds 10 / periodSeconds 30 (upstream's documented liveness shape, applied to both) instead of the Kubernetes defaults; pods roll once"

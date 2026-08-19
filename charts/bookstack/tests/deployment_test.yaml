@@ -160,10 +160,8 @@ tests:
           path: spec.template.metadata.annotations["second-annotation"]
           value: two
 
-  # bookstack always carries its own `config` volume and `/config` mount, so the
-  # passthroughs append rather than replace. The counts pin both halves: a chart
-  # entry lost to a misplaced `with` fails here, and so does a passthrough that
-  # renders nothing.
+  # The counts pin both halves: a chart entry lost to a misplaced `with` fails
+  # here, and so does a passthrough that renders nothing.
   - it: mounts only the config volume when the passthroughs are unset
     asserts:
       - lengthEqual: { path: spec.template.spec.volumes, count: 1 }

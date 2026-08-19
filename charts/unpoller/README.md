@@ -239,7 +239,7 @@ This version hardens the chart and standardizes its schema to match the other ho
 | settings.unifi.auth.user | string | `""` | UniFi controller username. For the self-hosted UniFi Network Application, this is the account's email. Maps to UP_UNIFI_CONTROLLER_0_USER |
 | settings.unifi.config | object | `{"save_alarms":false,"save_anomalies":false,"save_dpi":false,"save_events":false,"save_ids":false,"save_sites":true,"url":"","verify_ssl":false}` | non-sensitive UniFi controller connection settings, rendered as `UP_UNIFI_CONTROLLER_0_*` env vars (uppercased keys) |
 | settings.unifi.config.url | string | `""` | UniFi controller URL. Maps to UP_UNIFI_CONTROLLER_0_URL |
-| settings.unifi.config.verify_ssl | bool | `false` | skip TLS certificate verification for the controller (set true for self-signed). Maps to UP_UNIFI_CONTROLLER_0_VERIFY_SSL |
+| settings.unifi.config.verify_ssl | bool | `false` | verify the controller's TLS certificate. Defaults to `false`, which skips verification. Set `true` for a self-signed controller only if you also mount its CA via `volumes`. Maps to UP_UNIFI_CONTROLLER_0_VERIFY_SSL |
 | settings.unpoller.debug | bool | `false` | enable debug logging. Maps to UP_POLLER_DEBUG |
 | settings.unpoller.quiet | bool | `false` | suppress all but error logging. Maps to UP_POLLER_QUIET |
 | tests.enabled | bool | `true` | enable/disable the `helm test` connection-check Pod |

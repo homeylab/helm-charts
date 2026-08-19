@@ -121,7 +121,7 @@ settings:
       save_alarms: false
       save_anomalies: false
       save_dpi: false
-      # -- skip TLS certificate verification for the controller (set true for self-signed). Maps to UP_UNIFI_CONTROLLER_0_VERIFY_SSL
+      # -- verify the controller's TLS certificate. Defaults to `false`, which skips verification. Set `true` for a self-signed controller only if you also mount its CA via `volumes`. Maps to UP_UNIFI_CONTROLLER_0_VERIFY_SSL
       verify_ssl: false
       # role: ""
       # api_key: ""  # required for Integration/v1 metrics on Network 9.3.43+ (unpoller v3+)

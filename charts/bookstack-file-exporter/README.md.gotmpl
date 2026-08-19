@@ -110,11 +110,9 @@ Set by `config.run_interval`:
 > **Note** - upstream's app-native `config.run_schedule` is disabled: the chart fails the render if it's set. Use the k8s `CronJob` or the `run_interval` loop instead.
 
 ### Health Endpoint And Probes
-Probes apply to **Deployment mode only**, and only when `config.health_port` is set — upstream starts no health server otherwise and ignores the setting in one-shot (CronJob) mode. When it is set, the chart names a container port `health` and renders `livenessProbe` / `readinessProbe` against `GET /healthz` on it.
+Probes render in **Deployment mode only**, and only with `config.health_port` set — upstream starts no health server otherwise, and ignores it in CronJob mode. The chart then names a container port `health` and points the `livenessProbe` / `readinessProbe` passthroughs (default `initialDelaySeconds: 10` / `periodSeconds: 30`) at `GET /healthz` on it; set one to `null` (not `{}`, which Helm merges into the default) to drop it.
 
-Both are plain values passthroughs (`livenessProbe`, `readinessProbe`), defaulting to `initialDelaySeconds: 10` / `periodSeconds: 30`. Set one to `null` to drop it — `{}` does **not** work, since Helm merges an empty map into the default rather than replacing it.
-
-`/healthz` is a *liveness* signal: it stays `200` after a failed export cycle, so probes don't flap on a transient BookStack outage. Alert on the response body's `last_run.status` (`degraded` for a partial run) or `failure_count` instead.
+`/healthz` is a *liveness* signal — it stays `200` after a failed export cycle, so probes don't flap on a transient BookStack outage. Alert instead on the body's `last_run.status` (`degraded` for a partial run) or `failure_count`.
 
 ## Remote Storage
 In addition to (or instead of) the local `persistence` volume, the exporter can upload backups to one or more S3 / S3-compatible targets via `config.object_storage` (a list, empty by default). Each entry requires `name`, `endpoint`, `region`, and `bucket`; leave `endpoint` unset to use AWS S3's default endpoint, or set it to point at an S3-compatible provider (e.g. MinIO).

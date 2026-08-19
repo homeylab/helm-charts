@@ -37,4 +37,4 @@ annotations:
       url: https://github.com/homeylab/helm-charts/tree/main/charts/unpoller
   artifacthub.io/changes: |
     - kind: added
-      description: "volumes and volumeMounts passthroughs, so a CA bundle can be mounted for a self-signed Unifi controller certificate instead of disabling verify_ssl. Default rendering unchanged"
+      description: "volumes and volumeMounts passthroughs, so a self-signed Unifi controller CA can be mounted and verify_ssl set true instead of leaving verification off. Default rendering unchanged"
