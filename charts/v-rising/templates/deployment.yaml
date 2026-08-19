@@ -98,7 +98,7 @@ spec:
         - name: steam-server-files
           persistentVolumeClaim:
             claimName: {{ include "v-rising.fullname" . }}-steam-server-files
-      {{- end }} 
+      {{- end }}
     {{- else }}
         - name: steam-server-files
           emptyDir: {}
