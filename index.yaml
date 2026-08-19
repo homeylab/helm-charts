@@ -3,6 +3,48 @@ entries:
   bookstack:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: "the bookstack-file-exporter subchart is re-pinned 1.1.0 -> 1.2.0, so its tunable liveness/readiness probes and named health port reach this chart. Only relevant with bookstack-file-exporter.enabled; no values keys changed"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/homeylab/helm-charts/tree/main/charts/bookstack
+    apiVersion: v2
+    appVersion: version-v26.05.2
+    created: "2026-08-19T02:57:00.251656973Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.16.5
+    - condition: bookstack-file-exporter.enabled
+      name: bookstack-file-exporter
+      repository: oci://registry-1.docker.io/homeylabcharts
+      version: 1.2.0
+    description: bookstack documentation platform
+    digest: bd139c0d22e11102c6e50f692a72f88a230ced7def5cbd2f754fd97d82cd85c6
+    home: https://www.bookstackapp.com/
+    icon: https://raw.githubusercontent.com/BookStackApp/BookStack/development/public/icon.png
+    keywords:
+    - bookstack
+    - wiki
+    - documentation
+    - knowledge-base
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: homeylab
+      url: https://github.com/homeylab
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    - https://github.com/linuxserver/docker-bookstack
+    - https://github.com/homeylab/helm-charts
+    type: application
+    urls:
+    - https://github.com/homeylab/helm-charts/releases/download/bookstack-5.7.0/bookstack-5.7.0.tgz
+    version: 5.7.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: "volumes and volumeMounts passthroughs, appended to the chart's own config volume and /config mount. Default rendering unchanged"
       artifacthub.io/license: MIT
@@ -3243,4 +3285,4 @@ entries:
     urls:
     - https://github.com/homeylab/helm-charts/releases/download/v-rising-0.0.1/v-rising-0.0.1.tgz
     version: 0.0.1
-generated: "2026-08-19T02:45:04.259661902Z"
+generated: "2026-08-19T02:57:00.252048728Z"
