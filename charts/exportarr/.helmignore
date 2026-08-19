@@ -24,6 +24,7 @@
 
 # Not shipped to chart consumers — these are repo-side inputs, not part of the chart:
 #   ci/, tests/       test scaffolding, exercised from the repo (see CONTRIBUTING)
+#   docs/            long-form upgrade notes; the README links them by absolute URL
 #   README.md.gotmpl  helm-docs input; the generated README.md itself does ship
 # Anchored with a leading slash: an unanchored `tests/` matches on basename alone,
 # so it would also match templates/tests/ and strip the `helm test` hooks.
@@ -32,4 +33,5 @@
 # either until the chart itself changes.
 /ci/
 /tests/
+/docs/
 /README.md.gotmpl

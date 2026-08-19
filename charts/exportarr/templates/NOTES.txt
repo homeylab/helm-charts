@@ -3,8 +3,5 @@
 Get the {{ .Chart.Name }} instances by running this command:
     - kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "exportarr.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
 
-A sample Grafana dashboard is available from upstream:
-    - https://github.com/onedr0p/exportarr/tree/master/examples/grafana
-
-A slightly modified version (for this chart specifically) is available in charts repo:
+A Grafana dashboard extended to cover this chart's full apps list is bundled in the charts repo:
     - https://github.com/homeylab/helm-charts/tree/exportarr-{{ .Chart.Version }}/charts/exportarr/examples/dashboard.json

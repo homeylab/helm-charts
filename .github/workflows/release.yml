@@ -63,8 +63,9 @@ jobs:
             echo "No newly released charts to push to OCI."
           fi
 
-      # Log in / push only when there's something to publish, so doc- or
-      # workflow-only merges never touch Docker Hub.
+      # Log in only when cr packaged something. A docs-only merge still packages (files
+      # under charts/ changed) and so still authenticates, but the per-version probe
+      # below finds every version already published and skips each push.
       - name: Helm Registry Login
         if: steps.packaged.outputs.has == 'true'
         env:

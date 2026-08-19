@@ -118,7 +118,7 @@ config:
   ## preserved across upgrades). To pin one: `docker run -it --rm --entrypoint /bin/bash \
   ##   lscr.io/linuxserver/bookstack:latest appkey`
   ## Ignored if existingSecret is specified.
-  # -- app encryption key; leave empty to auto-generate and persist in the chart Secret, or pin an existing key (required when upgrading with existing data, see "Migrating to 5.0.0")
+  # -- app encryption key; leave empty to auto-generate and persist in the chart Secret, or pin an existing key (required when upgrading with existing data, see the [5.0.0 upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/docs/upgrade.md#from-41x-to-500))
   appKey: ""
   ## dbHost should be specified and consistent.
   ## If left empty, it is derived as "{{ .Release.Name }}-mariadb.{{ .Release.Namespace }}.svc.cluster.local"
@@ -171,7 +171,7 @@ ingress:
   className: ""
   ## Add controller-specific annotations here, e.g. for nginx:
   ##   nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-  # -- annotations added to the Ingress; empty by default (previously shipped nginx timeout annotations — see "Migrating to 5.0.0")
+  # -- annotations added to the Ingress; empty by default (previously shipped nginx timeout annotations — see the [5.0.0 upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/docs/upgrade.md#from-41x-to-500))
   annotations: {}
   # -- ingress hosts and paths
   hosts:
@@ -327,7 +327,7 @@ mariadb:
     # -- application db password created on first boot; single source of truth for bookstack's `config.dbPass` when `mariadb.enabled` is true
     password: "bookstack"
     ## Existing secret with keys: mariadb-root-password, mariadb-password
-    # -- existing Secret with `mariadb-root-password`/`mariadb-password` keys; if set, also set the bookstack-side `existingSecret` (see "Migrating to 5.0.0")
+    # -- existing Secret with `mariadb-root-password`/`mariadb-password` keys; if set, also set the bookstack-side `existingSecret` (see the [5.0.0 upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/docs/upgrade.md#from-41x-to-500))
     existingSecret: ""
   persistence:
     # -- enable a PVC for the embedded mariadb data volume

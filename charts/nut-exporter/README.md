@@ -31,13 +31,14 @@ Switching repos requires rewriting your values file — the value keys differ. M
 
 Table of Contents
 - [nut-exporter](#nut-exporter)
+  - [Migration to the upstream chart](#migration-to-the-upstream-chart)
   - [Add Chart Repo](#add-chart-repo)
   - [Install](#install)
   - [Upgrade](#upgrade)
   - [Configuration Options](#configuration-options)
   - [Grafana Dashboards](#grafana-dashboards)
 
-This chart provides [nut_exporter](https://github.com/DRuggeri/nut_exporter) [image](https://hub.docker.com/r/druggeri/nut_exporter) from `DRuggeri` repository. 
+This chart provides [nut_exporter](https://github.com/DRuggeri/nut_exporter) [image](https://hub.docker.com/r/druggeri/nut_exporter) from `DRuggeri` repository.
 
 ## Add Chart Repo
 ```bash
@@ -54,7 +55,7 @@ helm install nut-exporter  homeylab/nut-exporter -n nut-exporter --create-namesp
 helm install -f my-values.yaml nut-exporter homeylab/nut-exporter -n nut-exporter --create-namespace
 ```
 
-#### OCI Registry Support
+### OCI Registry Support
 ```bash
 helm install nut-exporter -n nut-exporter oci://registry-1.docker.io/homeylabcharts/nut-exporter --version X.Y.Z --create-namespace
 
@@ -63,9 +64,8 @@ helm install -f my-values.yaml nut-exporter -n nut-exporter oci://registry-1.doc
 ```
 
 ### Install Example
-Only some options are shown, view `values.yaml` for an exhaustive list. You can add/change more properties as needed.
+Only some options are shown, view `values.yaml` for an exhaustive list.
 
-Click below to expand for an example of a valid `custom-values.yaml` file. 
 <details closed>
 <summary>custom-values.yaml</summary>
 <br>
@@ -93,11 +93,6 @@ metrics:
 </details>
 <br>
 
-Install with custom:
-```bash
-helm install -f custom-values.yaml nut-exporter homeylab/nut-exporter -n nut-exporter --create-namespace
-```
-
 ## Upgrade
 ```bash
 helm upgrade nut-exporter homeylab/nut-exporter -n nut-exporter
@@ -106,7 +101,7 @@ helm upgrade nut-exporter homeylab/nut-exporter -n nut-exporter
 helm upgrade -f my-values.yaml nut-exporter homeylab/nut-exporter -n nut-exporter
 ```
 
-#### OCI Registry Support
+### OCI Registry Support
 ```bash
 helm upgrade nut-exporter -n nut-exporter oci://registry-1.docker.io/homeylabcharts/nut-exporter --version X.Y.Z
 
