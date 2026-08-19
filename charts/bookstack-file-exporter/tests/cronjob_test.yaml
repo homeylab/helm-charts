@@ -239,3 +239,83 @@ tests:
       - contains:
           path: spec.jobTemplate.spec.template.spec.containers[0].volumeMounts
           content: { name: second-extra, mountPath: /second }
+
+  # extraEnv range: two entries + lengthEqual so a range that only ever emits
+  # its first item, or drops one, fails.
+  - it: renders every entry of extraEnv as upper-cased env vars
+    set:
+      extraEnv:
+        first_var: value-one
+        second_var: value-two
+    asserts:
+      - lengthEqual: { path: "spec.jobTemplate.spec.template.spec.containers[0].env", count: 2 }
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].env
+          content: { name: FIRST_VAR, value: value-one }
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].env
+          content: { name: SECOND_VAR, value: value-two }
+
+  - it: mounts export-dump at persistence.mountPath when persistence.enabled
+    set:
+      persistence.enabled: true
+      persistence.mountPath: /data/backups
+    asserts:
+      - equal: { path: "spec.jobTemplate.spec.template.spec.containers[0].volumeMounts[1].name", value: export-dump }
+      - equal:
+          path: "spec.jobTemplate.spec.template.spec.containers[0].volumeMounts[1].mountPath"
+          value: /data/backups
+
+  # resources is rendered at nindent 14 - one level deeper than most container
+  # fields - so assert the nested limits/requests keys resolve, not just that
+  # `resources` exists, to catch an indent regression that demotes it under
+  # the wrong parent (or promotes it out of the container).
+  - it: renders resources.limits and resources.requests when set
+    set:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 250m
+          memory: 256Mi
+    asserts:
+      - equal: { path: "spec.jobTemplate.spec.template.spec.containers[0].resources.limits.cpu", value: 500m }
+      - equal:
+          path: "spec.jobTemplate.spec.template.spec.containers[0].resources.limits.memory"
+          value: 512Mi
+      - equal: { path: "spec.jobTemplate.spec.template.spec.containers[0].resources.requests.cpu", value: 250m }
+      - equal:
+          path: "spec.jobTemplate.spec.template.spec.containers[0].resources.requests.memory"
+          value: 256Mi
+
+  - it: mounts persistence.existingClaim as the export-dump PVC when set
+    set:
+      persistence.enabled: true
+      persistence.existingClaim: my-existing-pvc
+    asserts:
+      - equal: { path: "spec.jobTemplate.spec.template.spec.volumes[1].name", value: export-dump }
+      - equal:
+          path: "spec.jobTemplate.spec.template.spec.volumes[1].persistentVolumeClaim.claimName"
+          value: my-existing-pvc
+
+  - it: mounts the chart-managed PVC as the export-dump volume when persistence.existingClaim is unset
+    set:
+      persistence.enabled: true
+    asserts:
+      - equal: { path: "spec.jobTemplate.spec.template.spec.volumes[1].name", value: export-dump }
+      - equal:
+          path: "spec.jobTemplate.spec.template.spec.volumes[1].persistentVolumeClaim.claimName"
+          value: bookstack-file-exporter
+
+  # cronjob.yaml has no ports/probe logic at all - the "Deployment mode only"
+  # contract documented in values.yaml is currently enforced only by that
+  # omission. This pins it so a future change that wires health_port into the
+  # CronJob path does not slip through unnoticed.
+  - it: renders no ports or probes in CronJob mode even when config.health_port is set (probes are Deployment-mode only)
+    set:
+      config.health_port: "8080"
+    asserts:
+      - notExists: { path: "spec.jobTemplate.spec.template.spec.containers[0].ports" }
+      - notExists: { path: "spec.jobTemplate.spec.template.spec.containers[0].livenessProbe" }
+      - notExists: { path: "spec.jobTemplate.spec.template.spec.containers[0].readinessProbe" }
