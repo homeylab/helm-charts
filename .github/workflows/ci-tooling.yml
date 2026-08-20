@@ -52,6 +52,26 @@ jobs:
         # Helm 4 verifies plugin sources by default; unsigned git installs need --verify=false
         run: helm plugin install https://github.com/helm-unittest/helm-unittest --version "${UNITTEST_VERSION#v}" --verify=false
 
+      - name: Install helm-docs
+        env:
+          # renovate: datasource=github-releases depName=norwoodj/helm-docs
+          HELM_DOCS_VERSION: v1.14.2
+        # Pinned because the value table's formatting is version-dependent: an
+        # unpinned binary makes "is the README stale?" depend on who ran it last.
+        run: |
+          curl -fsSL "https://github.com/norwoodj/helm-docs/releases/download/${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION#v}_Linux_x86_64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin helm-docs
+
+      - name: Install lychee
+        env:
+          # renovate: datasource=github-releases depName=lycheeverse/lychee
+          LYCHEE_VERSION: v0.24.2
+        # musl build: statically linked, so it runs on older glibc too and the
+        # tool table in CONTRIBUTING can point contributors at the same binary.
+        run: |
+          curl -fsSL "https://github.com/lycheeverse/lychee/releases/download/lychee-${LYCHEE_VERSION}/lychee-x86_64-unknown-linux-musl.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin --strip-components=1 lychee-x86_64-unknown-linux-musl/lychee
+
       - name: Install kubeconform
         env:
           # renovate: datasource=github-releases depName=yannh/kubeconform
@@ -77,3 +97,15 @@ jobs:
             echo "::endgroup::"
           done
           exit "$fail"
+
+      # Both docs checks run even when the render tier above failed: they are
+      # independent of it, and one report per push beats two round trips.
+      - name: Check generated READMEs are current
+        if: '!cancelled()'
+        run: bash scripts/ci/helm-docs-drift.sh
+
+      # Dangling in-page anchors and relative links are invisible on GitHub and
+      # silently dropped by ArtifactHub — see the script header.
+      - name: Check markdown links and anchors
+        if: '!cancelled()'
+        run: bash scripts/ci/check-links.sh
