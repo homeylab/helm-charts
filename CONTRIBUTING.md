@@ -45,6 +45,8 @@ Every task takes the target chart as `APP=<chart>`, e.g. `task verify APP=bookst
 | **`task verify APP=<chart>`** | **`lint` + `kubeconform` + `unittest`** — the local mirror of the cluster-free CI gate. Run before every commit. |
 | `task template APP=<chart>` | `helm template … --debug` |
 | `task docs APP=<chart>` | regenerate `README.md` via helm-docs |
+| `task docs-drift` | fail if any generated `README.md` is stale — repo-wide, no `APP=`, never edits the tree |
+| `task check-links` | markdown anchors and cross-file links — repo-wide, no `APP=` |
 | `task actionlint` | `actionlint` over `.github/workflows/` — repo-wide, no `APP=` |
 
 ### Local cluster
@@ -198,7 +200,8 @@ Pipeline:
 
 ## Gotchas
 
-- **`README.md` is generated — never hand-edit it.** Edit `README.md.gotmpl`, run `task docs APP=<chart>`. Value-table rows come from the `# --` comments in `values.yaml`.
+- **`README.md` is generated — never hand-edit it.** Edit `README.md.gotmpl`, run `task docs APP=<chart>`. Value-table rows come from the `# --` comments in `values.yaml`. CI regenerates and diffs, so a forgotten run fails the build.
+- **Every link in a chart README must be absolute or an in-page anchor.** ArtifactHub renders only the packaged `README.md` and drops relative links silently - the text stays, the href does not, and a relative image renders as nothing. Cross-file links use the full `https://github.com/homeylab/helm-charts/blob/main/…` URL; `task check-links` enforces it, along with in-page anchors, which break the moment a heading moves to another file.
 - **Chart `version` must bump or the release is silently skipped.**
 - **Breaking-change table covers the current major only.** The README's `### Breaking Changes` table lists the upgrade into the current major plus breaking or destructive upgrades within it, one sentence and a link each; the full text of every version lives in `docs/upgrade.md`. Drop the older rows when a new major lands — the notes keep them.
 - **`ci/*-values.yaml` must be self-contained.** `ct install` runs in a fresh namespace, so values referencing pre-existing cluster objects (`existingSecret`, an external PVC/secret) fail with `CreateContainerConfigError` — cover those paths with helm-unittest instead. Keep memory limits generous for JVM/heavy images or `ct install` OOMs before Ready.

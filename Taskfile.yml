@@ -116,6 +116,17 @@ tasks:
     cmds:
       - helm-docs --chart-search-root {{.CHART_DIR}}/{{.APP}}
 
+  docs-drift:
+    desc: Fail if any generated README.md is stale (fleet-wide, mirrors CI)
+    # Regenerates into a throwaway copy, so unlike `docs` this never edits the tree.
+    cmds:
+      - bash scripts/ci/helm-docs-drift.sh
+
+  check-links:
+    desc: Validate markdown anchors and cross-file links (fleet-wide, mirrors CI)
+    cmds:
+      - python3 scripts/ci/check-links.py
+
   local-template:
     desc: Render a chart with local values (APP=<chart>)
     requires:
