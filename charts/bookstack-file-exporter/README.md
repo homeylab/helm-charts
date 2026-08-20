@@ -160,9 +160,10 @@ helm upgrade -f my-values.yaml bookstack-file-exporter -n bookstack-file-exporte
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `1.0.2` | `1.0.3` | Only with `persistence.existingClaim` set: the redundant chart-managed PVC stops rendering, so `helm upgrade` deletes it — and its PersistentVolume and data under the default `Delete` reclaim policy. [Upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack-file-exporter/docs/upgrade.md#from-102-to-103). |
 | `0.X.X` | `1.0.0` | Major breaking revision — exporter upgraded to upstream `v3.0.0` (config rewrite, `config` keys now snake_case). **Read the [upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack-file-exporter/docs/upgrade.md#from-0xx-to-100) in full before upgrading.** |
 
-_The [full upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack-file-exporter/docs/upgrade.md) cover every version, including upgrades gated on opt-in settings._
+_Upgrades from earlier majors are covered in the [full upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack-file-exporter/docs/upgrade.md)._
 
 ## Configuration Options
 | Key | Type | Default | Description |

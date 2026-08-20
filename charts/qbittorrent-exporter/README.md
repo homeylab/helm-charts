@@ -117,7 +117,7 @@ helm upgrade -f my-values.yaml qbittorrent-exporter -n qbittorrent-exporter oci:
 | ------------------- | -------------------- | ------------- |
 | `0.1.X` | `1.0.0` | Backing exporter swapped, hardened `securityContext`, standardized image schema, chart-managed Secret. **Read the [upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/qbittorrent-exporter/docs/upgrade.md#from-01x-to-100) in full before upgrading.** |
 
-_The [full upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/qbittorrent-exporter/docs/upgrade.md) cover every version, including upgrades gated on opt-in settings._
+_Upgrades from earlier majors are covered in the [full upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/qbittorrent-exporter/docs/upgrade.md)._
 
 ## Configuration Options
 | Key | Type | Default | Description |

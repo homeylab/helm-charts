@@ -190,9 +190,11 @@ kubectl cp default.conf bookstack/{{ "{{ pod_name }}" }}:/config/nginx/site-conf
 
 | Start Chart Version | Target Chart Version | Upgrade Steps |
 | ------------------- | -------------------- | ------------- |
+| `5.3.1` | `5.3.2` | Only with `bookstack-file-exporter.enabled` **and** `bookstack-file-exporter.persistence.existingClaim` set: the redundant chart-managed PVC stops rendering, so `helm upgrade` deletes it — and its PersistentVolume and data under the default `Delete` reclaim policy. [Upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/docs/upgrade.md#from-531-to-532). |
+| `5.0.X` | `5.1.0` | Only with `bookstack-file-exporter.enabled`: the subchart's config schema was rewritten and its API token moved to `bookstack-file-exporter.auth.*`. [Upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/docs/upgrade.md#from-50x-to-510). |
 | `4.1.X` | `5.0.0` | Major breaking revision — embedded mariadb dependency swapped (Bitnami → CloudPirates), credentials/APP_KEY moved to a chart-managed Secret, and BookStack updated to `version-v26.05.2`. **Read the [upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/docs/upgrade.md#from-41x-to-500) in full before upgrading** if you have existing data. |
 
-_The [full upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/docs/upgrade.md) cover every version, including upgrades gated on opt-in settings._
+_Upgrades from earlier majors are covered in the [full upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/docs/upgrade.md)._
 
 
 For more configuration options, refer to the documented env variables available for bookstack [here](https://github.com/BookStackApp/BookStack/blob/development/.env.example.complete).

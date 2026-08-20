@@ -115,7 +115,7 @@ helm upgrade -f my-values.yaml v-rising -n v-rising oci://registry-1.docker.io/h
 | ------------------- | -------------------- | ------------- |
 | `0.X.X` | `1.0.0` | Image schema split, rcon Service renamed, and Ingress removed. **Read the [upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/v-rising/docs/upgrade.md#from-0xx-to-100) in full before upgrading.** |
 
-_The [full upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/v-rising/docs/upgrade.md) cover every version, including upgrades gated on opt-in settings._
+_Upgrades from earlier majors are covered in the [full upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/v-rising/docs/upgrade.md)._
 
 ## Configuration Options
 | Key | Type | Default | Description |
