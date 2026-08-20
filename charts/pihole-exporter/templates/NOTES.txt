@@ -25,8 +25,5 @@ httproute.parentRefs exists and allows routes from namespace "{{ .Release.Namesp
 (via the listener's allowedRoutes or a ReferenceGrant).
 {{- end }}
 
-A sample Grafana dashboard is available from upstream:
-    - https://grafana.com/grafana/dashboards/10176-pi-hole-exporter/
-
 The upstream provider can be found here:
     - https://github.com/eko/pihole-exporter

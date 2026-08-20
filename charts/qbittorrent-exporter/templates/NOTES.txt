@@ -24,7 +24,3 @@ Ensure the Gateway API CRDs are installed and the Gateway referenced in
 httproute.parentRefs exists and allows routes from namespace "{{ .Release.Namespace }}"
 (via the listener's allowedRoutes or a ReferenceGrant).
 {{- end }}
-
-Sample Grafana dashboard is available from upstream:
-    - https://github.com/martabal/qbittorrent-exporter/blob/main/grafana/dashboard.json
-    (a high-cardinality variant also exists for use with settings.features.enableHighCardinality: dashboard_high_cardinality.json)

@@ -90,6 +90,7 @@ charts/<chart>/
 ├── values.schema.json      # (optional) values validation
 ├── README.md.gotmpl        # helm-docs source → generated README.md (never edit README.md)
 ├── README.md               # GENERATED — do not hand-edit
+├── docs/upgrade.md         # per-version upgrade notes; helmignored, README links it by URL
 ├── templates/
 │   ├── *.yaml              # manifests
 │   ├── _helpers.tpl        # named templates (labels, names, …)
@@ -199,6 +200,7 @@ Pipeline:
 
 - **`README.md` is generated — never hand-edit it.** Edit `README.md.gotmpl`, run `task docs APP=<chart>`. Value-table rows come from the `# --` comments in `values.yaml`.
 - **Chart `version` must bump or the release is silently skipped.**
+- **Breaking-change table covers the current major only.** The README's `### Breaking Changes` table lists the upgrade into the current major plus breaking or destructive upgrades within it, one sentence and a link each; the full text of every version lives in `docs/upgrade.md`. Drop the older rows when a new major lands — the notes keep them.
 - **`ci/*-values.yaml` must be self-contained.** `ct install` runs in a fresh namespace, so values referencing pre-existing cluster objects (`existingSecret`, an external PVC/secret) fail with `CreateContainerConfigError` — cover those paths with helm-unittest instead. Keep memory limits generous for JVM/heavy images or `ct install` OOMs before Ready.
 - **Adding an off-by-default feature or a passthrough? Add it to the kubeconform overlay.** Anything behind an `enabled`/`create` flag — CRD kinds, but also `serviceAccount.create`, `ingress.enabled` — renders in no default pass. Give it a **real payload** (a `prometheusRule` with an empty `rules` list renders `spec: null` and fails) and **at least two entries** in every list and map (an empty passthrough takes the `{{- else }}` branch and never exercises the `toYaml | nindent` path, which is where indent bugs live).
 - **Chart-specific overlay values go in `charts/<chart>/ci/kubeconform-overlay.yaml`**, layered on the fleet-wide file — use it when a key's *shape* differs (v-rising nests `persistence` under `steamServer`/`world`, exportarr nests everything under `exportarr:`). The name must not end in `-values.yaml` or `ct install` picks it up.

@@ -24,6 +24,3 @@ Ensure the Gateway API CRDs are installed and the Gateway referenced in
 httproute.parentRefs exists and allows routes from namespace "{{ .Release.Namespace }}"
 (via the listener's allowedRoutes or a ReferenceGrant).
 {{- end }}
-
-Sample Grafana dashboards are available from upstream:
-    - https://github.com/unpoller/dashboards

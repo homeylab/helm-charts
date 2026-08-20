@@ -209,11 +209,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-## Rendered only in Deployment mode (`config.run_interval > 0`) with `config.health_port` set;
-## `port: health` is the container port the chart names from it. Set either to `null` (not `{}`)
-## to drop that probe.
-## /healthz is a liveness signal: it stays 200 after a failed export cycle, so probes do not flap on
-## a transient BookStack outage. Alert on `last_run.status` / `failure_count` in the body instead.
+# -- liveness probe for the health server; rendered only in Deployment mode (`config.run_interval > 0`) with `config.health_port` set, against the container port the chart names `health`. Set to `null` (not `{}`, which Helm merges into this default) to drop it
 livenessProbe:
   httpGet:
     path: /healthz
@@ -221,6 +217,7 @@ livenessProbe:
   initialDelaySeconds: 10
   periodSeconds: 30
 
+# -- readiness probe for the health server; same gating as `livenessProbe`. Set to `null` (not `{}`) to drop it
 readinessProbe:
   httpGet:
     path: /healthz
