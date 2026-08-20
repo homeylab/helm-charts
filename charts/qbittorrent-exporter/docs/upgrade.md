@@ -1,7 +1,7 @@
 # qbittorrent-exporter — upgrade notes
 
-Per-version upgrade and migration notes for the `qbittorrent-exporter` chart. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/qbittorrent-exporter/README.md)
-carries the summary table of which upgrades break; the full steps for each are here.
+Every version's upgrade and migration notes for the `qbittorrent-exporter` chart, newest first. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/qbittorrent-exporter/README.md)
+flags the breaking ones in the **current** major; earlier majors are covered only here.
 
 ## From 0.1.X to 1.0.0
 First major release. This version **swaps the backing exporter image** and hardens the chart.

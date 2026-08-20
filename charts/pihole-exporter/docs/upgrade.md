@@ -1,7 +1,7 @@
 # pihole-exporter — upgrade notes
 
-Per-version upgrade and migration notes for the `pihole-exporter` chart. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/pihole-exporter/README.md)
-carries the summary table of which upgrades break; the full steps for each are here.
+Every version's upgrade and migration notes for the `pihole-exporter` chart, newest first. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/pihole-exporter/README.md)
+flags the breaking ones in the **current** major; earlier majors are covered only here.
 
 ## From 1.X.X to 2.0.0
 This release renames the `helm test` values to match the convention used by the other charts in this repo. **If you never overrode `testConnImage.*`, no action is needed** — the defaults are unchanged and the deployed exporter is unaffected.

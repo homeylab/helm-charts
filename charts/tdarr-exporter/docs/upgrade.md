@@ -1,7 +1,7 @@
 # tdarr-exporter — upgrade notes
 
-Per-version upgrade and migration notes for the `tdarr-exporter` chart. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/tdarr-exporter/README.md)
-carries the summary table of which upgrades break; the full steps for each are here.
+Every version's upgrade and migration notes for the `tdarr-exporter` chart, newest first. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/tdarr-exporter/README.md)
+flags the breaking ones in the **current** major; earlier majors are covered only here.
 
 ## From 1.X.X to 2.0.0
 This version hardens the chart and standardizes its schema to match the other homeylab exporter charts, and moves `appVersion` to the current upstream image. The image repository is unchanged (still `homeylab/tdarr-exporter`).

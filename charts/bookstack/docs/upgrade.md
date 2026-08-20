@@ -1,7 +1,7 @@
 # bookstack — upgrade notes
 
-Per-version upgrade and migration notes for the `bookstack` chart. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/README.md)
-carries the summary table of which upgrades break; the full steps for each are here.
+Every version's upgrade and migration notes for the `bookstack` chart, newest first. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/README.md)
+flags the breaking ones in the **current** major; earlier majors are covered only here.
 
 ## From 5.3.1 to 5.3.2
 **Only if `bookstack-file-exporter.enabled: true` *and* you set `bookstack-file-exporter.persistence.existingClaim`.** The subchart is re-pinned `1.0.2` -> `1.0.3`, which stops rendering the redundant chart-managed PVC it used to provision alongside your existing claim, so `helm upgrade` **deletes that PVC** — and, under the default `Delete` reclaim policy, its PersistentVolume and any data on it. Nothing mounted it, so this is normally the desired cleanup. If you previously ran *without* `existingClaim`, accumulated exports on the chart-managed PVC, and later switched to `existingClaim`, back up or run `kubectl patch pv <pv> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'` **before** upgrading. No values keys changed between `1.0.2` and `1.0.3` — see the exporter's [From 1.0.2 to 1.0.3](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack-file-exporter/docs/upgrade.md#from-102-to-103) notes.

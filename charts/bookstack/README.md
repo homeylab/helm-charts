@@ -179,7 +179,7 @@ After certain upgrades, you may see warnings in the logs about nginx configurati
 └────────────┴────────────┴────────────────────────────────────────────────────────────────────────┘
 ```
 
-Linuxserver.io changes their base Nginx configuration at times and it may have drifted. You can either find the new versions being referenced [here](https://github.com/linuxserver/docker-baseimage-alpine-nginx) or if your environment has access, it can be pulled. You can then copy the new version using `kubectl cp` to the pod and replace the old version. To re-pull it on start up, you can delete the file. Either option will require a restart of the pod to take effect.
+Linuxserver.io changes their base Nginx configuration at times and it may have drifted. Your deployed conf carries the exact upstream path and branch on its own first line (a `## Version <date> - Changelog:` link into [docker-baseimage-alpine-nginx](https://github.com/linuxserver/docker-baseimage-alpine-nginx)) - follow that to the version you are on, or if your environment has access, pull it. You can then copy the new version using `kubectl cp` to the pod and replace the old version. To re-pull it on start up, you can delete the file. Either option will require a restart of the pod to take effect.
 
 ```bash
 # example of deleting for a re-pull

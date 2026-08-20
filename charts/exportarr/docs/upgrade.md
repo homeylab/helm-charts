@@ -1,7 +1,7 @@
 # exportarr — upgrade notes
 
-Per-version upgrade and migration notes for the `exportarr` chart. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/exportarr/README.md)
-carries the summary table of which upgrades break; the full steps for each are here.
+Every version's upgrade and migration notes for the `exportarr` chart, newest first. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/exportarr/README.md)
+flags the breaking ones in the **current** major; earlier majors are covered only here.
 
 ## From 3.1.X to 4.0.0
 This release standardizes the image schema and the `helm test` values to match the other charts in this repo, and implements the previously-inert `prometheusRule` block. Only the value renames are breaking — if you never overrode the image or test-image values, the defaults are unchanged and no action is needed.

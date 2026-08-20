@@ -1,7 +1,7 @@
 # v-rising — upgrade notes
 
-Per-version upgrade and migration notes for the `v-rising` chart. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/v-rising/README.md)
-carries the summary table of which upgrades break; the full steps for each are here.
+Every version's upgrade and migration notes for the `v-rising` chart, newest first. The [chart README](https://github.com/homeylab/helm-charts/blob/main/charts/v-rising/README.md)
+flags the breaking ones in the **current** major; earlier majors are covered only here.
 
 ## From 0.X.X to 1.0.0
 This version graduates the chart to `1.0.0` and standardizes its schema to match the other homeylab charts.
