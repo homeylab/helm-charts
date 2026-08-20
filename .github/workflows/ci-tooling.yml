@@ -48,7 +48,7 @@ jobs:
       - name: Install helm-unittest plugin
         env:
           # renovate: datasource=github-releases depName=helm-unittest/helm-unittest
-          UNITTEST_VERSION: v1.1.1
+          UNITTEST_VERSION: v1.1.2
         # Helm 4 verifies plugin sources by default; unsigned git installs need --verify=false
         run: helm plugin install https://github.com/helm-unittest/helm-unittest --version "${UNITTEST_VERSION#v}" --verify=false
 
