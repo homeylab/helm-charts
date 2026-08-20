@@ -4,7 +4,17 @@ Every version's upgrade and migration notes for the `bookstack` chart, newest fi
 flags the breaking ones in the **current** major; earlier majors are covered only here.
 
 ## From 5.3.1 to 5.3.2
-**Only if `bookstack-file-exporter.enabled: true` *and* you set `bookstack-file-exporter.persistence.existingClaim`.** The subchart is re-pinned `1.0.2` -> `1.0.3`, which stops rendering the redundant chart-managed PVC it used to provision alongside your existing claim, so `helm upgrade` **deletes that PVC** — and, under the default `Delete` reclaim policy, its PersistentVolume and any data on it. Nothing mounted it, so this is normally the desired cleanup. If you previously ran *without* `existingClaim`, accumulated exports on the chart-managed PVC, and later switched to `existingClaim`, back up or run `kubectl patch pv <pv> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'` **before** upgrading. No values keys changed between `1.0.2` and `1.0.3` — see the exporter's [From 1.0.2 to 1.0.3](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack-file-exporter/docs/upgrade.md#from-102-to-103) notes.
+**Only if `bookstack-file-exporter.enabled: true` *and* you set `bookstack-file-exporter.persistence.existingClaim`.**
+
+The subchart is re-pinned `1.0.2` -> `1.0.3`, which stops rendering the redundant chart-managed PVC it used to provision alongside your existing claim. `helm upgrade` therefore **deletes that PVC** — and its PersistentVolume and any data on it, under the default `Delete` reclaim policy.
+
+Nothing ever mounted that PVC, so this is normally the cleanup you want. It only costs you data if you once ran *without* `existingClaim`, accumulated exports on the chart-managed PVC, and later switched to `existingClaim`. In that case, back the data up before upgrading, or retain the volume:
+
+```bash
+kubectl patch pv <pv> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+```
+
+No values keys changed between `1.0.2` and `1.0.3` — see the exporter's [From 1.0.2 to 1.0.3](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack-file-exporter/docs/upgrade.md#from-102-to-103) notes.
 
 ## From 5.0.X to 5.1.0
 Optional `bookstack-file-exporter` subchart bumped `0.0.2` -> `1.0.0` (breaking config rewrite; API token moved to `bookstack-file-exporter.auth.*`). Only relevant if `bookstack-file-exporter.enabled: true` — follow the [exporter's upgrade notes](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack-file-exporter/docs/upgrade.md#from-0xx-to-100).
@@ -48,7 +58,7 @@ BookStack has no built-in full export/import — a migration is done via a datab
 `fileBackups` has been moved to its own chart and can be enabled by setting `bookstack-file-exporter.enabled` to `true`
 
 ## From 3.X.X to 4.0.0
-Bookstack version is updated to `v24.10` from `v24.05.2`. The docker image from `linuxserver/bookstack` introduces the requirement for an appKey to be set in the `config` section. This will required to be set by the user, see [here](https://github.com/linuxserver/docker-bookstack?tab=readme-ov-file#parameters) for more information or the chart README's [Configuration Options](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/README.md#configuration-options) section. `DB_USER` and `DB_PASS` env variables have been changed to `DB_USERNAME` and `DB_PASSWORD` for those that use the `existingSecret` option.
+Bookstack version is updated to `v24.10` from `v24.05.2`. The docker image from `linuxserver/bookstack` introduces the requirement for an appKey to be set in the `config` section. This must be set by the user - see [here](https://github.com/linuxserver/docker-bookstack?tab=readme-ov-file#parameters) for more information or the chart README's [Configuration Options](https://github.com/homeylab/helm-charts/blob/main/charts/bookstack/README.md#configuration-options) section. `DB_USER` and `DB_PASS` env variables have been changed to `DB_USERNAME` and `DB_PASSWORD` for those that use the `existingSecret` option.
 
 ## From 2.8.X to 3.0.0
 Optional embedded mariadb chart version updated to `18.0.2` from `14.1.4`; MariaDB itself stays on a `11.3.X` release. If you set additional options under the embedded `mariadb` section of your `values.yaml`, they may need adjusting for that chart's changes — check its upstream upgrade notes first. Superseded for anyone going to `5.0.0` or later, which replaces the Bitnami dependency with CloudPirates outright.

@@ -4,7 +4,15 @@ Every version's upgrade and migration notes for the `bookstack-file-exporter` ch
 flags the breaking ones in the **current** major; earlier majors are covered only here.
 
 ## From 1.0.2 to 1.0.3
-**Only if you set `persistence.existingClaim`.** Earlier versions provisioned a redundant chart-managed PVC alongside your existing claim; `1.0.3` correctly stops rendering it, so `helm upgrade` **deletes that PVC** — and, under the default `Delete` reclaim policy, its PersistentVolume and any data on it. Nothing mounted it, so this is normally the desired cleanup. If you previously ran *without* `existingClaim`, accumulated exports on the chart-managed PVC, and later switched to `existingClaim`, back up or run `kubectl patch pv <pv> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'` **before** upgrading.
+**Only if you set `persistence.existingClaim`.**
+
+Earlier versions provisioned a redundant chart-managed PVC alongside your existing claim. `1.0.3` correctly stops rendering it, so `helm upgrade` **deletes that PVC** — and its PersistentVolume and any data on it, under the default `Delete` reclaim policy.
+
+Nothing ever mounted that PVC, so this is normally the cleanup you want. It only costs you data if you once ran *without* `existingClaim`, accumulated exports on the chart-managed PVC, and later switched to `existingClaim`. In that case, back the data up before upgrading, or retain the volume:
+
+```bash
+kubectl patch pv <pv> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+```
 
 ## From 0.X.X to 1.0.0
 This version graduates the chart to `1.0.0`, bumps the image to the current upstream `v3.0.0` (a breaking config rewrite), and standardizes the chart's schema to match the other homeylab charts.
