@@ -38,7 +38,11 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      issues: write # peter-evans/create-issue-from-file
+      issues: write # peter-evans/create-issue-from-file, and the close step below
+    env:
+      # One title, three consumers: the lookup matches on it, the action sets it,
+      # and the close step reports it. Changing it orphans whatever issue is open.
+      REPORT_TITLE: Broken links found in the docs
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -59,6 +63,11 @@ jobs:
       # github.com links, which rate-limit hard when unauthenticated. A non-zero
       # exit is recorded rather than failing the step: the issue is the
       # deliverable, and a red cron run notifies nobody.
+      #
+      # The footer is not decoration. The issue body is overwritten in place each
+      # week (see below), and an overwrite with byte-identical content is invisible
+      # — no diff, no notification, an issue that reads as abandoned. The timestamp
+      # and run link are what make "still broken as of Monday" legible.
       - name: Run lychee
         id: lychee
         env:
@@ -66,12 +75,65 @@ jobs:
         run: |
           set +e
           bash scripts/ci/check-links.sh --online lychee-report.md
-          echo "exit=$?" >> "$GITHUB_OUTPUT"
+          code=$?
+          set -e
+          echo "exit=$code" >> "$GITHUB_OUTPUT"
 
-      - name: Open an issue for the broken links
+          # Guard the footer append: if lychee died before writing anything, an
+          # unguarded >> would file an issue whose entire body is the footer.
+          if [ ! -f lychee-report.md ]; then
+            echo "lychee exited ${code} without writing a report. See the workflow run." > lychee-report.md
+          fi
+          printf '\n---\n_Last checked %s, commit \x60%s\x60 — [workflow run](%s/%s/actions/runs/%s)._\n' \
+            "$(date -u '+%Y-%m-%d %H:%M UTC')" "$GITHUB_SHA" \
+            "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" >> lychee-report.md
+
+      # Without this the cron files a brand-new issue every Monday for the same
+      # dead link, and the pile trains people to close them unread — the exact
+      # failure the weekly-not-daily cadence was chosen to avoid.
+      #
+      # --state open is load-bearing. create-issue-from-file's `issue-number` path
+      # calls issues.update({title, body}) and never touches state (verified in
+      # src/main.ts at v6.0.0), so aiming it at a CLOSED issue would silently
+      # rewrite it with nobody notified. Matching only open issues means closing a
+      # report is a real decision: the next failing run files a fresh one.
+      #
+      # Restricted to bot-authored issues so a human opening an issue with the same
+      # title does not get their body overwritten by the next cron run.
+      - name: Find the open report issue
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
+            --json number,title,author \
+            --jq '[.[] | select(.title == env.REPORT_TITLE and .author.is_bot)] | first | .number // empty')
+          echo "number=${number}" >> "$GITHUB_OUTPUT"
+          if [ -n "$number" ]; then
+            echo "Reusing issue #${number}"
+          else
+            echo "No open report issue; a new one will be filed if links are broken"
+          fi
+
+      # An empty issue-number means "create": the action does
+      # Number(core.getInput('issue-number')), and Number('') === 0 is falsy. So the
+      # lookup's output passes straight through, no conditional needed.
+      - name: Open or update the issue
         if: steps.lychee.outputs.exit != '0'
         uses: peter-evans/create-issue-from-file@fca9117c27cdc29c6c4db3b86c48e4115a786710 # v6.0.0
         with:
-          title: Broken links found in the docs
+          issue-number: ${{ steps.existing.outputs.number }}
+          title: ${{ env.REPORT_TITLE }}
           content-filepath: ./lychee-report.md
           labels: documentation
+
+      # The other half of dedupe. Without it a fixed link leaves the report open
+      # forever, and the next genuine break has nowhere to go but that stale issue.
+      - name: Close the report issue now the links are clean
+        if: steps.lychee.outputs.exit == '0' && steps.existing.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.existing.outputs.number }}
+        run: |
+          gh issue close "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --comment "Every link resolves again as of commit \`${GITHUB_SHA}\` ([workflow run](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})). Closing automatically; the next failing run will file a new report."
