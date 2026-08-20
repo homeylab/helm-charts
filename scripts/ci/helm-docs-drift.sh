@@ -12,6 +12,13 @@
 # Regenerates into a throwaway copy rather than the working tree, so running this
 # locally never leaves you with edits you did not ask for.
 #
+# Use the pinned release binary, not a `go install` build: the release sets its
+# version via ldflags and a source build leaves it empty, so version-dependent
+# template helpers render differently. `helm-docs.versionFooter` rendered nothing
+# locally and a real footer in CI, which is how this check found its first drift
+# (and why `--skip-version-footer` is no help - it does not suppress an explicit
+# `{{ template "helm-docs.versionFooter" . }}` call).
+#
 # Only charts that HAVE a README.md.gotmpl are touched, one at a time. Never run
 # helm-docs with --chart-search-root=charts: nut-exporter's README is hand-written
 # and has no .gotmpl, so a fleet-wide invocation overwrites it with the helm-docs

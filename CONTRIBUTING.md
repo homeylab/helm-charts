@@ -21,7 +21,7 @@ A monorepo of independent Helm charts under `charts/<chart>/`, each wrapping one
 | [Helm](https://helm.sh/docs/intro/install/) 3 | render/lint/package charts | `helm` |
 | [go-task](https://taskfile.dev/installation/) | task runner (all commands below) | `task` |
 | [helm-unittest](https://github.com/helm-unittest/helm-unittest) | template unit tests | `helm plugin install https://github.com/helm-unittest/helm-unittest` |
-| [helm-docs](https://github.com/norwoodj/helm-docs) | generate `README.md` from templates | `go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest` |
+| [helm-docs](https://github.com/norwoodj/helm-docs) | generate `README.md` from templates | a [pinned release binary](https://github.com/norwoodj/helm-docs/releases) - CI uses `v1.14.2`, and `go install` builds render version-dependent template helpers differently |
 | [kubeconform](https://github.com/yannh/kubeconform) | validate rendered manifests | `kubeconform` |
 | [chart-testing](https://github.com/helm/chart-testing) (`ct`) | install charts on a real cluster | `ct` |
 | [kind](https://kind.sigs.k8s.io/) + `kubectl` | local cluster for `ct` / `deploy-local` | `kind`, `kubectl` |
