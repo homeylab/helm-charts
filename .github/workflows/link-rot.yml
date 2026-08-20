@@ -1,0 +1,79 @@
+name: Link rot
+permissions: {}
+
+# The other half of the link checking in ci-tooling.yml, split by failure mode
+# rather than by tool — both run lychee.
+#
+# ci-tooling.yml runs it with --offline: it resolves only what the tree can prove
+# (in-page anchors, relative paths, and this repo's own blob/main URLs remapped to
+# files). Those break because of the PR in front of you, so they belong in a
+# required check that blocks the merge.
+#
+# Rot is the opposite: an upstream doc moves while nobody touches this repo, so it
+# would fail PRs whose author changed nothing related, for reasons outside the
+# repo — vendor outages, bot-blocking, rate limits. Measured 2026-08-20, a full
+# online run over 204 unique links returned 278 OK and 2 errors, both the same
+# vendor site serving a 500. As a required check that is a merge blocked on
+# someone else's bad afternoon; as a weekly issue it is a chore someone picks up.
+#
+# Weekly rather than daily because the external surface is upstream documentation
+# and image registries, which do not move that fast, and a re-reported dead link
+# every morning trains people to close the issue unread. Peer practice is genuinely
+# mixed — of six repos sampled, two run lychee on a schedule only, two on PR plus a
+# schedule, two on PR alone.
+on:
+  schedule:
+    # Mondays, 06:00 UTC.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: link-rot-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check external links for rot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write # peter-evans/create-issue-from-file
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install lychee
+        env:
+          # renovate: datasource=github-releases depName=lycheeverse/lychee
+          LYCHEE_VERSION: v0.24.2
+        run: |
+          curl -fsSL "https://github.com/lycheeverse/lychee/releases/download/lychee-${LYCHEE_VERSION}/lychee-x86_64-unknown-linux-musl.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin --strip-components=1 lychee-x86_64-unknown-linux-musl/lychee
+
+      # Same invocation as scripts/ci/check-links.sh minus --offline, so internal
+      # links still resolve locally and only external ones hit the network.
+      # GITHUB_TOKEN is read by lychee for github.com links, which rate-limit hard
+      # when unauthenticated. `fail` stays false: the report is the deliverable,
+      # and a red cron run notifies nobody.
+      - name: Run lychee
+        id: lychee
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          lychee --no-progress --include-fragments=anchor-only --max-concurrency 8 \
+            --format markdown --output lychee-report.md \
+            --remap "https://github.com/homeylab/helm-charts/blob/main/(.*) file://$GITHUB_WORKSPACE/\$1" \
+            './charts/**/*.md' './*.md'
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue for the broken links
+        if: steps.lychee.outputs.exit != '0'
+        uses: peter-evans/create-issue-from-file@fca9117c27cdc29c6c4db3b86c48e4115a786710 # v6.0.0
+        with:
+          title: Broken links found in the docs
+          content-filepath: ./lychee-report.md
+          labels: documentation
