@@ -23,6 +23,7 @@ A monorepo of independent Helm charts under `charts/<chart>/`, each wrapping one
 | [helm-unittest](https://github.com/helm-unittest/helm-unittest) | template unit tests | `helm plugin install https://github.com/helm-unittest/helm-unittest` |
 | [helm-docs](https://github.com/norwoodj/helm-docs) | generate `README.md` from templates | a [pinned release binary](https://github.com/norwoodj/helm-docs/releases) - CI uses `v1.14.2`, and `go install` builds render version-dependent template helpers differently |
 | [kubeconform](https://github.com/yannh/kubeconform) | validate rendered manifests | `kubeconform` |
+| [lychee](https://github.com/lycheeverse/lychee) | resolve markdown links and anchors | a [pinned release binary](https://github.com/lycheeverse/lychee/releases) - CI uses `v0.24.2`; take the `musl` build if your glibc is older than 2.38 |
 | [chart-testing](https://github.com/helm/chart-testing) (`ct`) | install charts on a real cluster | `ct` |
 | [kind](https://kind.sigs.k8s.io/) + `kubectl` | local cluster for `ct` / `deploy-local` | `kind`, `kubectl` |
 | [actionlint](https://github.com/rhysd/actionlint) (+ [shellcheck](https://www.shellcheck.net/)) | lint the GitHub Actions workflows | `actionlint`, `shellcheck` |

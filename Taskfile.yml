@@ -125,7 +125,7 @@ tasks:
   check-links:
     desc: Validate markdown anchors and cross-file links (fleet-wide, mirrors CI)
     cmds:
-      - python3 scripts/ci/check-links.py
+      - bash scripts/ci/check-links.sh
 
   local-template:
     desc: Render a chart with local values (APP=<chart>)
