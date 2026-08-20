@@ -24,7 +24,9 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 FENCE = re.compile(r"^```.*?^```", re.S | re.M)
-LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)\)")
+# CommonMark allows balanced parens inside a destination (`…/Foo_(bar)`), so
+# match one level of nesting rather than stopping at the first `)`.
+LINK = re.compile(r"!?\[[^\]]*\]\(((?:[^()\s]|\([^()\s]*\))+)\)")
 ABSOLUTE = re.compile(r"^(?:[a-z][a-z0-9+.-]*:|//|#)")
 
 

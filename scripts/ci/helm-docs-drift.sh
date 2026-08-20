@@ -26,6 +26,12 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+if ! command -v helm-docs >/dev/null; then
+  echo "helm-docs not found on PATH - see the tool table in CONTRIBUTING.md" >&2
+  exit 1
+fi
+
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 

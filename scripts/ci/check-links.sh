@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 # Validate markdown links, anchors, and this repo's ArtifactHub link policy.
-# Usage: scripts/ci/check-links.sh
+# Usage: scripts/ci/check-links.sh [--online <report.md>]
 # Mirrors `task check-links`. Needs lychee on PATH (see CONTRIBUTING).
+#
+# Default mode is the PR gate. `--online` is the weekly link-rot run driven by
+# .github/workflows/link-rot.yml: same invocation minus --offline, so external
+# URLs are actually fetched, writing a markdown report for the issue it files.
+# It lives here rather than inline in the workflow so the remap - which has to be
+# built at runtime, because a file:// remap target must be an absolute path and
+# so cannot live in a lychee.toml - exists in exactly one place.
 #
 # Two passes, because no single off-the-shelf tool covers both halves.
 #
@@ -32,15 +39,24 @@ if ! command -v lychee >/dev/null; then
   exit 1
 fi
 
+# `\$1` is lychee's own capture-group reference, not a shell positional.
+remap="https://github.com/homeylab/helm-charts/blob/main/(.*) file://$root/\$1"
+inputs=('./charts/**/*.md' './*.md')
+
+if [ "${1:-}" = "--online" ]; then
+  # Rot only. The relative-link policy is already enforced on every PR, and its
+  # findings would not appear in the markdown report the cron files as an issue.
+  exec lychee --no-progress --include-fragments=anchor-only --max-concurrency 8 \
+    --format markdown --output "${2:?usage: check-links.sh --online <report.md>}" \
+    --remap "$remap" "${inputs[@]}"
+fi
+
 # Both passes always run: a broken anchor must not hide a policy violation, the
 # same reason ci-tooling.yml marks its docs steps `if: !cancelled()`.
-#
-# `\$1` is lychee's own capture-group reference, not a shell positional.
 fail=0
 
 lychee --offline --no-progress --include-fragments=anchor-only \
-  --remap "https://github.com/homeylab/helm-charts/blob/main/(.*) file://$root/\$1" \
-  './charts/**/*.md' './*.md' || fail=1
+  --remap "$remap" "${inputs[@]}" || fail=1
 
 python3 scripts/ci/check-relative-links.py || fail=1
 

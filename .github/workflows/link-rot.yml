@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: link-rot-${{ github.workflow }}
+  group: link-rot-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -53,21 +53,19 @@ jobs:
           curl -fsSL "https://github.com/lycheeverse/lychee/releases/download/lychee-${LYCHEE_VERSION}/lychee-x86_64-unknown-linux-musl.tar.gz" \
             | sudo tar -xz -C /usr/local/bin --strip-components=1 lychee-x86_64-unknown-linux-musl/lychee
 
-      # Same invocation as scripts/ci/check-links.sh minus --offline, so internal
-      # links still resolve locally and only external ones hit the network.
-      # GITHUB_TOKEN is read by lychee for github.com links, which rate-limit hard
-      # when unauthenticated. `fail` stays false: the report is the deliverable,
-      # and a red cron run notifies nobody.
+      # The same script the PR gate runs, in its --online mode: identical remap and
+      # inputs, minus --offline, so internal links still resolve locally and only
+      # external ones hit the network. GITHUB_TOKEN is read by lychee for
+      # github.com links, which rate-limit hard when unauthenticated. A non-zero
+      # exit is recorded rather than failing the step: the issue is the
+      # deliverable, and a red cron run notifies nobody.
       - name: Run lychee
         id: lychee
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set +e
-          lychee --no-progress --include-fragments=anchor-only --max-concurrency 8 \
-            --format markdown --output lychee-report.md \
-            --remap "https://github.com/homeylab/helm-charts/blob/main/(.*) file://$GITHUB_WORKSPACE/\$1" \
-            './charts/**/*.md' './*.md'
+          bash scripts/ci/check-links.sh --online lychee-report.md
           echo "exit=$?" >> "$GITHUB_OUTPUT"
 
       - name: Open an issue for the broken links
